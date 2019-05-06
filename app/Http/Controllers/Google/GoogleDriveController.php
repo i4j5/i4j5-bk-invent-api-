@@ -9,24 +9,48 @@ use Illuminate\Http\Request;
 class GoogleDriveController extends Controller
 {
     private $service;
+    private $amocrm;
 
-    public function __construct()
+    public function __construct(AmoCrmManager $amocrm)
     {
         $client = new \Google_Client();
         $client->setAuthConfig(storage_path( env('GOOGLE_API_KEY') ));
         $client->addScope(\Google_Service_Drive::DRIVE);
         $this->service = new \Google_Service_Drive($client);
+
+        $this->amocrm = $amocrm;
     }
 
-    public function amoWebhook(Request $request, AmoCrmManager $amocrm)
+    public function amoWebhook(Request $request)
     {
         $lead_id = $request->input('leads')['status'][0]['id'];
-        $lead_name = $amocrm->lead->apiList([
+
+        $this->createLeadFolders($lead_id);
+    }
+
+    private function createLeadFolders($id = null)
+    {
+        $lead_id = $id;
+
+        $data = $this->amocrm->lead->apiList([
             'id' => $lead_id,
             'limit_rows' => 1,
-        ], '-100 DAYS')[0]['name'];    
+        ], '-100 DAYS')[0];
 
-        $lead = $amocrm->lead;
+        $lead_name = $data['name'];
+
+        foreach ( $data['custom_fields'] as $field )
+        {
+            if((int) $field['id'] == 223913)
+            {
+                if($field['values'][0]['value'] != '')
+                {
+                    return;
+                } 
+            }
+        }
+        
+        $lead = $this->amocrm->lead;
 
         $file = new \Google_Service_Drive_DriveFile([
             'parents' => ['1bLWjKyXRLKDQ_BKqxVsj6DegO9L6-SBf'],
@@ -69,6 +93,6 @@ class GoogleDriveController extends Controller
         $folder = $this->service->files->create($file);
         
         // Заносим данные в amoCRM
-        //$lead->apiUpdate((int)$lead_id, 'now');
+        $lead->apiUpdate((int) $lead_id, 'now');
     }
 }
