@@ -24,18 +24,20 @@ class GoogleDriveController extends Controller
 
     public function amoWebhook(Request $request)
     {        
-        if ( isset($request->input('id')) ) {
-            $lead_id = $request->input('id');
-        } else {
-            $lead_id = $request->input('leads')['status'][0]['id'];
-        }        
-
+        $lead_id = $request->input('id') ? (int) $request->input('id') : (int) $request->input('leads')['status'][0]['id'];     
+        
         $this->createLeadFolders($lead_id);
+
+       
     }
 
     private function createLeadFolders($id = null)
     {
         $lead_id = $id;
+
+        if (!$lead_id) {
+            return;
+        }
 
         $data = $this->amocrm->lead->apiList([
             'id' => $lead_id,
