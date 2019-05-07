@@ -19,11 +19,16 @@ class GoogleDriveController extends Controller
         $this->service = new \Google_Service_Drive($client);
 
         $this->amocrm = $amocrm;
+       
     }
 
     public function amoWebhook(Request $request)
-    {
-        $lead_id = $request->input('leads')['status'][0]['id'];
+    {        
+        if ( isset($request->input('id')) ) {
+            $lead_id = $request->input('id');
+        } else {
+            $lead_id = $request->input('leads')['status'][0]['id'];
+        }        
 
         $this->createLeadFolders($lead_id);
     }
@@ -41,10 +46,8 @@ class GoogleDriveController extends Controller
 
         foreach ( $data['custom_fields'] as $field )
         {
-            if((int) $field['id'] == 223913)
-            {
-                if($field['values'][0]['value'] != '')
-                {
+            if ((int) $field['id'] == 223913) {
+                if ($field['values'][0]['value'] != '') {
                     return;
                 } 
             }
