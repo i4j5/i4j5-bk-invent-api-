@@ -26,18 +26,14 @@ class GoogleDriveController extends Controller
     {        
         $lead_id = $request->input('id') ? (int) $request->input('id') : (int) $request->input('leads')['status'][0]['id'];     
         
-        $this->createLeadFolders($lead_id);
-
-       
+        if ($lead_id) {
+            $this->createLeadFolders($lead_id);
+        }
     }
 
     private function createLeadFolders($id = null)
     {
         $lead_id = $id;
-
-        if (!$lead_id) {
-            return;
-        }
 
         $data = $this->amocrm->lead->apiList([
             'id' => $lead_id,
@@ -58,7 +54,7 @@ class GoogleDriveController extends Controller
         $lead = $this->amocrm->lead;
 
         $file = new \Google_Service_Drive_DriveFile([
-            'parents' => ['1bLWjKyXRLKDQ_BKqxVsj6DegO9L6-SBf'],
+            'parents' => ['16_u3j93RtbO-eCvpQS9Dw_OGAa3X_Bw5'],
             'name' => $lead_name,
             'mimeType' => 'application/vnd.google-apps.folder'
         ]);
