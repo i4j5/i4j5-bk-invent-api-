@@ -19,4 +19,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::prefix('webhooks')->group(function () {
     Route::post('amocrm2google-drive', 'Google\GoogleDriveController@amoWebhook');
+    Route::post('amocrm2google-drive--delete', 'Google\GoogleDriveController@amoWebhookDelete');
 });

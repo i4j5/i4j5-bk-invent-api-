@@ -31,6 +31,15 @@ class GoogleDriveController extends Controller
         }
     }
 
+    public function amoWebhookDelete(Request $request)
+    {        
+        $lead_id = (int) $request->input('leads')['delete'][0]['id'];      
+        
+        if ($lead_id) {
+            $this->deleteLeadFolders($lead_id);
+        }
+    }
+
     private function createLeadFolders($id = null)
     {
         $lead_id = $id;
@@ -95,5 +104,37 @@ class GoogleDriveController extends Controller
         
         // Заносим данные в amoCRM
         $lead->apiUpdate((int) $lead_id, 'now');
+    }
+
+    private function deleteLeadFolders($id = null)
+    {
+
+        $lead_id = $id;
+
+        $data = $this->amocrm->lead->apiList([
+            'id' => $lead_id,
+            'limit_rows' => 1,
+        ], '-100 DAYS')[0];
+
+        $file_id = null;
+
+        foreach ( $data['custom_fields'] as $field )
+        {
+            if ((int) $field['id'] == 223913) {
+                $file_id = $field['values'][0]['value'];
+                $file_id = explode('?id=', $file_id)[1];
+            }
+        }
+
+        $file = $this->service->files->get($file_id);
+        
+        $fileMetadata = new \Google_Service_Drive_DriveFile([
+            'modifiedTime' => date('Y-m-d\TH:i:s.uP'),
+            'name' => 'Сделка удалена - ' . $file->getName(),
+        ]);
+
+        $folder = $this->service->files->update($file_id, $fileMetadata, [
+            'addParents' => '19lYv8HbljBc73E60ME6tss2_Jg9N0miY',
+        ]);
     }
 }
