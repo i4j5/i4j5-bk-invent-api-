@@ -21,3 +21,7 @@ Route::prefix('webhooks')->group(function () {
     Route::post('amocrm2google-drive', 'Google\GoogleDriveController@amoWebhook');
     Route::post('amocrm2google-drive--delete', 'Google\GoogleDriveController@amoWebhookDelete');
 });
+
+Route::prefix('amo')->group(function () {
+    Route::post('add', 'Amo\UnsortedController@add');
+});
