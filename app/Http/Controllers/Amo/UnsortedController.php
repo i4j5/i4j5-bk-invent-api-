@@ -48,6 +48,7 @@ class UnsortedController extends Controller
         $url = $request->input('url');
         $utm = $request->input('utm');
         $roistat = $request->input('roistat');
+		$comment = $request->input('comment');
 
 
         ///////////////
@@ -103,7 +104,7 @@ class UnsortedController extends Controller
         $lead->addCustomField(232417, $utm_content);
         $lead->addCustomField(232419, '-');
         $lead->addCustomField(232421, $url);
-        $lead->addCustomField(233419, ''); //ya_id
+        //$lead->addCustomField(233419, ''); //ya_id
         $lead->addCustomField(232423, $utm);
         $lead->addCustomField(226175, 487647);
         $lead->addCustomField(240623, $roistat);
@@ -117,14 +118,28 @@ class UnsortedController extends Controller
             'limit_rows' => 1,
         ]);
         
+		$note = $this->amo->note;
+		$note['element_type'] = \AmoCRM\Models\Note::TYPE_CONTACT;
+		$note['note_type'] = \AmoCRM\Models\Note::COMMON;
+		
+		$comment = $comment . " \n 
+		Страница захвата: $url \n
+		Ключевое слово: $utm_term \n
+		Промокод: $roistat \n
+		";
+		
         // Примечания, которые появятся в сделке если телефон имеется в базе
         if($query_contact) {
             $note = $this->amo->note;
             $note['element_type'] = \AmoCRM\Models\Note::TYPE_CONTACT;
             $note['note_type'] = \AmoCRM\Models\Note::COMMON;
-            $note['text'] = "Номер $contact_phone присутствует в базе!!!";
-            $lead['notes'] = $note;
+            $comment = $comment . " \n Номер $contact_phone присутствует в базе!!!";
+            
         }
+		
+		$note['text'] = $comment;
+		$lead['notes'] = $note;
+		
 
         // Заполнение контакта 
         $contact['name'] = $contact_name;
