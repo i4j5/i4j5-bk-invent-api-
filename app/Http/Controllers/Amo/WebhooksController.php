@@ -39,7 +39,6 @@ class WebhooksController extends Controller
     public function rawLead(Request $request)
     {        
         $lead_id = $request->input('id') ? (int) $request->input('id') : (int) $request->input('leads')['status'][0]['id'];     
-        //$lead_id = '16864475';
 
         $data = $this->amocrm->lead->apiList([
             'id' => $lead_id,
@@ -52,10 +51,9 @@ class WebhooksController extends Controller
             'id' => $contact_id,
             'limit_rows' => 1,
         ], '-100 DAYS')[0];
-        
-        //dd($data);
 
         $contact = $this->amocrm->contact;
+
         $phones = [];
         foreach ( $data['custom_fields'] as $field )
         {
@@ -68,14 +66,11 @@ class WebhooksController extends Controller
 
                     $res = $this->fixPhone($phone, $enum);
                     $phones[] = $res;
-                }
-
-                
+                }  
             }
         }
 
         $contact->addCustomField('95354', $phones);
-        
         $contact->apiUpdate((int) $contact_id, 'now');
 
     }

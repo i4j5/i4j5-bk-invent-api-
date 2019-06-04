@@ -25,4 +25,5 @@ Route::prefix('webhooks')->group(function () {
 
 Route::prefix('amo')->group(function () {
     Route::post('add', 'Amo\UnsortedController@add');
+    Route::get('fix-all-phones', 'Amo\ContactController@fixAllPhones');
 });
