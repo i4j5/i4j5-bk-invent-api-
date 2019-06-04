@@ -20,7 +20,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::prefix('webhooks')->group(function () {
     Route::post('amocrm2google-drive', 'Google\GoogleDriveController@amoWebhook');
     Route::post('amocrm2google-drive--delete', 'Google\GoogleDriveController@amoWebhookDelete');
-    Route::get('amocrm-fix-phone', 'Amo\WebhooksController@rawLead');
+    Route::post('amocrm-fix-phone', 'Amo\WebhooksController@rawLead');
 });
 
 Route::prefix('amo')->group(function () {
