@@ -52,33 +52,45 @@ class ContactController extends Controller
             ]);
             foreach ( $data as $contact )
             {
-                $contact = $this->amocrm->contact;
+                
                 $phones = [];
+                $i++; 
 
-                if(isset($data['custom_fields'])) 
+                if(isset($contact['custom_fields'])) 
                 {
                     
-                    foreach ( $data['custom_fields'] as $field )
+                    foreach ( $contact['custom_fields'] as $field )
                     {
-                        if ($field['code'] == 'PHONE') {
+                        if (isset($field['code']) && $field['code'] == 'PHONE') {
                             
-                            $i++; 
                             foreach ( $field['values'] as $item )
                             {
                                 $phone = $item['value'];
                                 $enum = $item['enum'];
-    
-                                $res = $this->fixPhone($phone, $enum);
-                                $phones[] = $res;
+
+                                
+                                if ($phone)
+                                {
+                                    $res = $this->fixPhone($phone, $enum);
+                                    $phones[] = $res;
+                                }
+                                
                             }  
                         }
                     }
                 }
 
-                $contact->addCustomField('95354', $phones);
+                $updateContact = $this->amocrm->contact;
+
+                if(count($phones))
+                {
+                    $updateContact->addCustomField('95354', $phones);
+                    
+                    if(isset($contact['id']) && $contact['id'])
+                        $updateContact->apiUpdate((int) $contact['id'], 'now');
+                        
+                }
                 
-                if(isset($data['id']) && $data['id']) 
-                    $contact->apiUpdate((int) $data['id'], 'now');
             }
 
             if (count($data) < 500) $run = false;
