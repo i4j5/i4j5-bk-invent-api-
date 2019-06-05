@@ -19,7 +19,7 @@ class ContactController extends Controller
 
     private function fixPhone($contact_phone, $enum = 214336)
     {
-        $contact_phone = str_replace(array('+', '(', ')', ' ', '-', '_', '*'), '', $contact_phone);
+        $contact_phone = str_replace(array('+', '(', ')', ' ', '-', '_', '*','–'), '', $contact_phone);
         
         if(strlen($contact_phone) >= 11) {
             if($contact_phone[0] == 8) {
@@ -41,6 +41,8 @@ class ContactController extends Controller
     {   
         $i = 0;     
         $run = true;
+		
+		$_dd = [];
 
         for($limit_offset = 0; $run; $limit_offset++) 
         {
@@ -50,6 +52,9 @@ class ContactController extends Controller
                 'limit_offset' => $limit_offset * 500,
                 'type' => 'all'
             ]);
+			
+			$_dd = array_merge($_dd, $data);
+			
             foreach ( $data as $contact )
             {
                 
@@ -80,24 +85,26 @@ class ContactController extends Controller
                     }
                 }
 
-                $updateContact = $this->amocrm->contact;
-
-                if(count($phones))
+                                
+                if(count($phones) && isset($contact['id']) && $contact['id'])
                 {
+                    if($contact["type"] == "company")
+                    {
+                        $updateContact = $this->amocrm->company;
+                    } else {
+                        $updateContact = $this->amocrm->contact;
+                    }
                     $updateContact->addCustomField('95354', $phones);
-                    
-                    if(isset($contact['id']) && $contact['id'])
-                        $updateContact->apiUpdate((int) $contact['id'], 'now');
+                    $updateContact->apiUpdate((int) $contact['id'], 'now');
                         
                 }
-                
+           
             }
 
             if (count($data) < 500) $run = false;
         }
 
         echo "Было обработано $i контактов";
-
     }
 
 }
