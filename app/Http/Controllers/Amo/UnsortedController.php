@@ -5,39 +5,29 @@ namespace App\Http\Controllers\Amo;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Dotzero\LaravelAmoCrm\AmoCrmManager;
+use App\Phone;
 
 class UnsortedController extends Controller
 {
 
-    private $amo;
+    private $amocrm;
+    private $_phone;
 
     public function __construct(AmoCrmManager $amocrm)
     {
-        try {
-            $this->amo = $amocrm;
-    
-        } catch (\Exception $e) {
-            abort(400, $e->getMessage());
-        }
+        $this->amocrm = $amocrm;
+        $this->_phone = Phone::getInstance();
     }
 
-    public function add(Request $request)
+    public function addForm(Request $request)
     {
         $lead_name = $request->input('order');
         $contact_name = $request->input('name');
         $contact_phone = $request->input('phone');
 
-        $contact_phone = str_replace(array('+', '(', ')', ' ', '-', '_', '*'), '', $contact_phone);
+        $arrPhone = $this->_phone->fix($contact_phone);
 
-        if(strlen($contact_phone) >= 11) {
-            if($contact_phone[0] == 8) {
-                $contact_phone[0] = 7;	
-            }
-        }
-
-        if(strlen($contact_phone) == 10) {
-            $contact_phone = '7' . $contact_phone;	
-        }
+        $contact_phone = $arrPhone['phone'];
 	
         $contact_email = $request->input('email');
         $utm_medium = $request->input('utm_medium');
@@ -54,7 +44,7 @@ class UnsortedController extends Controller
         ///////////////
 
 
-        $unsorted = $this->amo->unsorted;
+        $unsorted = $this->amocrm->unsorted;
         $unsorted['source'] = 'bk-invent.ru';
         $unsorted['source_uid'] = null;
 
@@ -90,10 +80,9 @@ class UnsortedController extends Controller
         ];
 
         // Сделка которая будет создана после одобрения заявки.
-        $lead = $this->amo->lead;
+        $lead = $this->amocrm->lead;
         $lead['name'] = $lead_name;
-        // $lead['price'] = 3000;
-        $lead['tags'] = ['LP'];
+        $lead['tags'] = ['Заявка с сайта'];
         
         // Системные
         $lead->addCustomField(232407, $utm_medium);
@@ -104,21 +93,19 @@ class UnsortedController extends Controller
         $lead->addCustomField(232417, $utm_content);
         $lead->addCustomField(232419, '-');
         $lead->addCustomField(232421, $url);
-        //$lead->addCustomField(233419, ''); //ya_id
         $lead->addCustomField(232423, $utm);
         $lead->addCustomField(226175, 487647);
         $lead->addCustomField(240623, $roistat);
       
-
         // Создание контакта
-        $contact = $this->amo->contact;
+        $contact = $this->amocrm->contact;
 
-        $query_contact = $this->amo->contact->apiList([
-            'query' => $contact_phone,
-            'limit_rows' => 1,
-        ]);
+        // $query_contact = $this->amocrm->contact->apiList([
+        //     'query' => $contact_phone,
+        //     'limit_rows' => 1,
+        // ]);
         
-		$note = $this->amo->note;
+		$note = $this->amocrm->note;
 		$note['element_type'] = \AmoCRM\Models\Note::TYPE_CONTACT;
 		$note['note_type'] = \AmoCRM\Models\Note::COMMON;
 		
@@ -129,17 +116,15 @@ class UnsortedController extends Controller
 		";
 		
         // Примечания, которые появятся в сделке если телефон имеется в базе
-        if($query_contact) {
-            $note = $this->amo->note;
+        if($arrPhone['double']) {
+            $note = $this->amocrm->note;
             $note['element_type'] = \AmoCRM\Models\Note::TYPE_CONTACT;
             $note['note_type'] = \AmoCRM\Models\Note::COMMON;
-            $comment = $comment . " \n Номер $contact_phone присутствует в базе!!!";
-            
+            $comment = "\n====================\n Возможно это дубль!!! \n====================\n". $comment;
         }
 		
 		$note['text'] = $comment;
 		$lead['notes'] = $note;
-		
 
         // Заполнение контакта 
         $contact['name'] = $contact_name;
@@ -156,9 +141,8 @@ class UnsortedController extends Controller
         // Присоединение сделки к неразобранному
         $unsorted->addDataLead($lead);
 
-        //exit;
         // Добавление неразобранной заявки с типом FORMS
         $unsortedId = $unsorted->apiAddForms();
-        print_r($unsortedId);
+        echo 'ok';
     }
 }
