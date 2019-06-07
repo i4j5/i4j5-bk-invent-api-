@@ -15,6 +15,9 @@ class Phone
 
     }
 
+    /**
+     * Instance
+     */
     public static function getInstance() 
     {
         if (self::$_instance === null) {
@@ -25,6 +28,13 @@ class Phone
         
     }
 
+    /**
+     * Проверка номера на дубли и приведение к единому формату
+     *
+     * @param string $phone
+     * @param integer $enum
+     * @return array 
+     */
     public function fix($phone = '', $enum = null)
     {
         $phone = str_replace(['+', '(', ')', ' ', '-', '_', '*','–'], '', $phone);
@@ -53,6 +63,8 @@ class Phone
         ];
     } 
 
-    public function findDuplicates($phone = '')
-    {}
+    public function findDuplicates()
+    {
+
+    }
 }

@@ -17,13 +17,31 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
+// WebHooks
 Route::prefix('webhooks')->group(function () {
-    Route::post('amocrm2google-drive', 'Google\GoogleDriveController@amoWebhook');
-    Route::post('amocrm2google-drive--delete', 'Google\GoogleDriveController@amoWebhookDelete');
-    Route::post('amocrm-fix-phone', 'Amo\WebhooksController@rawLead');
+    
+    // Исправление ошибок в контактах
+    Route::get('fix-all-contacts', 'Webhooks\FixAllContactsController@handle');
+
+    // prefix amo
+    Route::prefix('amo')->group(function () {
+
+        // Создание папки сделки на Google Drive
+        Route::post('create-lead-folders', 'Webhooks\Amo\CreateLeadFoldersController@handle');
+        
+        // При переходе на этап НЕОБРАБОТАННЫЙ ЛИД
+        Route::post('raw-lead', 'Webhooks\Amo\RawLeadController@handle');
+    });
+    
+    // prefix roistat
+    // Route::prefix('roistat')->group(function () {
+        
+    // }
 });
 
+
+// amoCRM
 Route::prefix('amo')->group(function () {
-    Route::post('add', 'Amo\UnsortedController@addForm');
-    Route::get('fix-all-phones', 'Amo\ContactController@fixAllPhones');
+    Route::post('create-lead-from-form', 'API\AmoController@createLeadFromForm');
 });

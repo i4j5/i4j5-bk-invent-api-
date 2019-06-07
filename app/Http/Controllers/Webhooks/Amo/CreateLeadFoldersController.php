@@ -1,12 +1,17 @@
 <?php
 
-namespace App\Http\Controllers\Google;
+namespace App\Http\Controllers\Webhooks\Amo;
 
 use App\Http\Controllers\Controller;
 use Dotzero\LaravelAmoCrm\AmoCrmManager;
 use Illuminate\Http\Request;
 
-class GoogleDriveController extends Controller
+/**
+ * WebHook
+ * amoCRM
+ * Создание папки сделки на Google Drive
+ */
+class CreateLeadFoldersController extends Controller
 {
     private $service;
     private $amocrm;
@@ -19,35 +24,25 @@ class GoogleDriveController extends Controller
         $this->service = new \Google_Service_Drive($client);
 
         $this->amocrm = $amocrm;
-       
     }
 
-    public function amoWebhook(Request $request)
+    public function handle(Request $request)
     {        
         $lead_id = $request->input('id') ? (int) $request->input('id') : (int) $request->input('leads')['status'][0]['id'];     
         
         if ($lead_id) {
-            $this->createLeadFolders($lead_id);
+            $this->create($lead_id);
         }
     }
 
-    public function amoWebhookDelete(Request $request)
-    {        
-        $lead_id = (int) $request->input('leads')['delete'][0]['id'];      
-        
-        if ($lead_id) {
-            $this->deleteLeadFolders($lead_id);
-        }
-    }
-
-    private function createLeadFolders($id = null)
+    private function create($id = null)
     {
         $lead_id = $id;
 
         $data = $this->amocrm->lead->apiList([
             'id' => $lead_id,
             'limit_rows' => 1,
-        ], '-100 DAYS')[0];
+        ])[0];
 
         $lead_name = $data['name'];
 
@@ -104,37 +99,5 @@ class GoogleDriveController extends Controller
         
         // Заносим данные в amoCRM
         $lead->apiUpdate((int) $lead_id, 'now');
-    }
-
-    private function deleteLeadFolders($id = null)
-    {
-
-        $lead_id = $id;
-
-        $data = $this->amocrm->lead->apiList([
-            'id' => $lead_id,
-            'limit_rows' => 1,
-        ], '-100 DAYS')[0];
-
-        $file_id = null;
-
-        foreach ( $data['custom_fields'] as $field )
-        {
-            if ((int) $field['id'] == 223913) {
-                $file_id = $field['values'][0]['value'];
-                $file_id = explode('?id=', $file_id)[1];
-            }
-        }
-
-        $file = $this->service->files->get($file_id);
-        
-        $fileMetadata = new \Google_Service_Drive_DriveFile([
-            'modifiedTime' => date('Y-m-d\TH:i:s.uP'),
-            'name' => 'Сделка удалена - ' . $file->getName(),
-        ]);
-
-        $folder = $this->service->files->update($file_id, $fileMetadata, [
-            'addParents' => '19lYv8HbljBc73E60ME6tss2_Jg9N0miY',
-        ]);
     }
 }

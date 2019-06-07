@@ -1,49 +1,34 @@
 <?php
 
-namespace App\Http\Controllers\Amo;
+namespace App\Http\Controllers\Webhooks;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Dotzero\LaravelAmoCrm\AmoCrmManager;
+use App\Phone;
 
-class ContactController extends Controller
+/**
+ * WebHook
+ * amoCRM
+ * Исправление ошибок в контактах
+ */
+class FixAllContactsController extends Controller
 {
 
     private $amocrm;
+    private $phone;
 
     public function __construct(AmoCrmManager $amocrm)
     {
         $this->amocrm = $amocrm;
+        $this->phone = Phone::getInstance();
+    }
+
+    public function handle(Request $request)
+    {        
         set_time_limit(0);
-    }
 
-    private function fixPhone($contact_phone, $enum = 214336)
-    {
-        $contact_phone = str_replace(array('+', '(', ')', ' ', '-', '_', '*','–'), '', $contact_phone);
-        
-        if(strlen($contact_phone) >= 11) {
-            if($contact_phone[0] == 8) {
-                $contact_phone[0] = 7;	
-            }
-        }
-
-        if(strlen($contact_phone) == 10) {
-            $contact_phone = '7' . $contact_phone;	
-        }
-
-        if ($enum == 214340) $enum = 214336;
-
-        return [$contact_phone, $enum];
-
-    }
-
-    public function fixAllPhones(Request $request)
-    {   
-        $i = 0;     
         $run = true;
-		
-		$_dd = [];
-
         for($limit_offset = 0; $run; $limit_offset++) 
         {
 
@@ -53,13 +38,9 @@ class ContactController extends Controller
                 'type' => 'all'
             ]);
 			
-			$_dd = array_merge($_dd, $data);
-			
             foreach ( $data as $contact )
             {
-                
                 $phones = [];
-                $i++; 
 
                 if(isset($contact['custom_fields'])) 
                 {
@@ -76,15 +57,14 @@ class ContactController extends Controller
                                 
                                 if ($phone)
                                 {
-                                    $res = $this->fixPhone($phone, $enum);
-                                    $phones[] = $res;
+                                    $res = $this->phone->fix($phone, $enum);
+                                    $phones[] = [$res['phone'], $res['enum']];
                                 }
                                 
                             }  
                         }
                     }
                 }
-
                                 
                 if(count($phones) && isset($contact['id']) && $contact['id'])
                 {
@@ -103,8 +83,6 @@ class ContactController extends Controller
 
             if (count($data) < 500) $run = false;
         }
-
-        echo "Было обработано $i контактов";
     }
 
 }

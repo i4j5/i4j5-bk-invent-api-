@@ -1,31 +1,37 @@
 <?php
 
-namespace App\Http\Controllers\Amo;
+namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Dotzero\LaravelAmoCrm\AmoCrmManager;
 use App\Phone;
 
-class UnsortedController extends Controller
+class AmoController extends Controller
 {
 
     private $amocrm;
-    private $_phone;
+    private $phone;
 
     public function __construct(AmoCrmManager $amocrm)
     {
         $this->amocrm = $amocrm;
-        $this->_phone = Phone::getInstance();
+        $this->phone = Phone::getInstance();
     }
 
-    public function addForm(Request $request)
+    /**
+     * Создание заявки с сайта
+     * POST
+     * @param Request $request
+     * @return void
+     */
+    public function createLeadFromForm(Request $request)
     {
         $lead_name = $request->input('order');
         $contact_name = $request->input('name');
         $contact_phone = $request->input('phone');
 
-        $arrPhone = $this->_phone->fix($contact_phone);
+        $arrPhone = $this->phone->fix($contact_phone);
 
         $contact_phone = $arrPhone['phone'];
 	
@@ -40,9 +46,7 @@ class UnsortedController extends Controller
         $roistat = $request->input('roistat');
 		$comment = $request->input('comment');
 
-
         ///////////////
-
 
         $unsorted = $this->amocrm->unsorted;
         $unsorted['source'] = 'bk-invent.ru';
@@ -99,11 +103,6 @@ class UnsortedController extends Controller
       
         // Создание контакта
         $contact = $this->amocrm->contact;
-
-        // $query_contact = $this->amocrm->contact->apiList([
-        //     'query' => $contact_phone,
-        //     'limit_rows' => 1,
-        // ]);
         
 		$note = $this->amocrm->note;
 		$note['element_type'] = \AmoCRM\Models\Note::TYPE_CONTACT;
@@ -143,6 +142,77 @@ class UnsortedController extends Controller
 
         // Добавление неразобранной заявки с типом FORMS
         $unsortedId = $unsorted->apiAddForms();
+        echo 'ok';
+    }
+
+    /**
+     * Исправление ошибок в контактах
+     * GET
+     * @param Request $request
+     * @return void
+     */
+    public function fixAllContacts(Request $request)
+    {   
+        set_time_limit(0);
+
+        $run = true;
+        for($limit_offset = 0; $run; $limit_offset++) 
+        {
+
+            $data = $this->amocrm->contact->apiList([
+                'limit_rows' => 500,
+                'limit_offset' => $limit_offset * 500,
+                'type' => 'all'
+            ]);
+			
+            foreach ( $data as $contact )
+            {
+                $phones = [];
+                $i++; 
+
+                if(isset($contact['custom_fields'])) 
+                {
+                    
+                    foreach ( $contact['custom_fields'] as $field )
+                    {
+                        if (isset($field['code']) && $field['code'] == 'PHONE') {
+                            
+                            foreach ( $field['values'] as $item )
+                            {
+                                $phone = $item['value'];
+                                $enum = $item['enum'];
+
+                                
+                                if ($phone)
+                                {
+                                    $res = $this->fixPhone($phone, $enum);
+                                    $phones[] = $res;
+                                }
+                                
+                            }  
+                        }
+                    }
+                }
+
+                                
+                if(count($phones) && isset($contact['id']) && $contact['id'])
+                {
+                    if($contact["type"] == "company")
+                    {
+                        $updateContact = $this->amocrm->company;
+                    } else {
+                        $updateContact = $this->amocrm->contact;
+                    }
+                    $updateContact->addCustomField('95354', $phones);
+                    $updateContact->apiUpdate((int) $contact['id'], 'now');
+                        
+                }
+           
+            }
+
+            if (count($data) < 500) $run = false;
+        }
+
         echo 'ok';
     }
 }
