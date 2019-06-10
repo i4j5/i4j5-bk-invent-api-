@@ -35,9 +35,8 @@ Route::prefix('webhooks')->group(function () {
     });
     
     // prefix roistat
-    // Route::prefix('roistat')->group(function () {
-        
-    // }
+    Route::prefix('roistat')->group(function () {
+        Route::post('lead-hunter', 'Webhooks\Roistat\LeadHunterController@handle');
 });
 
 
