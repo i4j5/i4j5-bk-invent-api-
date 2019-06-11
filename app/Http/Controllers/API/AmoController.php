@@ -28,12 +28,11 @@ class AmoController extends Controller
     public function createLeadFromForm(Request $request)
     {
         $lead_name = $request->input('order');
-        $contact_name = $request->input('name');
         $contact_phone = $request->input('phone');
 
         $arrPhone = $this->phone->fix($contact_phone);
-
         $contact_phone = $arrPhone['phone'];
+        $contact_name = $request->input('name') ? $request->input('name') : $contact_phone;
 	
         $contact_email = $request->input('email');
         $utm_medium = $request->input('utm_medium');

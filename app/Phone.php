@@ -61,10 +61,81 @@ class Phone
             'enum' => $enum,
             'double' => $double
         ];
-    } 
-
-    public function findDuplicates()
+    }
+    
+    
+    /**
+     * Детальный поиск дубликатов
+     *
+     * @param integer $id
+     * @return boolean
+     */
+    public function  checkDuplicateInLead($id)
     {
-        
+        $lead_id = (int) $id;
+        $double = false;
+
+        $data = $this->amocrm->lead->apiList([
+            'id' => $lead_id,
+            'limit_rows' => 1,
+        ])[0];
+
+        $tags = [];
+        foreach ( $data['tags'] as $tag )
+        {
+            array_push($tags, $tag['name']);
+        }
+
+        $contact_id = (int) $data['main_contact_id'];
+        $contact = $this->amocrm->contact;
+
+        $phones = [];
+        foreach ( $data['custom_fields'] as $field )
+        {
+            if ($field['code'] == 'PHONE') {
+
+                foreach ( $field['values'] as $item )
+                {
+                    $phone = $item['value'];
+                    $phones[] = $res['phone'];
+                }  
+            }
+        }
+
+        foreach ( $phones as $phone ) {
+
+            $items = $this->amocrm->contact->apiList([
+                'query' => $phone,
+                'type' => 'contact',
+            ]);
+            
+            foreach ( $items as $item )
+            {
+                
+                foreach ( $item['custom_fields'] as $field )
+                {
+                    if(isset($field['code']) && $field['code'] == 'PHONE') {
+                        foreach ( $field['values'] as $el )
+                        {
+                            if (in_array($el['value'], $phones)) 
+                            {
+                                $double = true;
+                                break(4);
+                            }
+                        }  
+                    }
+                }
+            }
+           
+        }
+
+        if($double) {
+            $lead = $this->amocrm->lead;
+            array_push($tags, 'Дубль');
+            $lead['tags'] = $tags;
+            $lead->apiUpdate($lead_id, 'now');
+        }
+
+        return $double;
     }
 }

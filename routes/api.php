@@ -19,7 +19,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 
 // WebHooks
-Route::prefix('webhooks')->group(function () {
+Route::prefix('webhook')->group(function () {
     
     // Исправление ошибок в контактах
     Route::get('fix-all-contacts', 'Webhooks\FixAllContactsController@handle');
@@ -36,11 +36,17 @@ Route::prefix('webhooks')->group(function () {
     
     // prefix roistat
     Route::prefix('roistat')->group(function () {
+
+        // Ловец Лидов
         Route::post('lead-hunter', 'Webhooks\Roistat\LeadHunterController@handle');
+    });
 });
 
 
 // amoCRM
 Route::prefix('amo')->group(function () {
+
+    // Создание заявки с сайта
     Route::post('create-lead-from-form', 'API\AmoController@createLeadFromForm');
 });
+
