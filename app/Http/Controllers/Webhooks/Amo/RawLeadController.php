@@ -77,7 +77,6 @@ class RawLeadController extends Controller
             
             foreach ( $items as $item )
             {
-                
                 foreach ( $item['custom_fields'] as $field )
                 {
                     if(isset($field['code']) && $field['code'] == 'PHONE') {
