@@ -24,7 +24,7 @@ class RawLeadController extends Controller
 
     public function handle(Request $request)
     {        
-        $lead_id = (int) $request->input('leads')['status'][0]['id'];     
+        $lead_id = (int) $request->input('leads')['add'][0]['id'];     
 
         $data = $this->amocrm->lead->apiList([
             'id' => $lead_id,
