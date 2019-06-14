@@ -32,6 +32,7 @@ Route::prefix('webhook')->group(function () {
         
         // При переходе на этап НЕОБРАБОТАННЫЙ ЛИД
         Route::post('raw-lead', 'Webhooks\Amo\RawLeadController@handle');
+        Route::post('not-implemented', 'Webhooks\Amo\NotImplementedController@handle');
     });
     
     // prefix roistat
