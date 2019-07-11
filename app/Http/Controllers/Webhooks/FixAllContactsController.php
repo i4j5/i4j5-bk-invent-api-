@@ -90,9 +90,12 @@ class FixAllContactsController extends Controller
 
                     if($double) {
                         array_push($tags, 'Дубль');
-                        $updateContact['tags'] = $tags;
                         $i++;
+                    } else {
+                        unset($tags[array_search('Дубль', $tags)]);
                     }
+
+                    $updateContact['tags'] = $tags;
 
                     $updateContact->apiUpdate((int) $contact['id'], 'now');
                     sleep(10);

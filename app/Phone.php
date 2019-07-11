@@ -105,11 +105,13 @@ class Phone
         {
             $items = $this->amocrm->contact->apiList([
                 'query' => $phone,
-                'type' => 'contact',
+                'type' => 'all',
             ]);
             
             foreach ( $items as $item )
             {
+
+                if($lead_id == $item['id']) break;
                 
                 foreach ( $item['custom_fields'] as $field )
                 {
