@@ -24,37 +24,48 @@ class FixAllContactsController extends Controller
         $this->phone = Phone::getInstance();
     }
 
-    public function handle(Request $request)
+    public function handle($query = '')
     {        
         set_time_limit(0);
+
+        $i = 0;
 
         $run = true;
         for($limit_offset = 0; $run; $limit_offset++) 
         {
 
             $data = $this->amocrm->contact->apiList([
+                'query' => $query,
                 'limit_rows' => 500,
                 'limit_offset' => $limit_offset * 500,
                 'type' => 'all'
             ]);
+
 			
             foreach ( $data as $contact )
             {
+
+                // Формируеи список тегов
+                $tags = [];
+                foreach ( $contact['tags'] as $tag )
+                {
+                    array_push($tags, $tag['name']);
+                }
+
+                $double = $this->phone->checkDuplicateInСontact($contact['id']);
+                
                 $phones = [];
 
                 if(isset($contact['custom_fields'])) 
                 {
-                    
                     foreach ( $contact['custom_fields'] as $field )
                     {
-                        if (isset($field['code']) && $field['code'] == 'PHONE') {
-                            
+                        if (isset($field['code']) && $field['code'] == 'PHONE') 
+                        {
                             foreach ( $field['values'] as $item )
                             {
                                 $phone = $item['value'];
                                 $enum = $item['enum'];
-
-                                
                                 if ($phone)
                                 {
                                     $res = $this->phone->fix($phone, $enum);
@@ -68,21 +79,31 @@ class FixAllContactsController extends Controller
                                 
                 if(count($phones) && isset($contact['id']) && $contact['id'])
                 {
-                    if($contact["type"] == "company")
+
+                    if($contact['type'] == 'company')
                     {
                         $updateContact = $this->amocrm->company;
                     } else {
                         $updateContact = $this->amocrm->contact;
                     }
                     $updateContact->addCustomField('95354', $phones);
+
+                    if($double) {
+                        array_push($tags, 'Дубль');
+                        $updateContact['tags'] = $tags;
+                        $i++;
+                    }
+
                     $updateContact->apiUpdate((int) $contact['id'], 'now');
-                        
+                    sleep(10);
                 }
            
             }
 
             if (count($data) < 500) $run = false;
         }
+
+        echo "Найдено дублей: $i";
     }
 
 }

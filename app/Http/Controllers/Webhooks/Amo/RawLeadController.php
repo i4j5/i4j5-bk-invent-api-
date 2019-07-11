@@ -77,9 +77,6 @@ class RawLeadController extends Controller
             
             foreach ( $items as $item )
             {
-                // echo '<pre>';
-                // print_r($item);
-                // echo '<br>';
                 if($item['id'] == $contact_id) break;
                 
                 foreach ( $item['custom_fields'] as $field )

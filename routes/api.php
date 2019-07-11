@@ -22,7 +22,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::prefix('webhook')->group(function () {
     
     // Исправление ошибок в контактах
-    Route::get('fix-all-contacts', 'Webhooks\FixAllContactsController@handle');
+    Route::get('fix-all-contacts/{query?}', 'Webhooks\FixAllContactsController@handle');
 
     // prefix amo
     Route::prefix('amo')->group(function () {
