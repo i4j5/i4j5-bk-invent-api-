@@ -79,7 +79,13 @@ class Phone
             'id' => $lead_id,
             'limit_rows' => 1,
             'type' => 'all'
-        ])[0];
+        ]);
+
+        if (isset($data[0])) {
+            $data = $data[0];
+        } else {
+            return false;
+        }
        
         $contact_id = (int) $data['id'];
         $contact = $this->amocrm->contact;
