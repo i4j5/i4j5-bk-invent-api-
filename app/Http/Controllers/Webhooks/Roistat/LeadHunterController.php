@@ -108,12 +108,12 @@ class LeadHunterController extends Controller
 		";
 		
         // Примечания, которые появятся в сделке если телефон имеется в базе
-        if($arrPhone['double']) {
-            $note = $this->amocrm->note;
-            $note['element_type'] = \AmoCRM\Models\Note::TYPE_CONTACT;
-            $note['note_type'] = \AmoCRM\Models\Note::COMMON;
-            $comment = "\n====================\n Возможно это дубль!!! \n====================\n". $comment;
-        }
+        // if($arrPhone['double']) {
+        //     $note = $this->amocrm->note;
+        //     $note['element_type'] = \AmoCRM\Models\Note::TYPE_CONTACT;
+        //     $note['note_type'] = \AmoCRM\Models\Note::COMMON;
+        //     $comment = "\n====================\n Возможно это дубль!!! \n====================\n". $comment;
+        // }
 		
 		$note['text'] = $comment;
 		$lead['notes'] = $note;

@@ -50,92 +50,48 @@ class Phone
         }
         
         if ($enum == 214340) $enum = 214336;
-        
-        $double = $this->amocrm->contact->apiList([
-            'query' => $phone,
-            'limit_rows' => 1,
-        ]);
 
         return [
             'phone' => $phone,
-            'enum' => $enum,
-            'double' => $double
+            'enum' => $enum
         ];
     }
     
     
     /**
-     * Детальный поиск дубликатов в Контактах
+     * Поиск контакта
      *
-     * @param integer $id
-     * @return boolean
+     * @param string $phone 
+     * @return integer
      */
-    public function  checkDuplicateInСontact($id)
+    public function contactSearch($phone)
     {
-        $lead_id = (int) $id;
-        $double = false;
-
+        $id = 0;
+        
         $data = $this->amocrm->contact->apiList([
-            'id' => $lead_id,
+            'query' => $phone,
             'limit_rows' => 1,
-            'type' => 'all'
+            'type' => 'contact' 
         ]);
 
-        if (isset($data[0])) {
-            $data = $data[0];
-        } else {
-            return false;
-        }
-       
-        $contact_id = (int) $data['id'];
-        $contact = $this->amocrm->contact;
-        
-        // Формируеи список номеров
-        $phones = [];
-        if(isset($data['custom_fields'])) 
+        foreach ( $data as $contact )
         {
-            foreach ( $data['custom_fields'] as $field )
+            foreach ( $contact['custom_fields'] as $field )
             {
-                if (isset($field['code']) && $field['code'] == 'PHONE') 
+                if(isset($field['code']) && $field['code'] == 'PHONE') 
                 {
                     foreach ( $field['values'] as $item )
                     {
-                        $phones[] = $item['value'];
+                        if ($phone == $item['value']) 
+                        {
+                            $id = $contact['id'];
+                            break(3);
+                        }
                     }  
                 }
             }
         }
 
-        // Поиск дублей
-        foreach ( $phones as $phone ) 
-        {
-            $items = $this->amocrm->contact->apiList([
-                'query' => $phone,
-                'type' => 'all',
-            ]);
-            
-            foreach ( $items as $item )
-            {
-
-                if($lead_id == $item['id']) break;
-                
-                foreach ( $item['custom_fields'] as $field )
-                {
-                    if(isset($field['code']) && $field['code'] == 'PHONE') {
-                        foreach ( $field['values'] as $el )
-                        {
-                            if (in_array($el['value'], $phones)) 
-                            {
-                                $double = true;
-                                break(4);
-                            }
-                        }  
-                    }
-                }
-            }
-           
-        }
-
-        return $double;
+        return $id;
     }
 }

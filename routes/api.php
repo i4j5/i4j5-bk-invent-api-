@@ -32,6 +32,8 @@ Route::prefix('webhook')->group(function () {
         
         // При переходе на этап НЕОБРАБОТАННЫЙ ЛИД
         Route::post('raw-lead', 'Webhooks\Amo\RawLeadController@handle');
+
+        // При переходе на этап ЗАКРЫТО И НЕ РЕАЛИЗОВАНО
         Route::post('not-implemented', 'Webhooks\Amo\NotImplementedController@handle');
     });
     
@@ -48,6 +50,6 @@ Route::prefix('webhook')->group(function () {
 Route::prefix('amo')->group(function () {
 
     // Создание заявки с сайта
-    Route::post('create-lead-from-form', 'API\AmoController@createLeadFromForm');
+    Route::get('create-lead-from-form', 'API\AmoController@createLeadFromForm');
 });
 

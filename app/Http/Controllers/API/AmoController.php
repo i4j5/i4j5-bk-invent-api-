@@ -27,6 +27,16 @@ class AmoController extends Controller
      */
     public function createLeadFromForm(Request $request)
     {
+
+        // $this->amocrm->links->apiList([
+        //     'from' => 'leads',
+        //     'from_id' => 17475673,
+        //     'to' => 'contacts',
+        //     'to_id' => 24896913
+        // ]);
+
+
+
         $lead_name = $request->input('order');
         $contact_phone = $request->input('phone');
 
@@ -44,44 +54,7 @@ class AmoController extends Controller
         $utm = $request->input('utm');
         $roistat = $request->input('roistat');
 		$comment = $request->input('comment');
-
-        ///////////////
-
-        $unsorted = $this->amocrm->unsorted;
-        $unsorted['source'] = 'bk-invent.ru';
-        $unsorted['source_uid'] = null;
-
-        //Данные заявки (зависят от категории)
-        $unsorted['source_data'] = [
-            'data' => [
-                'name' => [
-                    'type' => 'text',
-                    'element_type' => '1',
-                    'name' => 'Имя',
-                    'value' => $contact_name,
-                ],
-                'phone' => [
-                    'type' => 'text',
-                    'element_type' => '1',
-                    'name' => 'Телефон',
-                    'value' => $contact_phone,
-                ],
-                'email' => [
-                    'type' => 'text',
-                    'element_type' => '1',
-                    'name' => 'E-mail',
-                    'value' => $contact_email,
-                ],
-            ],
-            'form_id' => 1,
-            'form_type' => 1,
-            'origin' => [
-                'ip' => $_SERVER['REMOTE_ADDR']
-            ],
-            'date' => time(),
-            'from' => 'Заявка с сайта'
-        ];
-
+       
         // Сделка которая будет создана после одобрения заявки.
         $lead = $this->amocrm->lead;
         $lead['name'] = $lead_name;
@@ -99,9 +72,8 @@ class AmoController extends Controller
         $lead->addCustomField(232423, $utm);
         $lead->addCustomField(226175, 487647);
         $lead->addCustomField(240623, $roistat);
-      
-        // Создание контакта
-        $contact = $this->amocrm->contact;
+
+        $contact_id = $this->phone->contactSearch($contact_phone);
         
 		$note = $this->amocrm->note;
 		$note['element_type'] = \AmoCRM\Models\Note::TYPE_CONTACT;
@@ -114,103 +86,84 @@ class AmoController extends Controller
 		";
 		
         // Примечания, которые появятся в сделке если телефон имеется в базе
-        if($arrPhone['double']) {
-            $note = $this->amocrm->note;
-            $note['element_type'] = \AmoCRM\Models\Note::TYPE_CONTACT;
-            $note['note_type'] = \AmoCRM\Models\Note::COMMON;
-            $comment = "\n====================\n Возможно это дубль!!! \n====================\n". $comment;
-        }
+        // if($arrPhone['double']) {
+        //     $note = $this->amocrm->note;
+        //     $note['element_type'] = \AmoCRM\Models\Note::TYPE_CONTACT;
+        //     $note['note_type'] = \AmoCRM\Models\Note::COMMON;
+        //     $comment = "\n====================\n Возможно это дубль!!! \n====================\n". $comment;
+        // }
 		
 		$note['text'] = $comment;
 		$lead['notes'] = $note;
 
-        // Заполнение контакта 
-        $contact['name'] = $contact_name;
-        $contact->addCustomField('95354', [
-            [$contact_phone, 'MOB'],
-        ]);
-        $contact->addCustomField('95356', [
-            [$contact_email, 'PRIV'],
-        ]);
-                
-        // Присоединение контакт к неразобранному
-        $unsorted->addDataContact($contact);
-
-        // Присоединение сделки к неразобранному
-        $unsorted->addDataLead($lead);
-
-        // Добавление неразобранной заявки с типом FORMS
-        $unsortedId = $unsorted->apiAddForms();
-        echo 'ok';
-    }
-
-    /**
-     * Исправление ошибок в контактах
-     * GET
-     * @param Request $request
-     * @return void
-     */
-    public function fixAllContacts(Request $request)
-    {   
-        set_time_limit(0);
-
-        $run = true;
-        for($limit_offset = 0; $run; $limit_offset++) 
+        if(!$contact_id)
         {
+            $unsorted = $this->amocrm->unsorted;
+            $unsorted['source'] = 'bk-invent.ru';
+            $unsorted['source_uid'] = null;
+    
+            //Данные заявки (зависят от категории)
+            $unsorted['source_data'] = [
+                'data' => [
+                    'name' => [
+                        'type' => 'text',
+                        'element_type' => '1',
+                        'name' => 'Имя',
+                        'value' => $contact_name,
+                    ],
+                    'phone' => [
+                        'type' => 'text',
+                        'element_type' => '1',
+                        'name' => 'Телефон',
+                        'value' => $contact_phone,
+                    ],
+                    'email' => [
+                        'type' => 'text',
+                        'element_type' => '1',
+                        'name' => 'E-mail',
+                        'value' => $contact_email,
+                    ],
+                ],
+                'form_id' => 1,
+                'form_type' => 1,
+                'origin' => [
+                    'ip' => $_SERVER['REMOTE_ADDR']
+                ],
+                'date' => time(),
+                'from' => 'Заявка с сайта'
+            ];
 
-            $data = $this->amocrm->contact->apiList([
-                'limit_rows' => 500,
-                'limit_offset' => $limit_offset * 500,
-                'type' => 'all'
+            // Заполнение контакта 
+            $contact = $this->amocrm->contact;
+            $contact['name'] = $contact_name;
+            $contact->addCustomField('95354', [
+                [$contact_phone, 'MOB'],
             ]);
-			
-            foreach ( $data as $contact )
-            {
-                $phones = [];
-                $i++; 
+            $contact->addCustomField('95356', [
+                [$contact_email, 'PRIV'],
+            ]);
 
-                if(isset($contact['custom_fields'])) 
-                {
-                    
-                    foreach ( $contact['custom_fields'] as $field )
-                    {
-                        if (isset($field['code']) && $field['code'] == 'PHONE') {
-                            
-                            foreach ( $field['values'] as $item )
-                            {
-                                $phone = $item['value'];
-                                $enum = $item['enum'];
+            // Присоединение контакт к неразобранному
+            $unsorted->addDataContact($contact);
 
-                                
-                                if ($phone)
-                                {
-                                    $res = $this->fixPhone($phone, $enum);
-                                    $phones[] = $res;
-                                }
-                                
-                            }  
-                        }
-                    }
-                }
+            // Присоединение сделки к неразобранному
+            $unsorted->addDataLead($lead);
 
-                                
-                if(count($phones) && isset($contact['id']) && $contact['id'])
-                {
-                    if($contact["type"] == "company")
-                    {
-                        $updateContact = $this->amocrm->company;
-                    } else {
-                        $updateContact = $this->amocrm->contact;
-                    }
-                    $updateContact->addCustomField('95354', $phones);
-                    $updateContact->apiUpdate((int) $contact['id'], 'now');
-                        
-                }
-           
-            }
-
-            if (count($data) < 500) $run = false;
+            // Добавление неразобранной заявки с типом FORMS
+            $unsortedId = $unsorted->apiAddForms();
+        } else {
+            // ПРОВЕРКА емэйла
+            // Создание сделки
+            
+            
+            $link = $this->amocrm->links;
+            $link['from'] = 'leads';
+            $link['from_id'] = 17475673;
+            $link['to'] = 'contacts';
+            $link['to_id'] = $contact_id;
+            
         }
+
 
         echo 'ok';
     }
