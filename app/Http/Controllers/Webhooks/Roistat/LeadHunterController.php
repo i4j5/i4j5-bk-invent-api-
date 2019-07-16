@@ -25,7 +25,6 @@ class LeadHunterController extends Controller
 
     public function handle(Request $request)
     {        
-
         $contact_name = $request->input('name');
         $contact_phone = $request->input('phone');
 

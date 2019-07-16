@@ -27,7 +27,6 @@ class AmoController extends Controller
      */
     public function createLeadFromForm(Request $request)
     {
-
         $lead_name = $request->input('order');
         $contact_phone = $request->input('phone');
 
