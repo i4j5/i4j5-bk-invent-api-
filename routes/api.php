@@ -50,6 +50,6 @@ Route::prefix('webhook')->group(function () {
 Route::prefix('amo')->group(function () {
 
     // Создание заявки с сайта
-    Route::get('create-lead-from-form', 'API\AmoController@createLeadFromForm');
+    Route::post('create-lead-from-form', 'API\AmoController@createLeadFromForm');
 });
 

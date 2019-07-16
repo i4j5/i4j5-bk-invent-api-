@@ -12,7 +12,7 @@ use App\Phone;
  * amoCRM
  * Поиск дублей
  */ 
-class FindDuplicatesController extends Controlle
+class FindDuplicatesController extends Controller
 {
 
     private $amocrm;
@@ -101,12 +101,10 @@ class FindDuplicatesController extends Controlle
 
         $finishDouble = microtime(true);
     
-
         //Сохраняем изменения
         foreach ( $contacts as  $id => $contact)
         {
             if($contact['double']) {
-                echo $id . '<br>';
                 array_push($contact['tags'], 'Дубль');
                 $updateContact = $this->amocrm->contact;
                 $i++;
@@ -126,9 +124,6 @@ class FindDuplicatesController extends Controlle
         }
 
         $finishSeve = microtime(true);
-
-        // dd($allPhones);
-
         $finish = microtime(true);
 
         echo 'Время на получение контактов: ' . ($finishData - $start) . ' сек. <br>';

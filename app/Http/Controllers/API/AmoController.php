@@ -28,15 +28,6 @@ class AmoController extends Controller
     public function createLeadFromForm(Request $request)
     {
 
-        // $this->amocrm->links->apiList([
-        //     'from' => 'leads',
-        //     'from_id' => 17475673,
-        //     'to' => 'contacts',
-        //     'to_id' => 24896913
-        // ]);
-
-
-
         $lead_name = $request->input('order');
         $contact_phone = $request->input('phone');
 
@@ -53,7 +44,7 @@ class AmoController extends Controller
         $url = $request->input('url');
         $utm = $request->input('utm');
         $roistat = $request->input('roistat');
-		$comment = $request->input('comment');
+        $comment = $request->input('comment');
        
         // Сделка которая будет создана после одобрения заявки.
         $lead = $this->amocrm->lead;
@@ -73,36 +64,35 @@ class AmoController extends Controller
         $lead->addCustomField(226175, 487647);
         $lead->addCustomField(240623, $roistat);
 
-        $contact_id = $this->phone->contactSearch($contact_phone);
+        $contact = $this->phone->contactSearch($contact_phone);
         
 		$note = $this->amocrm->note;
 		$note['element_type'] = \AmoCRM\Models\Note::TYPE_CONTACT;
 		$note['note_type'] = \AmoCRM\Models\Note::COMMON;
-		
-		$comment = $comment . " \n 
+    
+        $comment = $comment . " \n
+        ====================\n
+        $lead_name \n
+        ====================\n
+        Имя: $contact_name \n
+        Телефон: $contact_phone \n
+        E-mail: $contact_email \n
+        ====================\n
 		Страница захвата: $url \n
 		Ключевое слово: $utm_term \n
 		Промокод: $roistat \n
 		";
 		
-        // Примечания, которые появятся в сделке если телефон имеется в базе
-        // if($arrPhone['double']) {
-        //     $note = $this->amocrm->note;
-        //     $note['element_type'] = \AmoCRM\Models\Note::TYPE_CONTACT;
-        //     $note['note_type'] = \AmoCRM\Models\Note::COMMON;
-        //     $comment = "\n====================\n Возможно это дубль!!! \n====================\n". $comment;
-        // }
-		
 		$note['text'] = $comment;
-		$lead['notes'] = $note;
 
-        if(!$contact_id)
+        if(!$contact)
         {
+            $lead['notes'] = $note;
+
             $unsorted = $this->amocrm->unsorted;
             $unsorted['source'] = 'bk-invent.ru';
             $unsorted['source_uid'] = null;
     
-            //Данные заявки (зависят от категории)
             $unsorted['source_data'] = [
                 'data' => [
                     'name' => [
@@ -152,19 +142,33 @@ class AmoController extends Controller
             // Добавление неразобранной заявки с типом FORMS
             $unsortedId = $unsorted->apiAddForms();
         } else {
-            // ПРОВЕРКА емэйла
+            // Добавление отвественного
+            $lead['responsible_user_id'] = $contact['responsible_user_id'];
             
             $lead_id = $lead->apiAdd();
             
-            
+            //Добавить коментарий
+            $note['element_id'] = $contact['id'];
+            $note->apiAdd();
+
+            // Добавить задачу
+            $task = $this->amocrm->task;
+            $task['element_id'] = $lead_id;
+            $task['element_type'] = 2;
+            $task['task_type'] = 1;
+            $task['text'] = "@A Связаться с клиентом. Новая заявка с сайта";
+            $task['responsible_user_id'] = $contact['responsible_user_id'];
+            $task['complete_till'] = '+20 minutes';
+            $task->apiAdd();
+
             $link = $this->amocrm->links;
             $link['from'] = 'leads';
             $link['from_id'] = $lead_id;
             $link['to'] = 'contacts';
-            $link['to_id'] = $contact_id;
+            $link['to_id'] = $contact['id'];
+            $link->apiLink();
             
         }
-
 
         echo 'ok';
     }
