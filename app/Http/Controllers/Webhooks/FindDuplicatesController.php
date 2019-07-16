@@ -12,7 +12,7 @@ use App\Phone;
  * amoCRM
  * Поиск дублей
  */ 
-class FixAllContactsController extends Controller // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! переименовать класс FindDuplicates
+class FindDuplicatesController extends Controlle
 {
 
     private $amocrm;
@@ -82,73 +82,58 @@ class FixAllContactsController extends Controller // !!!!!!!!!!!!!!!!!!!!!!!!!!!
                 'tags' => $tags,
                 'double' => false
             ];
+        }
 
-            //Поиск дублей
-            foreach ( $allPhones as $item )
+
+        //Поиск дублей
+        foreach ( $allPhones as $item )
+        {
+            foreach ( $allPhones as $elem )
             {
-                $key = array_search($item['phone'], array_column($allPhones, 'phone'));
+                if($item['contactID'] == $elem['contactID']) break;
 
-                if($key) 
+                if($item['phone'] == $elem['phone'])
                 {
-                    if($item['contactID'] != $allPhones[$key]['contactID'])
-                    {
-                        // $contacts[ $item['contactID'] ]['double'] == true;
+                    $contacts[$item['contactID']]['double'] = true;
+                }
+            }
+        }
 
-                        $contact = $contacts[$item['contactID']];
+        $finishDouble = microtime(true);
+    
 
-                        array_push($contact['tags'], 'Дубль');
-
-                        $updateContact = $this->amocrm->contact;
-                        $updateContact['tags'] = $tags;
-                        $updateContact->apiUpdate((int) $item['contactID'], 'now');
-                        $i++;
-
-                    }
-                } else  {
-                    $contact = $contacts[$item['contactID']];
-
-                    if( in_array('Дубль', $contact['tags']) )
-                    {
-                        unset($tags[array_search('Дубль', $contact['tags'])]);
-
-                        $updateContact = $this->amocrm->contact;
-                        $updateContact['tags'] = $tags;
-                        $updateContact->apiUpdate((int) $item['contactID'], 'now');
-                    }
+        //Сохраняем изменения
+        foreach ( $contacts as  $id => $contact)
+        {
+            if($contact['double']) {
+                echo $id . '<br>';
+                array_push($contact['tags'], 'Дубль');
+                $updateContact = $this->amocrm->contact;
+                $i++;
+            } else {
+                if( in_array('Дубль', $contact['tags']) ) 
+                {
+                    unset($contact['tags'][array_search('Дубль', $contact['tags'])]);
+                    $updateContact = $this->amocrm->contact;
                 }
             }
 
-            $finishDouble = microtime(true);
-            
-
-            // Сохраняем изменения
-            // foreach ( $contacts as  $id => $contact)
-            // {
-            //     if($contact['double']) {
-            //         array_push($contact['tags'], 'Дубль');
-            //         $updateContact = $this->amocrm->contact;
-            //         $i++;
-            //     } else {
-            //         if( in_array('Дубль', $contact['tags']) ) 
-            //         {
-            //             unset($tags[array_search('Дубль', $contact['tags'])]);
-            //             $updateContact = $this->amocrm->contact;
-            //         }
-            //     }
-
-            //     if(isset($updateContact))
-            //     {
-            //         $updateContact['tags'] = $tags;
-            //         $updateContact->apiUpdate((int) $id, 'now');
-            //     }
-            // }
-        
+            if(isset($updateContact))
+            {
+                $updateContact['tags'] = $contact['tags'];
+                $updateContact->apiUpdate((int) $id, 'now');
+            }
         }
+
+        $finishSeve = microtime(true);
+
+        // dd($allPhones);
 
         $finish = microtime(true);
 
         echo 'Время на получение контактов: ' . ($finishData - $start) . ' сек. <br>';
         echo 'Время на поиск дубликатов: ' . ($finishDouble - $finishData) . ' сек. <br>';
+        echo 'Время на сохранение изменений: ' . ($finishSeve - $finishDouble) . ' сек. <br>';
         echo 'Общее время: ' . ($finish - $start) . ' сек. <br>';
         echo "Найдено дублей: $i";
     }

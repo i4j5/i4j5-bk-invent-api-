@@ -153,12 +153,13 @@ class AmoController extends Controller
             $unsortedId = $unsorted->apiAddForms();
         } else {
             // ПРОВЕРКА емэйла
-            // Создание сделки
+            
+            $lead_id = $lead->apiAdd();
             
             
             $link = $this->amocrm->links;
             $link['from'] = 'leads';
-            $link['from_id'] = 17475673;
+            $link['from_id'] = $lead_id;
             $link['to'] = 'contacts';
             $link['to_id'] = $contact_id;
             
