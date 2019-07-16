@@ -66,7 +66,7 @@ class Phone
      */
     public function contactSearch($phone)
     {
-        $data = [];
+        $res = [];
         
         $data = $this->amocrm->contact->apiList([
             'query' => $phone,
@@ -84,7 +84,7 @@ class Phone
                     {
                         if ($phone == $item['value']) 
                         {
-                            $data = $contact;
+                            $res = $contact;
                             break(3);
                         }
                     }  
@@ -92,6 +92,6 @@ class Phone
             }
         }
 
-        return $data;
+        return $res;
     }
 }

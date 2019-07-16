@@ -37,7 +37,5 @@ class NotImplementedController extends Controller
             $lead->apiUpdate($lead_id, 'now');
         }
 
-        //TODO: Добавить закрыто как спам
-
     }
 }

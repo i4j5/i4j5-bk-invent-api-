@@ -133,7 +133,10 @@ class LeadHunterController extends Controller
             $unsortedId = $unsorted->apiAddForms();
         } else {
             // Добавление отвественного
-            $lead['responsible_user_id'] = $contact['responsible_user_id'];
+            if(isset($contact['responsible_user_id']))
+            {
+                $lead['responsible_user_id'] = $contact['responsible_user_id'];
+            }
             
             $lead_id = $lead->apiAdd();
             
