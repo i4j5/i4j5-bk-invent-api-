@@ -20,6 +20,10 @@
                 margin: 0;
             }
 
+            img {
+                max-width: 100%;
+            }
+
             .full-height {
                 height: 100vh;
             }
@@ -55,7 +59,6 @@
                 font-weight: 600;
                 letter-spacing: .1rem;
                 text-decoration: none;
-                text-transform: uppercase;
             }
 
             .m-b-md {
@@ -68,9 +71,9 @@
             @if (Route::has('login'))
                 <div class="top-right links">
                     @auth
-                        <a href="{{ url('/home') }}">Home</a>
+                        <a href="{{ url('/home') }}">Войти</a>
                     @else
-                        <a href="{{ route('login') }}">Login</a>
+                        <a href="{{ route('login') }}">Войти</a>
 
                         @if (Route::has('register'))
                             <a href="{{ route('register') }}">Register</a>
@@ -85,7 +88,7 @@
                 </div>
 
                 <div class="links">
-                     <!-- <a href="https://bk-invent.ru">Сайт</a> -->
+                     <a href="https://bk-invent.ru">Корпоративный сайт</a>
                 </div>
             </div>
         </div>

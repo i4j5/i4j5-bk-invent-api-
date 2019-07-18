@@ -4,6 +4,11 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+
+use Socialite;
+use Auth;
 
 class LoginController extends Controller
 {
@@ -36,4 +41,44 @@ class LoginController extends Controller
     {
         $this->middleware('guest')->except('logout');
     }
+
+
+    /**
+     * Перенаправьте пользователя на страницу аутентификации Google.
+     * 
+     * @return \Illuminate\Http\Response
+     */
+    public function redirectToProvider()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    /**
+     * Получить информацию о пользователе из Google
+     * 
+     * @return \Illuminate\Http\Response
+     */
+    public function handleProviderCallback()
+    {
+        $googleUser = Socialite::driver('google')->user();
+        $existUser = User::where('email', $googleUser->email)->first();
+
+        if($existUser) {
+            Auth::loginUsingId($existUser->id);
+        }
+        else if(explode("@", $googleUser->email)[1] === 'bkinvent.net'){
+
+            $user = User::create([
+                'name' => $googleUser->name,
+                'email' => $googleUser->email,
+                'password' => Hash::make(md5(rand(1,10000))),
+            ]);
+
+            Auth::loginUsingId($user->id);
+        }
+
+        return redirect()->to($this->redirectTo);
+
+    }
+
 }

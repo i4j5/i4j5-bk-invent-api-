@@ -15,7 +15,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Auth::routes();
+Auth::routes(['register' => false]);
+Route::get('login', ['as' => 'login', 'uses' => 'Auth\LoginController@redirectToProvider']);
+Route::get('login/google/callback', 'Auth\LoginController@handleProviderCallback')->name('login.google.callback');
 
 Route::get('/home', 'HomeController@index')->name('home');
 

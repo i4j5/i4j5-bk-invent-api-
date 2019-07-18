@@ -50,7 +50,7 @@ class RawLeadController extends Controller
         $dataPhones = [];
         foreach ( $data['custom_fields'] as $field )
         {
-            if ($field['code'] == 'PHONE') {
+            if (isset($field['code']) && $field['code'] == 'PHONE') {
 
                 foreach ( $field['values'] as $item )
                 {
