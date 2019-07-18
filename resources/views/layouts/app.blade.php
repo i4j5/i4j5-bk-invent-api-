@@ -23,7 +23,7 @@
     <div id="app">
         <nav class="navbar navbar-expand-md navbar-light navbar-laravel">
             <div class="container">
-                <a class="navbar-brand" href="{{ url('/') }}">
+                <a class="navbar-brand" href="{{ route('home') }}">
                     {{ config('app.name', 'Laravel') }}
                 </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
@@ -33,9 +33,15 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav mr-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('login') }}">Телефонная книга</a>
+                        <li class="nav-item dropdown">
+                            <a id="phonebook" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>Телефонная книга</a>
+                            
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="phonebook">
+                                <a class="dropdown-item" href="{{ route('phonebook') }}">Все контакты</a>
+                                <a class="dropdown-item" href="{{ route('phonebook.search') }}">Поиск</a>
+                            </div>
                         </li> 
+
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('login') }}">О компании</a>
                         </li> 

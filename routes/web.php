@@ -15,12 +15,12 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Авторизация
 Auth::routes(['register' => false]);
 Route::get('login', ['as' => 'login', 'uses' => 'Auth\LoginController@redirectToProvider']);
 Route::get('login/google/callback', 'Auth\LoginController@handleProviderCallback')->name('login.google.callback');
 
 Route::get('/home', 'HomeController@index')->name('home');
 
-Route::get('/debug-sentry', function () {
-    throw new Exception('My first Sentry error!');
-});
+Route::get('/phonebook', 'PhoneBookController@index')->name('phonebook');
+Route::get('/phonebook/search', 'PhoneBookController@index')->name('phonebook.search');
