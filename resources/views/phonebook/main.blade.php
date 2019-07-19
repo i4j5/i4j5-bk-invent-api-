@@ -5,37 +5,40 @@
     <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header">Телефонная книга</div>
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-lg-6 col-mb-6 col-sm-8">
+                            <input class="form-control" type="search" placeholder="Поиск" aria-label="Поиск">
+                        </div>
+                        <div class="col-lg-6 col-mb-6 col-mb-4 text-right">
+                            <a class="btn btn-outline-info" href="{{ route('phonebook.update') }}">Обновить базу</a>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="card-body">
                     <div class="row">
-                        @foreach ($data as $contact)
+                        @foreach ($contacts as $contact)
                             <div class="col-lg-4 col-mb-12 col-sm-6">
                                 <div class="card mb-3">
                                     <div class="card-body">
-                                        <b class="card-title">{{ $contact['name'] }}</b>
+                                        <b class="card-title">{{ $contact->name }}</b>
                                         <br>
-                                        @if (isset($contact['custom_fields'])) 
-                                            @foreach ($contact['custom_fields'] as $field)
-                                                @if (isset($field['code']))   
-                                                    @if($field['code'] == 'PHONE')
-                                                        @foreach ($field['values'] as $value)
-                                                            <a href="tel:{{ $value['value'] }}">{{ $value['value'] }}</a>
-                                                            <br>
-                                                        @endforeach 
-                                                    @elseif ($field['code'] == 'EMAIL')
-                                                        @foreach ($field['values'] as $value)
-                                                            <p>{{ $value['value'] }}</p>
-                                                        @endforeach  
-                                                    @endif
-                                                @endif
-                                            @endforeach
-                                        @endif
+                                        @foreach ($contact->values as $field)
+                                            @if($field->type == 'PHONE')
+                                                <a href="tel:{{ $field->value }}">{{ $field->value }}</a>
+                                                <br>
+                                            @elseif ($field->type == 'EMAIL')
+                                                {{ $field->value }}
+                                                <br>
+                                            @endif
+                                        @endforeach
                                     </div>
                                 </div>
                             </div>
                         @endforeach
                     </div>
+                    {{ $contacts->appends(['sort' => 'votes'])->links() }}
 
                 </div>
             </div>

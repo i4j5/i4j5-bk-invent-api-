@@ -23,4 +23,4 @@ Route::get('login/google/callback', 'Auth\LoginController@handleProviderCallback
 Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('/phonebook', 'PhoneBookController@index')->name('phonebook');
-Route::get('/phonebook/search', 'PhoneBookController@index')->name('phonebook.search');
+Route::get('/phonebook/update', 'PhoneBookController@update')->name('phonebook.update');

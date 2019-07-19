@@ -33,13 +33,8 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav mr-auto">
-                        <li class="nav-item dropdown">
-                            <a id="phonebook" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>Телефонная книга</a>
-                            
-                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="phonebook">
-                                <a class="dropdown-item" href="{{ route('phonebook') }}">Все контакты</a>
-                                <a class="dropdown-item" href="{{ route('phonebook.search') }}">Поиск</a>
-                            </div>
+                        <li class="nav-item">
+                                <a class="nav-link" href="{{ route('phonebook') }}">Телефонная книга</a>
                         </li> 
 
                         <li class="nav-item">
