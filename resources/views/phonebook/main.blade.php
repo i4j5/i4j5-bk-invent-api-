@@ -8,10 +8,14 @@
                 <div class="card-header">
                     <div class="row">
                         <div class="col-lg-6 col-mb-6 col-sm-8">
-                            <input class="form-control" type="search" placeholder="Поиск" aria-label="Поиск">
+                            <form method="POST" class="form-inline my-2 my-lg-0" action="{{ route('phonebook.search') }}">
+                                {{ csrf_field() }} 
+                            <input class="form-control mr-sm-2" name="search" type="search" value="{{ $search }}" placeholder="Поиск" aria-label="Поиск">
+                                <button type="submit" class="btn btn-primary my-2 my-sm-0">Поиск</button>
+                            </form>
                         </div>
                         <div class="col-lg-6 col-mb-6 col-mb-4 text-right">
-                            <a class="btn btn-outline-info" href="{{ route('phonebook.update') }}">Обновить базу</a>
+                            
                         </div>
                     </div>
                 </div>
@@ -21,9 +25,16 @@
                         @foreach ($contacts as $contact)
                             <div class="col-lg-4 col-mb-12 col-sm-6">
                                 <div class="card mb-3">
+                                    <div class="card-header">
+                                        <b class="card-title">
+                                            @if($contact->type == 'company')
+                                                <small class="float-right badge badge-pill badge-warning">Компания</small>
+                                            @endif
+                                            {{ $contact->name }}
+                                        </b>
+                                        
+                                    </div>
                                     <div class="card-body">
-                                        <b class="card-title">{{ $contact->name }}</b>
-                                        <br>
                                         @foreach ($contact->values as $field)
                                             @if($field->type == 'PHONE')
                                                 <a href="tel:{{ $field->value }}">{{ $field->value }}</a>
@@ -34,12 +45,22 @@
                                             @endif
                                         @endforeach
                                     </div>
+                                    <div class="text-right card-footer text-muted">
+                                        @if($contact->type == 'company')
+                                            <a class="btn btn-primary btn-sm btn-outline-dark" href="https://bkinvent.amocrm.ru/companies/detail/{{$contact->amo_id}}">Открыть в amoCRM</a>
+                                        @else
+                                            <a class="btn btn-primary btn-sm btn-outline-dark" href="https://bkinvent.amocrm.ru/contacts/detail/{{$contact->amo_id}}">Открыть в amoCRM</a>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         @endforeach
                     </div>
                     {{ $contacts->appends(['sort' => 'votes'])->links() }}
-
+                    <div class="text-right">
+                        <a class="btn btn-outline-info" href="{{ route('phonebook.all') }}">Показать все</a>
+                        <a class="btn btn-outline-info" href="{{ route('phonebook.update') }}">Обновить базу</a>
+                    </div>
                 </div>
             </div>
         </div>

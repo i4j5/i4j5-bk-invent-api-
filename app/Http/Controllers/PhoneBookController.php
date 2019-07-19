@@ -18,14 +18,43 @@ class PhoneBookController extends Controller
         
     }
 
-    public function index()
+    public function index(Request $request)
     {
+
+        $search = $request->input('search');
+
         //$contacts = AmoContact::all();
-        $contacts = AmoContact::paginate(99);
+
+        if($search) 
+        {
+            $contacts = AmoContact::where('name', 'LIKE', '%' . $search . '%')->paginate(999999);
+            $values = AmoContactValue::where('value', 'LIKE', '%' . $search . '%')
+                            // ->orwhere('value', 'LIKE', '%' . $search . '%')
+                            ->paginate(999999);
+            
+            $_contacts = $contacts->items();
+            foreach($values as $value)
+            {
+                array_push($_contact, $value->contact());
+            }
+
+            dd($contacts->items(), $_contacts);
+        } else {
+            $contacts = AmoContact::paginate(99);
+        }
+        
+
         // $contacts->withPath('custom/url');
         // $contacts->values();
 
-        return view('phonebook/main')->with('contacts', $contacts);
+        return view('phonebook/main')->with('contacts', $contacts)->with('search', $search);
+    }
+
+    public function all()
+    {
+        $contacts = AmoContact::paginate(999999);
+
+        return view('phonebook/main')->with('contacts', $contacts)->with('search', '');
     }
 
     public function update()
@@ -51,11 +80,12 @@ class PhoneBookController extends Controller
         foreach ( $data as $contact )
         {
             $values = [];
-
+            
             if(isset($contact['custom_fields'])) 
             {
                 foreach( $contact['custom_fields'] as $field )
                 {
+
                     if (isset($field['code'])) 
                     {
 
@@ -89,6 +119,7 @@ class PhoneBookController extends Controller
             $items[] = [
                 'name' => $contact['name'],
                 'id' => $contact['id'],
+                'type' => $contact['type'],
                 'values' => $values,
             ];
         }
@@ -109,6 +140,7 @@ class PhoneBookController extends Controller
 
             $contact = new AmoContact([
                 'name' => $item['name'],
+                'type' => $item['type'],
                 'amo_id' => $item['id'],
             ]);
 
@@ -122,3 +154,5 @@ class PhoneBookController extends Controller
     }
 
 }
+
+

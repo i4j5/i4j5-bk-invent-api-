@@ -11,6 +11,7 @@ class AmoContact extends Model
     protected $fillable = [
         'name', 
         'amo_id', 
+        'type', 
     ];
 
     public function values()
