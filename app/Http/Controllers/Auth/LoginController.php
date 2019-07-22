@@ -72,6 +72,7 @@ class LoginController extends Controller
                 'name' => $googleUser->name,
                 'email' => $googleUser->email,
                 'password' => Hash::make(md5(rand(1,10000))),
+                'role' => User::ROLE_USER,
             ]);
 
             Auth::loginUsingId($user->id);

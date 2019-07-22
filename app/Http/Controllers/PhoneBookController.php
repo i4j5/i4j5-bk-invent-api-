@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Dotzero\LaravelAmoCrm\AmoCrmManager;
 use App\Models\AmoContact;
 use App\Models\AmoContactValue;
+use DB;
 
 class PhoneBookController extends Controller
 {
@@ -21,40 +22,31 @@ class PhoneBookController extends Controller
     public function index(Request $request)
     {
 
-        $search = $request->input('search');
-
-        //$contacts = AmoContact::all();
+        $search = $request->query('search');
 
         if($search) 
         {
-            $contacts = AmoContact::where('name', 'LIKE', '%' . $search . '%')->paginate(999999);
-            $values = AmoContactValue::where('value', 'LIKE', '%' . $search . '%')
-                            // ->orwhere('value', 'LIKE', '%' . $search . '%')
-                            ->paginate(999999);
-            
-            $_contacts = $contacts->items();
-            foreach($values as $value)
+
+            $res = DB::table('amo-contacts')
+                    ->join('amo-contact-values', 'amo-contacts.id', '=', 'amo-contact-values.contact_id')
+                    ->select('*')
+                    ->where('name', 'LIKE', '%' . $search . '%')
+                    ->orWhere('value', 'LIKE', '%' . $search . '%')
+                    ->get();
+
+            $ids = [];
+            foreach($res as $item)
             {
-                array_push($_contact, $value->contact());
+                array_push($ids, $item->contact_id);
             }
 
-            dd($contacts->items(), $_contacts);
+            $contacts = AmoContact::whereIn('id', $ids)->paginate(48);
+
         } else {
-            $contacts = AmoContact::paginate(99);
+            $contacts = AmoContact::paginate(48);
         }
         
-
-        // $contacts->withPath('custom/url');
-        // $contacts->values();
-
         return view('phonebook/main')->with('contacts', $contacts)->with('search', $search);
-    }
-
-    public function all()
-    {
-        $contacts = AmoContact::paginate(999999);
-
-        return view('phonebook/main')->with('contacts', $contacts)->with('search', '');
     }
 
     public function update()

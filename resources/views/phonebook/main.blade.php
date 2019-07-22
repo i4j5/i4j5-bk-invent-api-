@@ -8,8 +8,8 @@
                 <div class="card-header">
                     <div class="row">
                         <div class="col-lg-6 col-mb-6 col-sm-8">
-                            <form method="POST" class="form-inline my-2 my-lg-0" action="{{ route('phonebook.search') }}">
-                                {{ csrf_field() }} 
+                            <form method="GET" class="form-inline my-2 my-lg-0" action="{{ route('phonebook.search') }}">
+                                {{-- {{ csrf_field() }}  --}}
                             <input class="form-control mr-sm-2" name="search" type="search" value="{{ $search }}" placeholder="Поиск" aria-label="Поиск">
                                 <button type="submit" class="btn btn-primary my-2 my-sm-0">Поиск</button>
                             </form>
@@ -56,9 +56,8 @@
                             </div>
                         @endforeach
                     </div>
-                    {{ $contacts->appends(['sort' => 'votes'])->links() }}
+                    {{ $contacts->appends(['search' => $search])->links() }}
                     <div class="text-right">
-                        <a class="btn btn-outline-info" href="{{ route('phonebook.all') }}">Показать все</a>
                         <a class="btn btn-outline-info" href="{{ route('phonebook.update') }}">Обновить базу</a>
                     </div>
                 </div>
