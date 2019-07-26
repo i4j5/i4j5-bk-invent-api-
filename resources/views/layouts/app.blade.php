@@ -38,10 +38,8 @@
                         </li> 
 
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('login') }}">О компании</a>
+                            {{-- <a class="nav-link" href="{{ route('page.all') }}">Pages</a> --}}
                         </li> 
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('login') }}">Обучение</a>
                         </li>    
                     </ul>
 
