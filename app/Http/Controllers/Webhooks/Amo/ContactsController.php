@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
  * amoCRM
  * Синхранизация контактов
  */
-class NotImplementedController extends Controller
+class ContactsController extends Controller
 {
     private $amocrm;
 
@@ -22,7 +22,9 @@ class NotImplementedController extends Controller
 
     public function handle(Request $request)
     {        
-        $arr = (int) $request->input('contacts'); 
+        $arr = $request->input('contacts'); 
+
+        dd($arr);
         
         $event = null;
 

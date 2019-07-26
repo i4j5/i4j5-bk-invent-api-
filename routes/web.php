@@ -25,3 +25,5 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/phonebook', 'PhoneBookController@index')->name('phonebook');
 Route::get('/phonebook/update', 'PhoneBookController@update')->name('phonebook.update');
 Route::post('/phonebook', 'PhoneBookController@index')->name('phonebook.search');
+
+app(\App\PageRoutes::class)->routes();

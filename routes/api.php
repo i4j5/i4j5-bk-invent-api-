@@ -35,6 +35,9 @@ Route::prefix('webhook')->group(function () {
 
         // При переходе на этап ЗАКРЫТО И НЕ РЕАЛИЗОВАНО
         Route::post('not-implemented', 'Webhooks\Amo\NotImplementedController@handle');
+
+        // Контакты
+        Route::post('contacts', 'Webhooks\Amo\ContactsController@handle');
     });
     
     // prefix roistat
