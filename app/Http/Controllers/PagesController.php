@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Page;
 use Illuminate\View\View;
 use Illuminate\Http\Request;
+use Artisan;
 
 /**
  * Class PagesController
@@ -46,6 +47,8 @@ class PagesController extends Controller
             'content' => $request->content
         ]);
 
+        Artisan::call('cache:clear');
+
         return redirect('/pages/'.$page->id);
     }
 
@@ -71,6 +74,7 @@ class PagesController extends Controller
         $page->content = $request->content;
         $page->save();
         $request->session()->flash('message', 'Страница успешно изменена!');
+        Artisan::call('cache:clear');
         return redirect('pages');
     }
 
@@ -78,6 +82,7 @@ class PagesController extends Controller
     {
         $page->delete();
         $request->session()->flash('message', 'Страница успешно удалина!');
+        Artisan::call('cache:clear');
         return redirect('pages');
     }
 }

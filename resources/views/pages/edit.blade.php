@@ -16,7 +16,7 @@
       </div>
       <div class="form-group">
         <label for="description">content</label>
-        <input type="text" class="form-control"  value="{{$page->content}}" name="content">
+        <textarea class="form-control"  name="content">{{$page->content}}</textarea>
       </div>
       @if ($errors->any())
         <div class="alert alert-danger">
