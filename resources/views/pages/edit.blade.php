@@ -16,7 +16,8 @@
       </div>
       <div class="form-group">
         <label for="description">content</label>
-        <textarea class="form-control"  name="content">{{$page->content}}</textarea>
+        <textarea class="form-control control-editor" id="editor" name="content">{{$page->content}}</textarea>
+
       </div>
       @if ($errors->any())
         <div class="alert alert-danger">

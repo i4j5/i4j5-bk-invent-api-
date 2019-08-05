@@ -31,10 +31,8 @@ Route::group(['middleware' => 'auth'], function(){
     Route::post('/phonebook', 'PhoneBookController@index')->name('phonebook.search');
 
     app(\App\PageRoutes::class)->routes();
-});
 
-Route::group(['middleware' => 'admin'], function(){
-
-    Route::resource('pages', 'PagesController');
-    
+    Route::group(['middleware' => 'admin'], function(){
+        Route::resource('pages', 'PagesController');
+    });
 });
