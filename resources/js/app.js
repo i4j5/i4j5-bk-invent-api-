@@ -7,18 +7,7 @@
 
 require('./bootstrap');
 
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
-import '@ckeditor/ckeditor5-build-classic/build/translations/ru.js'
-
 window.Vue = require('vue')
-
-ClassicEditor 
-        .create(document.querySelector('#editor'), {
-            language: 'ru',
-        })
-        .then(function(){
-            console.log('OK')
-        })  
 
 /**
  * The following block of code may be used to automatically register your
