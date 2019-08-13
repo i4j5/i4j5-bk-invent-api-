@@ -35,6 +35,7 @@ class PagesController extends Controller
         $request->validate([
             'name' => 'required|min:3',
             'path' => 'required',
+            'content' => 'required',
         ]);
         
         $page = Page::create([
@@ -71,6 +72,7 @@ class PagesController extends Controller
         $request->validate([
             'name' => 'required|min:3',
             'path' => 'required',
+            'content' => 'required',
         ]);
         
         $page->name = $request->name;

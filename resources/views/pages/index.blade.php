@@ -24,7 +24,7 @@
                 <tr>
                     <th scope="row">{{ $page->id }}</th>
                     <td><a href="{{ URL::to($page->path) }}.html">{{ $page->name }}</a></td>
-                    <td>{{ $page->path }}</td>
+                    <td>/{{ $page->path }}.html</td>
                     <td>
                       <div class="btn-group" role="group" aria-label="Basic example">
                           <a href="{{ URL::to('pages/' . $page->id . '/edit') }}">
