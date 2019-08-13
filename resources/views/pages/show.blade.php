@@ -4,6 +4,6 @@
 <div class="container">
     <h1>{{ $page->name }}</h1>
 
-    <div>{!! $page->content !!}</div>
+    <div class="ck-content">{!! $page->content !!}</div>
 </div>
 @endsection
