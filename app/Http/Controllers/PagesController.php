@@ -61,7 +61,6 @@ class PagesController extends Controller
         return view('pages.show', compact('page'));
     }
 
-
     public function edit(Page $page)
     {
         return view('pages.edit', compact('page'));
