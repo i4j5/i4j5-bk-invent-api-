@@ -20,8 +20,8 @@ class PageRoutes
     public function routes()
     {
         $this->pages()->each(function(Page $page) {
-            Route::get($page->path, function() use ($page) {
-                return App::make(PagesController::class)->callAction('dynamic', ['page' => $page]);
+            Route::get($page->path . '.html', function() use ($page) {
+                return App::make(PagesController::class)->callAction('showByPath', ['page' => $page]);
             })->name('page.'.Str::snake($page->path));
         });
     }

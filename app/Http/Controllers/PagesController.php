@@ -18,14 +18,10 @@ class PagesController extends Controller
      * @param Page $page
      * @return View
      */
-    public function dynamic(Page $page)
-    {
-       return view('pages/visible')->with(compact('page'));
-    }
 
     public function index()
     {        
-        $pages = Page::paginate(2);
+        $pages = Page::paginate(10);
         return view('pages.index')->with(compact('pages'));
     }
 
@@ -49,13 +45,21 @@ class PagesController extends Controller
 
         Artisan::call('cache:clear');
 
-        return redirect('/pages/'.$page->id);
+        return redirect('/'.$page->path.'.html');
     }
 
     public function show(Page $page)
     {
+        // Сделать ридерект
         return view('pages.show', compact('page'));
     }
+
+    public function showByPath(Page $page)
+    {
+        // $page = Page::where('path', $path)->first();
+        return view('pages.show', compact('page'));
+    }
+
 
     public function edit(Page $page)
     {

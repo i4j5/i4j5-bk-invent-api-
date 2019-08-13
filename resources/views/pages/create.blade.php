@@ -1,20 +1,21 @@
 @extends('layouts.app')
 
 @section('content')
-  <h1>Add New Page</h1>
+<div class="container">
+  <h1>Добавить новую стоницу</h1>
   <hr>
   <form action="/pages" method="post">
     {{ csrf_field() }}
     <div class="form-group">
-      <label for="title">name</label>
+      <label for="title">Название</label>
       <input type="text" class="form-control" id="" name="name">
     </div>
     <div class="form-group">
-      <label for="description">path</label>
+      <label for="description">Путь</label>
       <input type="text" class="form-control" name="path">
     </div>
     <div class="form-group">
-      <label for="description">content</label>
+      <label for="description">Контент</label>
       <textarea class="form-control"  name="content"></textarea>
     </div>
     @if ($errors->any())
@@ -26,6 +27,7 @@
       </ul>
       </div>
     @endif
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" class="btn btn-primary">Добавить</button>
   </form>
+</div>
 @endsection
