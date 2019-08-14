@@ -7,6 +7,7 @@ use App\Models\Page;
 use Illuminate\View\View;
 use Illuminate\Http\Request;
 use Artisan;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Class PagesController
@@ -89,5 +90,19 @@ class PagesController extends Controller
         $request->session()->flash('message', 'Страница успешно удалина!');
         Artisan::call('cache:clear');
         return redirect('pages');
+    }
+
+    public function imageUpload(Request $request){
+        $image = $request->file('upload');
+        //$path  = $request->file('image')->store('uploads', 'public');
+
+        $image->store('public');
+        $url = asset('storage/'.$image->hashName());
+
+
+        return response()->json(array(
+            'url' => $url,
+            'uploaded'=> true,
+        ));
     }
 }

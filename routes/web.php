@@ -22,6 +22,24 @@ Route::get('login', ['as' => 'login', 'uses' => 'Auth\LoginController@redirectTo
 Route::get('login/google/callback', 'Auth\LoginController@handleProviderCallback')->name('login.google.callback');
 
 
+Route::get('storage/{filename}', function ($filename)
+{
+    $path = storage_path('app\public\\' . $filename);
+
+    if (!File::exists($path)) {
+        abort(404);
+    }
+
+    $file = File::get($path);
+    $type = File::mimeType($path);
+
+    $response = Response::make($file, 200);
+    $response->header("Content-Type", $type);
+
+    return $response;
+});
+
+
 Route::group(['middleware' => 'auth'], function(){
 
     Route::get('/home', 'HomeController@index')->name('home');
@@ -34,5 +52,6 @@ Route::group(['middleware' => 'auth'], function(){
 
     Route::group(['middleware' => 'admin'], function(){
         Route::resource('pages', 'PagesController');
+        Route::post('pages/image-upload', 'PagesController@imageUpload')->name('pages.image-upload');
     });
 });

@@ -7,7 +7,16 @@ import '@ckeditor/ckeditor5-build-decoupled-document/build/translations/ru.js'
 DecoupledEditor
 		.create( document.querySelector( '#editor' ), {
             language: 'ru',
-			// toolbar: [ 'heading', '|', 'bold', 'italic', 'link' ]
+            // toolbar: [ 'heading', '|', 'bold', 'italic', 'link' ]
+            ckfinder: {
+                uploadUrl: '/pages/image-upload',
+                options: {
+                    resourceType: 'Images',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                }
+            }
 		} )
 		.then( editor => {
 			const toolbarContainer = document.querySelector( '.toolbar-container' );
