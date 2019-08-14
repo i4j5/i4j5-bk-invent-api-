@@ -8,6 +8,7 @@ use Illuminate\View\View;
 use Illuminate\Http\Request;
 use Artisan;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Class PagesController
@@ -35,10 +36,10 @@ class PagesController extends Controller
     {
         $request->validate([
             'name' => 'required|min:3',
-            'path' => 'required',
+            'path' => ['required', 'unique:pages'],
             'content' => 'required',
         ]);
-        
+
         $page = Page::create([
             'name' => $request->name,
             'path' => $request->path,
@@ -71,7 +72,8 @@ class PagesController extends Controller
     {
         $request->validate([
             'name' => 'required|min:3',
-            'path' => 'required',
+            // 'path' => 'required',
+            'path' => 'required|unique:pages,path,'.$page->id,
             'content' => 'required',
         ]);
         
@@ -94,8 +96,7 @@ class PagesController extends Controller
 
     public function imageUpload(Request $request){
         $image = $request->file('upload');
-        //$path  = $request->file('image')->store('uploads', 'public');
-
+        
         $image->store('public');
         $url = asset('storage/'.$image->hashName());
 
