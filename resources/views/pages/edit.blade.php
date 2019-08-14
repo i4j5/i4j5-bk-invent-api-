@@ -17,8 +17,9 @@
       </div>
       <div class="form-group">
         <label for="description">Контент</label>
-        <textarea class="form-control control-editor" id="editor" name="content">{{$page->content}}</textarea>
-
+        <input type="hidden" class="form-control" id="data-editor" value="{{$page->content}}" name="content">
+        <div class="toolbar-container"></div>
+        <div id="editor">{!!$page->content!!}</div>
       </div>
       @if ($errors->any())
         <div class="alert alert-danger">

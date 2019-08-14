@@ -40,10 +40,10 @@ class PhoneBookController extends Controller
                 array_push($ids, $item->contact_id);
             }
 
-            $contacts = AmoContact::whereIn('id', $ids)->paginate(48);
+            $contacts = AmoContact::whereIn('id', $ids)->paginate(13);
 
         } else {
-            $contacts = AmoContact::paginate(48);
+            $contacts = AmoContact::paginate(13);
         }
         
         return view('phonebook/main')->with('contacts', $contacts)->with('search', $search);

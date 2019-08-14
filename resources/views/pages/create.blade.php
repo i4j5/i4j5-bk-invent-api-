@@ -15,8 +15,10 @@
       <input type="text" class="form-control" name="path">
     </div>
     <div class="form-group">
-      <label for="description">Контент</label>
-      <textarea class="form-control"  id="editor" name="content"></textarea>
+        <label for="description">Контент</label>
+        <input type="hidden" class="form-control" id="data-editor" value="" name="content">
+        <div class="toolbar-container"></div>
+        <div id="editor"></div>
     </div>
     @if ($errors->any())
       <div class="alert alert-danger">

@@ -1,17 +1,24 @@
 import '../sass/app.scss'
 import './bootstrap'
 
+import DecoupledEditor from '@ckeditor/ckeditor5-build-decoupled-document'
+import '@ckeditor/ckeditor5-build-decoupled-document/build/translations/ru.js'
 
-import * as $ from 'jquery'
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
-import '@ckeditor/ckeditor5-build-classic/build/translations/ru.js'
+DecoupledEditor
+		.create( document.querySelector( '#editor' ), {
+            language: 'ru',
+			// toolbar: [ 'heading', '|', 'bold', 'italic', 'link' ]
+		} )
+		.then( editor => {
+			const toolbarContainer = document.querySelector( '.toolbar-container' );
 
-ClassicEditor
-    .create(document.querySelector('#editor'), {
-        language: 'ru',
-        // toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'textColor', 'bulletedList', 'numberedList', '|', 'undo', 'redo' ],
-        // table: {
-        //     contentToolbar: [ 'tableRow', 'tableColumn', 'mergeTableCells' ],
-        //     tableToolbar: [ 'blockQuote' ]
-        // },
-    }) 
+			toolbarContainer.prepend( editor.ui.view.toolbar.element );
+
+		    editor.model.document.on( 'change:data', () => {
+                $('#data-editor').val(editor.getData())
+            });
+		} )
+		.catch( err => {
+			console.error( err.stack );
+        } );
+        

@@ -7,13 +7,19 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const PATHS = {
   src: path.join(__dirname, '../'),
   dist: path.join(__dirname, '../../public_html'),
+  node_dir: path.join(__dirname, '../../node_modules'),
 }
 
 module.exports = {
   // BASE config
+  resolve: {
+    alias: {
+      'jquery': PATHS.node_dir + '/jquery/dist/jquery.js',
+      'bootstrap': PATHS.node_dir + '/bootstrap/dist/js/bootstrap.min.js'
+    }
+  },
   externals: {
-    paths: PATHS,
-    jquery: 'jQuery'
+    paths: PATHS
   },
   entry: {
     app: PATHS.src + '/js/app.js',

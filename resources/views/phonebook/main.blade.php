@@ -47,9 +47,9 @@
                                     </div>
                                     <div class="text-right card-footer text-muted">
                                         @if($contact->type == 'company')
-                                            <a class="btn btn-primary btn-sm btn-outline-dark" href="https://bkinvent.amocrm.ru/companies/detail/{{$contact->amo_id}}">Открыть в amoCRM</a>
+                                            <a class="btn btn-info btn-sm" href="https://bkinvent.amocrm.ru/companies/detail/{{$contact->amo_id}}">Открыть в amoCRM</a>
                                         @else
-                                            <a class="btn btn-primary btn-sm btn-outline-dark" href="https://bkinvent.amocrm.ru/contacts/detail/{{$contact->amo_id}}">Открыть в amoCRM</a>
+                                            <a class="btn btn-info btn-sm" href="https://bkinvent.amocrm.ru/contacts/detail/{{$contact->amo_id}}">Открыть в amoCRM</a>
                                         @endif
                                     </div>
                                 </div>
