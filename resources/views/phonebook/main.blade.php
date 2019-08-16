@@ -56,7 +56,7 @@
                             </div>
                         @endforeach
                     </div>
-                    {{ $contacts->appends(['search' => $search])->links() }}
+                    {{ $contacts->appends(['search' => $search])->links('pagination/bootstrap-4') }}
                     <div class="text-right">
                         <a class="btn btn-outline-info" href="{{ route('phonebook.update') }}">Обновить базу</a>
                     </div>
