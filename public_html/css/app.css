@@ -1,4 +1,2 @@
 @import url(https://fonts.googleapis.com/css?family=Nunito);
-.navbar-laravel{background-color:#fff;-webkit-box-shadow:0 2px 4px rgba(0,0,0,.04);box-shadow:0 2px 4px rgba(0,0,0,.04)}#editor{max-width:100%;min-height:100px;margin:0 auto;padding:10px;border:1px solid #d3d3d3;background-color:#fff;-webkit-box-shadow:0 0 5px rgba(0,0,0,.1);box-shadow:0 0 5px rgba(0,0,0,.1)}
-
-/*# sourceMappingURL=app.css.map*/
+.navbar-laravel{background-color:#fff;-webkit-box-shadow:0 2px 4px rgba(0,0,0,.04);box-shadow:0 2px 4px rgba(0,0,0,.04)}#editor{max-width:100%;min-height:100px;margin:0 auto;padding:10px;border:1px solid #d3d3d3;background-color:#fff;-webkit-box-shadow:0 0 5px rgba(0,0,0,.1);box-shadow:0 0 5px rgba(0,0,0,.1)}.bd-sidebar{margin:-1.5rem 0!important;padding:1.5rem 15px!important;background-color:rgba(0,0,0,.03);border-right:1px solid rgba(0,0,0,.125);position:-webkit-sticky;position:sticky;height:100vh}.bd-sidebar img{max-width:100%}

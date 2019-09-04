@@ -48,7 +48,7 @@ Route::group(['middleware' => 'auth'], function(){
         return $response;
     });
     Route::group(['middleware' => 'admin'], function(){
-        Route::match(['get', 'post'], 'pages/menu', 'PagesController@menu')->name('pages.menu');
+        Route::match(['get', 'post'], 'pages/sidebar', 'PagesController@sidebar')->name('pages.sidebar');
         Route::resource('pages', 'PagesController');
         Route::post('pages/image-upload', 'PagesController@imageUpload')->name('pages.image-upload');
     });

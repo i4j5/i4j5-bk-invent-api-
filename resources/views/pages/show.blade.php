@@ -4,7 +4,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-12 col-md-3 col-xl-2 bd-sidebar">
-            {!! $menu !!}
+            {!! $sidebar !!}
         </div>
         <div class="col-12 col-md-9 col-xl-10 bd-content">
             <h1>{{ $page->name }}</h1>

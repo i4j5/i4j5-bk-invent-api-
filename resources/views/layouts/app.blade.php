@@ -37,7 +37,7 @@
                         </li> 
 
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('phonebook') }}">Вики</a>
+                            <a class="nav-link" href="{{ url('/main.html') }}">Вики</a>
                         </li> 
                         </li>    
                     </ul>

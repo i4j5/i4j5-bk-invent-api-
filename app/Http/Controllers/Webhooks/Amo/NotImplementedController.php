@@ -29,8 +29,7 @@ class NotImplementedController extends Controller
             'limit_rows' => 1,
         ])[0];
         
-        // Закрыт как дубль
-        if($data['loss_reason_id'] == 1751311) 
+        if($data['loss_reason_id'] == 1751311 || $data['loss_reason_id'] == 3341590) 
         {
             $lead = $this->amocrm->lead;
             $lead->addCustomField(241507, true);

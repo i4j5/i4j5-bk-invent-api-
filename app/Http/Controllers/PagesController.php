@@ -60,9 +60,8 @@ class PagesController extends Controller
 
     public function showByPath(Page $page)
     {
-        // $page = Page::where('path', $path)->first();
-        $menu = Settings::find('wiki_menu')->value;
-        return view('pages.show', compact('page', 'menu'));
+        $sidebar = Settings::find('pages_sidebar')->value;
+        return view('pages.show', compact('page', 'sidebar'));
     }
 
     public function edit(Page $page)
@@ -110,16 +109,16 @@ class PagesController extends Controller
         ));
     }
     
-    public function menu(Request $request) 
+    public function sidebar(Request $request) 
     {
-        $menu = Settings::find('wiki_menu');
+        $sidebar = Settings::find('pages_sidebar');
         
         if ( $request->method() === 'POST' )
         {
-            $menu->value = $request->value;
-            $menu->save(); 
+            $sidebar->value = $request->value;
+            $sidebar->save(); 
         }
         
-        return view('pages.menu', compact('menu'));
+        return view('pages.sidebar', compact('sidebar'));
     }
 }

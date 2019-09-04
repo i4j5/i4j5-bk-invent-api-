@@ -2,14 +2,14 @@
 
 @section('content')
 <div class="container">
-    <h1>------</h1>
+    <h1>Боковая панель</h1>
     <hr>
-    <form action="{{url('pages/menu')}}" method="post">
+    <form action="{{url('pages/sidebar')}}" method="post">
       {{ csrf_field() }}
       <div class="form-group">
-        <input type="hidden" class="form-control" id="data-editor" value="{{ old('value', $menu->value) }}" name="value">
+        <input type="hidden" class="form-control" id="data-editor" value="{{ old('value', $sidebar->value) }}" name="value">
         <div class="toolbar-container"></div>
-        <div id="editor">{!! old('value', $menu->value) !!}</div>
+        <div id="editor">{!! old('value', $sidebar->value) !!}</div>
       </div>
       @if ($errors->any())
         <div class="alert alert-danger">

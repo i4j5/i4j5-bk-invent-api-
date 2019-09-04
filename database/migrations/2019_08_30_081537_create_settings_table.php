@@ -21,7 +21,7 @@ class CreateSettingsTable extends Migration
         });
         
         DB::table('settings')->insert([
-            'key' => 'wiki_menu',
+            'key' => 'pages_sidebar',
             'type' => '',
             'value' => '',
             'created_at' => \Carbon\Carbon::now(),

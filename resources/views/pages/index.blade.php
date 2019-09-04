@@ -16,6 +16,10 @@
                         <a href="{{ URL::to('pages/create') }}">
                             <button type="button" class="btn btn-primary">Добавить</button>
                         </a>
+                        <a href="{{ URL::to('pages/sidebar') }}">
+                            <button type="button" class="btn btn-primary">Редактировать боковую панель</button>
+                        </a>
+                    </th>
                     </th>
                 </tr>
             </thead>
