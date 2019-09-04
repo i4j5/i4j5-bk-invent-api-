@@ -37,7 +37,7 @@
                         </li> 
 
                         <li class="nav-item">
-                            {{-- <a class="nav-link" href="{{ route('page.all') }}">Pages</a> --}}
+                            <a class="nav-link" href="{{ route('phonebook') }}">Вики</a>
                         </li> 
                         </li>    
                     </ul>
@@ -64,6 +64,7 @@
 
                                     @if ( Auth::user()->isAdmin())
                                         <a class="dropdown-item" href="/pages">Cтраницы</a>
+                                        <a class="dropdown-item" href="/settings">Настройки</a>
                                     @endif
 
 

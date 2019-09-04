@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Page;
+use App\Models\Settings;
 use Illuminate\View\View;
 use Illuminate\Http\Request;
 use Artisan;
@@ -60,7 +61,8 @@ class PagesController extends Controller
     public function showByPath(Page $page)
     {
         // $page = Page::where('path', $path)->first();
-        return view('pages.show', compact('page'));
+        $menu = Settings::find('wiki_menu')->value;
+        return view('pages.show', compact('page', 'menu'));
     }
 
     public function edit(Page $page)
@@ -94,7 +96,8 @@ class PagesController extends Controller
         return redirect('pages');
     }
 
-    public function imageUpload(Request $request){
+    public function imageUpload(Request $request)
+    {
         $image = $request->file('upload');
         
         $image->store('public');
@@ -105,5 +108,18 @@ class PagesController extends Controller
             'url' => $url,
             'uploaded'=> true,
         ));
+    }
+    
+    public function menu(Request $request) 
+    {
+        $menu = Settings::find('wiki_menu');
+        
+        if ( $request->method() === 'POST' )
+        {
+            $menu->value = $request->value;
+            $menu->save(); 
+        }
+        
+        return view('pages.menu', compact('menu'));
     }
 }
