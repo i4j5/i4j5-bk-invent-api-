@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Webhooks\Amo;
 use App\Http\Controllers\Controller;
 use Dotzero\LaravelAmoCrm\AmoCrmManager;
 use Illuminate\Http\Request;
+use App\Models\AmoContact;
 
 /**
  * WebHook
@@ -76,7 +77,6 @@ class ContactsController extends Controller
                 } 
             }
         }
-
 
         if ($event === 'add') {
 

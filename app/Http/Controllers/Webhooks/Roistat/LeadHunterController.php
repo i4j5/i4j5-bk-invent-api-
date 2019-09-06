@@ -65,9 +65,9 @@ class LeadHunterController extends Controller
         $lead->addCustomField(226175, 487647);
         $lead->addCustomField(240623, $roistat);
         
-		$note = $this->amocrm->note;
-		$note['element_type'] = \AmoCRM\Models\Note::TYPE_CONTACT;
-		$note['note_type'] = \AmoCRM\Models\Note::COMMON;
+        $note = $this->amocrm->note;
+        $note['element_type'] = \AmoCRM\Models\Note::TYPE_CONTACT;
+        $note['note_type'] = \AmoCRM\Models\Note::COMMON;
     
         $comment = $comment . " \n
         ====================\n
@@ -76,12 +76,12 @@ class LeadHunterController extends Controller
         Имя: $contact_name \n
         Телефон: $contact_phone \n
         ====================\n
-		Страница захвата: $url \n
-		Ключевое слово: $utm_term \n
-		Промокод: $roistat \n
-		";
-		
-		$note['text'] = $comment;
+        Страница захвата: $url \n
+        Ключевое слово: $utm_term \n
+        Промокод: $roistat \n
+        ";
+
+        $note['text'] = $comment;
 
         if(!$contact)
         {

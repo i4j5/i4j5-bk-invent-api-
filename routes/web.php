@@ -33,7 +33,7 @@ Route::group(['middleware' => 'auth'], function(){
 
     Route::get('storage/{filename}', function ($filename)
     {
-        $path = storage_path('app\public\\' . $filename);
+        $path = storage_path('app/public/' . $filename);
 
         if (!File::exists($path)) {
             abort(404);
