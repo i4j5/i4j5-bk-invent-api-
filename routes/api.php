@@ -45,6 +45,9 @@ Route::prefix('webhook')->group(function () {
 
         // Ловец Лидов
         Route::post('lead-hunter', 'Webhooks\Roistat\LeadHunterController@handle');
+        
+        // Емейлтрекинг
+        Route::post('emailtracking', 'Webhooks\Roistat\EmailTrackingController@handle');
     });
 });
 
