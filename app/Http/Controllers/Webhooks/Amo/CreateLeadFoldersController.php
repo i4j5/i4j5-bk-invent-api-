@@ -99,5 +99,7 @@ class CreateLeadFoldersController extends Controller
         
         // Заносим данные в amoCRM
         $lead->apiUpdate((int) $lead_id, 'now');
+        
+        return 'ok';
     }
 }

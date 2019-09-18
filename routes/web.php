@@ -51,5 +51,6 @@ Route::group(['middleware' => 'auth'], function(){
         Route::match(['get', 'post'], 'pages/sidebar', 'PagesController@sidebar')->name('pages.sidebar');
         Route::resource('pages', 'PagesController');
         Route::post('pages/image-upload', 'PagesController@imageUpload')->name('pages.image-upload');
+        Route::get('tools/api/log', 'ToolsController@webhooksLog')->name('api.log');
     });
 });

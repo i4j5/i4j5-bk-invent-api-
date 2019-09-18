@@ -162,7 +162,7 @@ class LeadHunterController extends Controller
             
         }
 
-        echo 'ok';
+        return 'ok';
     }
 
 }

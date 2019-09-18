@@ -162,7 +162,7 @@ class EmailTrackingController extends Controller
             $link->apiLink();
         }
 
-        echo 'ok';
+        return 'ok';
     }
     
     private function contactSearch($email) 

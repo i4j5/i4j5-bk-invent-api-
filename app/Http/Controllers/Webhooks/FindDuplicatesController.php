@@ -126,11 +126,14 @@ class FindDuplicatesController extends Controller
         $finishSeve = microtime(true);
         $finish = microtime(true);
 
-        echo 'Время на получение контактов: ' . ($finishData - $start) . ' сек. <br>';
-        echo 'Время на поиск дубликатов: ' . ($finishDouble - $finishData) . ' сек. <br>';
-        echo 'Время на сохранение изменений: ' . ($finishSeve - $finishDouble) . ' сек. <br>';
-        echo 'Общее время: ' . ($finish - $start) . ' сек. <br>';
-        echo "Найдено дублей: $i";
+        
+        $res =  'Время на получение контактов: ' . ($finishData - $start) . ' сек. <br>';
+        $res = $res . 'Время на поиск дубликатов: ' . ($finishDouble - $finishData) . ' сек. <br>';
+        $res = $res . 'Время на сохранение изменений: ' . ($finishSeve - $finishDouble) . ' сек. <br>';
+        $res = $res . 'Общее время: ' . ($finish - $start) . ' сек. <br>';
+        $res = $res . "Найдено дублей: $i";
+        
+        return $res;
     }
 
 }

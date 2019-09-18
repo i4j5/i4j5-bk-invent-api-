@@ -172,6 +172,6 @@ class AmoController extends Controller
             
         }
 
-        echo 'ok';
+        return 'ok';
     }
 }

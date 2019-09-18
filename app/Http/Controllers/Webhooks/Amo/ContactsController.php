@@ -104,6 +104,8 @@ class ContactsController extends Controller
             $newContact->values()->saveMany($values);
 
         }
+        
+        return 'ok';
 
     }
     

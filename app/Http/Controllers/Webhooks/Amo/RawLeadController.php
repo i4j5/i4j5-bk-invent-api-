@@ -107,6 +107,8 @@ class RawLeadController extends Controller
 
        $contact->addCustomField('95354', $dataPhones);
        $contact->apiUpdate((int) $contact_id, 'now');
+       
+       return 'ok';
     }
 
 }

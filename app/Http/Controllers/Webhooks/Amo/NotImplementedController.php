@@ -35,6 +35,8 @@ class NotImplementedController extends Controller
             $lead->addCustomField(241507, true);
             $lead->apiUpdate($lead_id, 'now');
         }
+        
+        return 'ok';
 
     }
 }
