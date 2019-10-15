@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container">
-    <h1>История вебхуков</h1>
+    <h1>Запросы к API</h1>
     <hr>
     <table class="table table-striped table-bordered table-sm">
         <thead>

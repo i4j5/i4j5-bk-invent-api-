@@ -20,6 +20,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 // WebHooks
 Route::prefix('webhook')->group(function () {
+    Route::any('test', function () {return 'ok!';});
     
     // Исправление ошибок в контактах
     Route::get('find-duplicates/{query?}', 'Webhooks\FindDuplicatesController@handle');
@@ -49,6 +50,12 @@ Route::prefix('webhook')->group(function () {
         // Емейлтрекинг
         Route::post('emailtracking', 'Webhooks\Roistat\EmailTrackingController@handle');
     });
+    
+    Route::prefix('sipuni')->group(function () {
+        
+        // Обработка входящих звонков
+        Route::get('incoming-call', 'Webhooks\Sipuni\IncomingCallController@handle');
+    });
 });
 
 
@@ -59,3 +66,9 @@ Route::prefix('amo')->group(function () {
     Route::post('create-lead-from-form', 'API\AmoController@createLeadFromForm');
 });
 
+Route::prefix('salesap')->group(function () {
+
+    // Создание заявки с сайта
+    Route::post('create-lead-from-form', 'API\SalesapController@createLeadFromForm');
+    Route::get('i', 'API\SalesapController@index');
+});

@@ -10,8 +10,10 @@ class APILog
     {
         $response = $next($request);
         
-        \App\Models\ApiLog::write($request, $response->content(), $response->getStatusCode());
-        
+        if($response->getStatusCode() != 500)
+        {
+            \App\Models\ApiLog::write($request, $response->content(), $response->getStatusCode());
+        }
         return $response;
     }
 }

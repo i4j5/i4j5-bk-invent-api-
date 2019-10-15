@@ -9,7 +9,7 @@ class ToolsController extends Controller
 {
     public function webhooksLog(Request $request)
     {     
-        $logs = ApiLog::orderBy('created_at', 'desc')->paginate(6);
+        $logs = ApiLog::orderBy('created_at', 'desc')->paginate(8);
         return view('tools/api/log')->with(compact('logs'));
     }
 }

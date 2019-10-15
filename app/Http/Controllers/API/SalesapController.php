@@ -1,31 +1,32 @@
 <?php
 
-namespace App\Http\Controllers\Webhooks\Roistat;
+namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\SalesapAPI;
 
-/**
- * WebHook
- * Roistat
- * Ловец Лидов
- */
-class LeadHunterController extends Controller
+class SalesapController extends Controller
 {
-
-     protected $crm;
+    
+    protected $crm;
     
     public function __construct() {
         $this->crm = SalesapAPI::getInstance();
     }
-
-    public function handle(Request $request)
-    {        
-        $lead_name = 'Пойманный лид';
+    
+    /**
+     * Создание заявки с сайта
+     * POST
+     * @param Request $request
+     * @return void
+     */
+    public function createLeadFromForm(Request $request) {
+        $lead_name = 'Заявка с сайта. ' . $request->input('order');
         
-        $contact_name = $request->input('name');
         $contact_phone = $request->input('phone');
+        $contact_name = $request->input('name') ? $request->input('name') : $contact_phone;
+        $contact_email = $request->input('email');
         
         $utm = [
             'utm_medium' => $request->input('utm_medium'),
@@ -35,14 +36,19 @@ class LeadHunterController extends Controller
             'utm_content' => $request->input('utm_content'),
         ];
         
-        $url = $request->input('landing_page');
-        $roistat = $request->input('visit_id');
-        $referrer = $request->input('referrer');
+        $url = $request->input('url');
+        
+        //$utm = $request->input('utm');
+        
+        $roistat = $request->input('roistat');
+        $comment = $request->input('comment');
         
         $comment = 
                     "Имя: $contact_name |
-                    Телефон: $contact_phone";
-        
+                    Телефон: $contact_phone |
+                    E-mail: $contact_email | "
+                    . $comment;
+     
         $responsibleID = null;
            
         $response = $this->crm->searchConcat($contact_phone);
@@ -58,7 +64,6 @@ class LeadHunterController extends Controller
         }
         
         $this->crm->addОrder($lead_name, $contact->id, $responsibleID, $url, $comment, $roistat, $utm);
-
 
         return 'ok';
     }
