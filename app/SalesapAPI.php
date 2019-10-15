@@ -41,8 +41,22 @@ class SalesapAPI
     {
         $url = $this->url . 'contacts';
         
-        if ($name === null) $name = $phone;
+        $phone = str_replace(['+', '(', ')', ' ', '-', '_', '*','–'], '', $phone);
         
+        if(strlen($phone) >= 11) {
+            if($phone[0] == 8) {
+                $phone[0] = 7;	
+            }
+        }
+
+        if(strlen($phone) == 10) {
+            $phone = '7' . $phone;	
+        }
+        
+        $phone = '+' . $phone;
+        
+        if ($name === null) $name = $phone;
+       
         $data = [
             'data' => [
                 'type' => 'contacts',

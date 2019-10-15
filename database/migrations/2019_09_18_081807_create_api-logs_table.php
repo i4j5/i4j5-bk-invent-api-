@@ -14,7 +14,7 @@ class CreateApiLogsTable extends Migration
     public function up()
     {
         Schema::create('api-logs', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->bigIncrements('id')->unsigned();
             $table->string('method', 150);
             $table->string('url', 255);
             $table->text('request');

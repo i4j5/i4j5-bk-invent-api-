@@ -54,11 +54,10 @@ class LeadHunterController extends Controller
                 $responsibleID = $responsible->data->id;
             }
         } else {
-            $contact = $this->crm->addConcat($contact_phone, $contact_name, $contact_email);
+            $contact = $this->crm->addConcat($contact_phone, $contact_name);
         }
         
         $this->crm->addОrder($lead_name, $contact->id, $responsibleID, $url, $comment, $roistat, $utm);
-
 
         return 'ok';
     }
