@@ -18,7 +18,7 @@ class ApiLog extends Model
         self::create([
             'method' => $request->method(),
             'url' => $request->url(),
-            'request' => count($request->all()) ? json_encode($request->all()) : '', 
+            'request' => count($request->all()) ? json_encode($request->all(), JSON_UNESCAPED_UNICODE) : '', 
             'response' => $response,
             'code' => $code,
         ]);

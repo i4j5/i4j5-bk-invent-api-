@@ -33,7 +33,7 @@
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav mr-auto">
                         <li class="nav-item">
-                                <a class="nav-link" href="{{ route('phonebook') }}">Телефонная книга</a>
+                            <!--<a class="nav-link" href="{{ route('phonebook') }}">Телефонная книга</a>-->
                         </li> 
 
                         <li class="nav-item">
@@ -64,7 +64,7 @@
 
                                     @if ( Auth::user()->isAdmin())
                                         <a class="dropdown-item" href="/pages">Cтраницы</a>
-                                        <a class="dropdown-item" href="/settings">Настройки</a>
+                                        <a class="dropdown-item" href="/tools/api/log">Запросы к API</a>
                                     @endif
 
 

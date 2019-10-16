@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+<div class="container-fluid">
     <h1>Запросы к API</h1>
     <hr>
     <table class="table table-striped table-bordered table-sm">

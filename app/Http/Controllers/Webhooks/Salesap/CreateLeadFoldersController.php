@@ -16,7 +16,7 @@ class CreateLeadFoldersController extends Controller
     private $service;
     private $crm;
 
-    public function __construct(AmoCrmManager $amocrm)
+    public function __construct()
     {
         $client = new \Google_Client();
         $client->setAuthConfig(storage_path( env('GOOGLE_API_KEY') ));
@@ -40,7 +40,7 @@ class CreateLeadFoldersController extends Controller
 
     private function create($deal = [])
     {
-        if($deal['custom_fields']['custom_48203'] != '') return 'ok';
+        if($deal['data']['custom_48203'] != null) return 'ok';
         
         $data = [];
         

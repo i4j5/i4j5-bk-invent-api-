@@ -35,5 +35,4 @@ class IncomingCallController extends Controller
         ]);
         
     }
-    
 }

@@ -20,10 +20,15 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 // WebHooks
 Route::prefix('webhook')->group(function () {
-    Route::any('test', function () {return 'ok!';});
-    
+   
     // Исправление ошибок в контактах
     Route::get('find-duplicates/{query?}', 'Webhooks\FindDuplicatesController@handle');
+    
+    Route::prefix('salesap')->group(function () {
+
+        // Создание папки сделки на Google Drive
+        Route::post('create-deal-folders', 'Webhooks\Salesap\CreateLeadFoldersController@handle');;
+    });
 
     // prefix amo
     Route::prefix('amo')->group(function () {
@@ -70,5 +75,4 @@ Route::prefix('salesap')->group(function () {
 
     // Создание заявки с сайта
     Route::post('create-lead-from-form', 'API\SalesapController@createLeadFromForm');
-    Route::get('i', 'API\SalesapController@index');
 });

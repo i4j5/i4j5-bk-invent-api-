@@ -130,7 +130,7 @@ class SalesapAPI
         return false;
     }
     
-    public function addОrder($name='', $contactID=0, $responsibleID=0, $url='', $comment='', $roistat='', $utm=[])
+    public function addОrder($name='', $contactID=0, $responsibleID=0, $landing_page='', $comment='', $roistat='', $utm=[])
     {
         $url = $this->url . 'orders';
         
@@ -149,7 +149,7 @@ class SalesapAPI
                         'custom-48451' => isset($utm['utm_campaign']) ? $utm['utm_campaign'] : '',
                         'custom-48452' => isset($utm['utm_term']) ? $utm['utm_term'] : '',
                         'custom-48453' => isset($utm['utm_content']) ? $utm['utm_content'] : '',
-                        'custom-48454' => $url,
+                        'custom-48455' => $landing_page,
                     ]
                 ],
                 'relationships' => [
@@ -162,7 +162,7 @@ class SalesapAPI
                 ]
             ]
         ]; 
-        
+                
         if($contactID)
         {
              $data['data']['relationships']['contacts'] = [
@@ -212,10 +212,11 @@ class SalesapAPI
         $data = [
             'data' => [
                 'type' => 'deals',
+                'id' => $id,
                 'attributes' => $attributes
             ]
         ];
-                
+             
         $this->curl->patch($url, $data);
 
         $response = $this->curl->response;
@@ -227,18 +228,11 @@ class SalesapAPI
         return false;
     }
     
-    //Передаваемые параметры:
-    //fromnum - с какого номера пришёл вызов.
-    //tonum - на какой номер пришёл вызов
-    //dtmf - если перед функцией звонок попал на узел голосовое меню и звонящий
-    //набрал в нём какое нибудь число, оно будет передано в параметре
-    //label - если указан текст метки, он будет передан в параметре
-    //time - время прихода вызова в АТС 
     public function sipuni($phone)
     {
         $data = [ 
             'name' => $phone,
-            'choince' => '0',
+            'choice' => '0',
             'number' => '',
             'timeout' => '0',
         ];
@@ -270,8 +264,8 @@ class SalesapAPI
             if($response->data[0])
             {
                 $data['number'] = $response->data[0]->attributes->number;
-                $data['timeout'] = '20';
-                $data['choince'] = '1';
+                $data['timeout'] = '5';
+                $data['choice'] = '1';
             }
         }
 
