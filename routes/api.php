@@ -59,7 +59,8 @@ Route::prefix('webhook')->group(function () {
     Route::prefix('sipuni')->group(function () {
         
         // Обработка входящих звонков
-        Route::get('incoming-call', 'Webhooks\Sipuni\IncomingCallController@handle');
+        Route::get('incoming-call', 'Webhooks\Sipuni\IncomingCallController@getName');
+        Route::get('incoming-call/redirection', 'Webhooks\Sipuni\IncomingCallController@redirection');
     });
 });
 

@@ -15,13 +15,15 @@ class IncomingCallController extends Controller
 {
     protected $crm;
     
-    public function __construct() {
+    public function __construct() 
+    {
         $this->crm = SalesapAPI::getInstance();
     }
 
-    public function handle(Request $request)
+    public function getName(Request $request)
     {        
         $data = $request->all();
+           
         if(isset($data['fromnum']))
         {
             return response()->json($this->crm->sipuni($data['fromnum']));
@@ -33,6 +35,22 @@ class IncomingCallController extends Controller
             'number' => '',
             'timeout' => '0',
         ]);
+    }
+    
+    public function redirection(Request $request)
+    {        
+        $data = $request->all();
+           
+        if(isset($data['fromnum']))
+        {
+            return response()->json($this->crm->sipuni($data['fromnum'], true));
+        }
         
+        return response()->json([ 
+            'name' => '',
+            'choince' => '0',
+            'number' => '',
+            'timeout' => '0',
+        ]);
     }
 }

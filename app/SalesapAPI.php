@@ -48,6 +48,8 @@ class SalesapAPI
                 $phone[0] = 7;	
             }
         }
+        
+        if( is_null($email) ) $email = ''; 
 
         if(strlen($phone) == 10) {
             $phone = '7' . $phone;	
@@ -65,6 +67,9 @@ class SalesapAPI
                     'last-name' => '',
                     'email' => $email,
                     'general-phone' => $phone,
+                    'customs' => [
+                        'custom-48582' => 'private',
+                    ]
                 ]
             ]
         ]; 
@@ -136,19 +141,23 @@ class SalesapAPI
         
         $contactID = (int) $contactID;
         $responsibleID = (int)$responsibleID;
+        
+        if( is_null($roistat) ) $roistat = ''; 
              
         $data = [
             'data' => [
                 'type' => 'orders',
+                //'roistat-account-id' => '240',
+                //'roistat-visit' => $roistat,
                 'attributes' => [
                     'name' => $name,
                     'description' => $comment,
                     'customs' => [
-                        'custom-48449' => isset($utm['utm_medium']) ? $utm['utm_medium'] : '',
-                        'custom-48450' => isset($utm['utm_source']) ? $utm['utm_source'] : '',
-                        'custom-48451' => isset($utm['utm_campaign']) ? $utm['utm_campaign'] : '',
-                        'custom-48452' => isset($utm['utm_term']) ? $utm['utm_term'] : '',
-                        'custom-48453' => isset($utm['utm_content']) ? $utm['utm_content'] : '',
+                        'custom-48449' => isset($utm['utm_medium']) && !is_null($utm['utm_medium']) ? $utm['utm_medium'] : '',
+                        'custom-48450' => isset($utm['utm_source']) && !is_null($utm['utm_source']) ? $utm['utm_source'] : '',
+                        'custom-48451' => isset($utm['utm_campaign']) && !is_null($utm['utm_campaign']) ? $utm['utm_campaign'] : '',
+                        'custom-48452' => isset($utm['utm_term']) && !is_null($utm['utm_term']) ? $utm['utm_term'] : '',
+                        'custom-48453' => isset($utm['utm_content']) && !is_null($utm['utm_content']) ? $utm['utm_content'] : '',
                         'custom-48455' => $landing_page,
                     ]
                 ],
@@ -228,7 +237,7 @@ class SalesapAPI
         return false;
     }
     
-    public function sipuni($phone)
+    public function sipuni($phone = '', $redirection = false)
     {
         $data = [ 
             'name' => $phone,
@@ -237,38 +246,50 @@ class SalesapAPI
             'timeout' => '0',
         ];
         
-        $responsible = null;
-        
         $contacts = $this->searchConcat($phone);
         
-        if($contacts) 
-        {
-            foreach ($contacts as $contact) {
-                $response = $this->curl->get($contact->relationships->responsible->links->related);
-                
-                if($response->data)
-                {
-                    if($contact->attributes->{'first-name'} != '')
-                    {
-                        $data['name'] = $contact->attributes->{'first-name'};
-                    }
-                    $responsible = $response->data;
+        if ($contacts && !$redirection) {
+            
+            foreach ($contacts as $contact) 
+            {
+                if ($contact->attributes->{'first-name'} != '') {
+                    $data['name'] = $contact->attributes->{'first-name'};
                     break;
                 }
             }
+            
+        } elseif ($contacts) {
+            
+            $responsible = null;
+            
+            foreach ($contacts as $contact) 
+            {
+                if ($contact->attributes->{'first-name'} != '') {
+                    $data['name'] = $contact->attributes->{'first-name'};
+                }
+                
+                if (!$responsible) {
+                    $response = $this->curl->get($contact->relationships->responsible->links->related);
+
+                    if ($response->data) {
+                        $responsible = $response->data;
+                        break;
+                    }
+                } 
+            }
+            
+            if ($responsible) {
+                $response = $this->curl->get($this->url . 'telephony-phones?filter[user]=' . $responsible->id);
+                
+                if (isset($response->data[0])) {
+                    $data['number'] = $response->data[0]->attributes->number;
+                    $data['timeout'] = '20';
+                    $data['choice'] = '1';
+                }
+            }
+            
         }
         
-        if ($responsible) 
-        {
-            $response = $this->curl->get($this->url . 'telephony-phones?filter[user]=' . $responsible->id);
-            if($response->data[0])
-            {
-                $data['number'] = $response->data[0]->attributes->number;
-                $data['timeout'] = '5';
-                $data['choice'] = '1';
-            }
-        }
-
         return $data;
     }
     
