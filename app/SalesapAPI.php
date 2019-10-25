@@ -57,7 +57,7 @@ class SalesapAPI
         
         $phone = '+' . $phone;
         
-        if ($name === null) $name = $phone;
+        if ( is_null($name) ) $name = $phone;
        
         $data = [
             'data' => [
