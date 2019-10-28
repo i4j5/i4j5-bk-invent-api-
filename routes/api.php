@@ -20,6 +20,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 // WebHooks
 Route::prefix('webhook')->group(function () {
+    
+    Route::any('test', function () {return 'ok!';});
    
     // Исправление ошибок в контактах
     Route::get('find-duplicates/{query?}', 'Webhooks\FindDuplicatesController@handle');

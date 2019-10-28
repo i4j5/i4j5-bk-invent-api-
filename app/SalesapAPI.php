@@ -253,7 +253,12 @@ class SalesapAPI
             foreach ($contacts as $contact) 
             {
                 if ($contact->attributes->{'first-name'} != '') {
-                    $data['name'] = $contact->attributes->{'first-name'};
+                    $data['name'] = 
+                            $contact->attributes->{'last-name'}
+                            . ' ' .
+                            $contact->attributes->{'first-name'}
+                            . ' ' .
+                            $contact->attributes->{'middle-name'};
                     break;
                 }
             }
@@ -265,7 +270,12 @@ class SalesapAPI
             foreach ($contacts as $contact) 
             {
                 if ($contact->attributes->{'first-name'} != '') {
-                    $data['name'] = $contact->attributes->{'first-name'};
+                    $data['name'] = 
+                            $contact->attributes->{'last-name'}
+                            . ' ' .
+                            $contact->attributes->{'first-name'}
+                            . ' ' .
+                            $contact->attributes->{'middle-name'};
                 }
                 
                 if (!$responsible) {
@@ -283,7 +293,7 @@ class SalesapAPI
                 
                 if (isset($response->data[0])) {
                     $data['number'] = $response->data[0]->attributes->number;
-                    $data['timeout'] = '20';
+                    $data['timeout'] = '8';
                     $data['choice'] = '1';
                 }
             }

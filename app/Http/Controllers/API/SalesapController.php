@@ -87,6 +87,7 @@ class SalesapController extends Controller
         {
             $roistat = $json['roistat_visit'];
             
+            
             // Получить данные из ройстата!!!
             
             $contact_phone = $json['src_phone_number'];
@@ -106,6 +107,11 @@ class SalesapController extends Controller
                 }
             } else {
                 $contact = $this->crm->addConcat($contact_phone);
+                
+                //Проверка статуса звонка 
+                
+                    // Узнать кто ответил.
+                    // Поставить отвественного
             }
             
             if ($contact)
