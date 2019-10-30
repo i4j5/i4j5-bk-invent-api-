@@ -147,8 +147,6 @@ class SalesapAPI
         $data = [
             'data' => [
                 'type' => 'orders',
-                //'roistat-account-id' => '240',
-                //'roistat-visit' => $roistat,
                 'attributes' => [
                     'name' => $name,
                     'description' => $comment,

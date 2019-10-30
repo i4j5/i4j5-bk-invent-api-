@@ -81,14 +81,9 @@ class SalesapController extends Controller
     {
         $data = $request->input('data');
         
-        if ($data['src_phone_number'] != '+79614270575') {
-            return ')))';
-        }
-        
         if ($data['direction'] == 'incoming')
         {
             $roistat = $data['custom_49119'];
-            // Получить данные из ройстата!!!
             
             $contact_phone = $data['src_phone_number'];
             
@@ -97,13 +92,13 @@ class SalesapController extends Controller
             $contact = null;
             $responsibleID = null;
             
-            if ($response && (int)$roistat) {
-                $contact = $response[0];
-                $responsible = $this->crm->curl->get($contact->relationships->responsible->links->related);
-                if ($responsible->data)
-                {
-                    $responsibleID = $responsible->data->id;
-                }
+            if ($response || $roistat == 'Динамичный коллтрекинг') {
+//                $contact = $response[0];
+//                $responsible = $this->crm->curl->get($contact->relationships->responsible->links->related);
+//                if ($responsible->data)
+//                {
+//                    $responsibleID = $responsible->data->id;
+//                }
             } else {
                 $contact = $this->crm->addConcat($contact_phone);
                 
