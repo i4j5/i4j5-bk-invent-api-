@@ -159,6 +159,7 @@ class SalesapAPI
                         'custom-48452' => isset($utm['utm_term']) && !is_null($utm['utm_term']) ? $utm['utm_term'] : '',
                         'custom-48453' => isset($utm['utm_content']) && !is_null($utm['utm_content']) ? $utm['utm_content'] : '',
                         'custom-48455' => $landing_page,
+                        'custom-49132' => $roistat,
                     ]
                 ],
                 'relationships' => [
@@ -265,7 +266,7 @@ class SalesapAPI
             
         } elseif ($contacts) {
             
-            $responsible = null;
+            $number = null;
             
             foreach ($contacts as $contact) 
             {
@@ -278,25 +279,29 @@ class SalesapAPI
                             $contact->attributes->{'middle-name'};
                 }
                 
-                if (!$responsible) {
+                if ( isset($contact->attributes->customs->{'custom-49127'}[0]) ) {
+                    $number = $contact->attributes->customs->{'custom-49127'}[0];
+                    break;
+                } else {
                     $response = $this->curl->get($contact->relationships->responsible->links->related);
 
                     if ($response->data) {
-                        $responsible = $response->data;
+                        $responsible = $this->curl->get($this->url . 'telephony-phones?filter[user]=' . $response->data->id);
+
+                        if (isset($responsible->data[0])) {
+                            $number = $responsible->data[0]->attributes->number;
+                        }
                         break;
                     }
                 } 
             }
             
-            if ($responsible) {
-                $response = $this->curl->get($this->url . 'telephony-phones?filter[user]=' . $responsible->id);
-                
-                if (isset($response->data[0])) {
-                    $data['number'] = $response->data[0]->attributes->number;
-                    $data['timeout'] = '8';
-                    $data['choice'] = '1';
-                }
+            if ($number) {
+                $data['number'] = $number;
+                $data['timeout'] = '8';
+                $data['choice'] = '1';
             }
+            
             
         }
         

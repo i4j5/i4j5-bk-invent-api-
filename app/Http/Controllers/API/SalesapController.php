@@ -22,7 +22,7 @@ class SalesapController extends Controller
      * @return string
      */
     public function createLeadFromForm(Request $request) {
-        $lead_name = 'Заявка с сайта. ' . $request->input('order');
+        $lead_name = $request->input('order');
         
         $contact_phone = $request->input('phone');
         $contact_name = $request->input('name') ? $request->input('name') : $contact_phone;
@@ -81,24 +81,23 @@ class SalesapController extends Controller
     {
         $data = $request->input('data');
         
-        if ($data) $json = json_decode($data, true);
+        if ($data['src_phone_number'] != '+79614270575') {
+            return ')))';
+        }
         
-        if ($json['direction'] == 'incoming')
+        if ($data['direction'] == 'incoming')
         {
-            $roistat = $json['roistat_visit'];
-            
-            
+            $roistat = $data['custom_49119'];
             // Получить данные из ройстата!!!
             
-            $contact_phone = $json['src_phone_number'];
+            $contact_phone = $data['src_phone_number'];
             
             $response = $this->crm->searchConcat($contact_phone);
 
             $contact = null;
             $responsibleID = null;
             
-            if ($response && (int)$roistat) 
-            {
+            if ($response && (int)$roistat) {
                 $contact = $response[0];
                 $responsible = $this->crm->curl->get($contact->relationships->responsible->links->related);
                 if ($responsible->data)
@@ -108,24 +107,21 @@ class SalesapController extends Controller
             } else {
                 $contact = $this->crm->addConcat($contact_phone);
                 
-                //Проверка статуса звонка 
-                
-                    // Узнать кто ответил.
-                    // Поставить отвественного
+                //Отвечено - 123164
+                //Неотвечено - 123165    
+                if ($data['status_id'] == 123164) 
+                {       
+                    $dst = $this->crm->curl->get('https://app.salesap.ru/api/v1/telephony-calls/' . $data['id'] . '/dst-phone');
+                   
+                    if ($dst->data) {
+                        $user = $this->crm->curl->get($dst->data->relationships->user->links->related);
+                        if ($user) $responsibleID = $user->data->id;
+                    }
+                }
             }
-            
-            if ($contact)
-            {
-                $comment = '';
-
-                $this->crm->addОrder(
-                    'Звонок от ' .$contact_phone, 
-                    $contact->id, 
-                    $responsibleID, 
-                    '',
-                    $comment, 
-                    $roistat
-                );
+              
+            if ($contact) {
+               $this->crm->addОrder("Входящий звонок - $roistat", $contact->id, $responsibleID, '', '', $roistat);
             }
         }
 

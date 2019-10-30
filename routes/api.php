@@ -29,7 +29,8 @@ Route::prefix('webhook')->group(function () {
     Route::prefix('salesap')->group(function () {
 
         // Создание папки сделки на Google Drive
-        Route::post('create-deal-folders', 'Webhooks\Salesap\CreateLeadFoldersController@handle');;
+        Route::post('create-deal-folders', 'Webhooks\Salesap\CreateLeadFoldersController@handle');
+        Route::post('incoming-call', 'API\SalesapController@incomingСall');
     });
 
     // prefix amo
