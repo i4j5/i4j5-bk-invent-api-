@@ -9,12 +9,12 @@ use App\SalesapAPI;
 /**
  * WebHook
  * Roistat
- * Ловец Лидов
+ * Коллтрекинг
  */
-class LeadHunterController extends Controller
+class CallTrackingController extends Controller
 {
 
-     protected $crm;
+    protected $crm;
     
     public function __construct() {
         $this->crm = SalesapAPI::getInstance();
@@ -22,10 +22,9 @@ class LeadHunterController extends Controller
 
     public function handle(Request $request)
     {        
-        $lead_name = 'Пойманный лид';
+        $lead_name = 'Входящий звонок';
         
-        $contact_name = $request->input('name');
-        $contact_phone = $request->input('phone');
+        $contact_phone = $request->input('caller');
         
         $utm = [
             'utm_medium' => $request->input('utm_medium'),
@@ -38,12 +37,11 @@ class LeadHunterController extends Controller
         $url = $request->input('landing_page');
         $roistat = $request->input('visit_id');
         $referrer = $request->input('referrer');
-        
-        $comment = 
-                    "Имя: $contact_name |
-                    Телефон: $contact_phone";
-        
+
         $responsibleID = null;
+        
+        //Возможно сделать задержку 
+        //sleep(180);
            
         $response = $this->crm->searchConcat($contact_phone);
         
@@ -57,7 +55,7 @@ class LeadHunterController extends Controller
             $contact = $this->crm->addConcat($contact_phone, $contact_name);
         }
         
-        $this->crm->addОrder($lead_name, $contact->id, $responsibleID, $url, $comment, $roistat, $utm);
+        $this->crm->addОrder($lead_name, $contact->id, $responsibleID, $url, '', $roistat, $utm);
 
         return 'ok';
     }

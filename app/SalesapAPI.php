@@ -37,9 +37,11 @@ class SalesapAPI
      * @param scting $email
      * @return array|boolean
      */
-    public function addConcat($phone='', $name=null, $email='')
+    public function addConcat($phone='', $name=null, $email='', $responsibleID=0)
     {
         $url = $this->url . 'contacts';
+        
+        $responsibleID = (int)$responsibleID;
         
         $phone = str_replace(['+', '(', ')', ' ', '-', '_', '*','–'], '', $phone);
         
@@ -73,6 +75,16 @@ class SalesapAPI
                 ]
             ]
         ]; 
+        
+        if($responsibleID)
+        {
+            $data['data']['relationships']['responsible'] = [
+                'data' => [
+                    'type' => 'users',
+                    'id' => $responsibleID
+                ]
+            ];
+        }
         
         $this->curl->post($url, $data);
         
@@ -109,6 +121,31 @@ class SalesapAPI
         return false;
     }
     
+    public function editConcat($id = null, $attributes = []) 
+    {
+        if ($id === null) return false;
+
+        $url = $this->url . 'contacts/' . $id;
+
+        $data = [
+            'data' => [
+                'type' => 'contacts',
+                'id' => $id,
+                'attributes' => $attributes
+            ]
+        ];
+
+        $this->curl->patch($url, $data);
+
+        $response = $this->curl->response;
+
+        if (!isset($response->error)) {
+            return $response;
+        }
+
+        return false;
+    }
+
     /**
      * Поиск контакта
      * @param scting $phone
@@ -164,7 +201,7 @@ class SalesapAPI
                     'source' => [
                        'data' => [
                            'type' => 'sources',
-                           'id' => 1 // ????
+                           'id' => 1
                        ]
                    ],
                 ]
@@ -181,6 +218,8 @@ class SalesapAPI
                     ]
                 ]
             ];
+             
+            // Поставить задачу
         }
         
         if($responsibleID)
@@ -299,7 +338,6 @@ class SalesapAPI
                 $data['timeout'] = '8';
                 $data['choice'] = '1';
             }
-            
             
         }
         

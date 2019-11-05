@@ -84,6 +84,7 @@ class SalesapController extends Controller
         if ($data['direction'] == 'incoming')
         {
             $roistat = $data['custom_49119'];
+            // Получить данные из роймтат 
             
             $contact_phone = $data['src_phone_number'];
             
@@ -92,7 +93,7 @@ class SalesapController extends Controller
             $contact = null;
             $responsibleID = null;
             
-            if ($response || $roistat == 'Динамичный коллтрекинг') {
+            if ($response) {
 //                $contact = $response[0];
 //                $responsible = $this->crm->curl->get($contact->relationships->responsible->links->related);
 //                if ($responsible->data)
@@ -100,8 +101,6 @@ class SalesapController extends Controller
 //                    $responsibleID = $responsible->data->id;
 //                }
             } else {
-                $contact = $this->crm->addConcat($contact_phone);
-                
                 //Отвечено - 123164
                 //Неотвечено - 123165    
                 if ($data['status_id'] == 123164) 
@@ -113,11 +112,44 @@ class SalesapController extends Controller
                         if ($user) $responsibleID = $user->data->id;
                     }
                 }
+                
+                $contact = $this->crm->addConcat($contact_phone, $contact_phone, '', $responsibleID);
             }
               
             if ($contact) {
                $this->crm->addОrder("Входящий звонок - $roistat", $contact->id, $responsibleID, '', '', $roistat);
             }
+        } elseif ($data['direction'] == 'outgoing') {
+            
+            $contact_phone = $data['dst_phone_number'];
+            
+            $response = $this->crm->searchConcat($contact_phone);
+            
+            if (!$response) {
+                $src = $this->crm->curl->get('https://app.salesap.ru/api/v1/telephony-calls/' . $data['id'] . '/src-phone');
+                
+                $additional = null;
+                $responsibleID = null;
+                
+                if ($src->data) {
+                    $user = $this->crm->curl->get($src->data->relationships->user->links->related);
+                    if ($user)
+                        $responsibleID = $user->data->id;
+                } else {
+                   $additional = $data['src_phone_number'];
+                }
+                
+                $contact = $this->crm->addConcat($contact_phone, $contact_phone, '', $responsibleID);
+                
+                if ($additional) {
+                    $this->crm->editConcat($contact->id, [
+                        'customs' => [
+                            'custom-49127' => [$additional]
+                        ]
+                    ]);
+                }
+            }
+            
         }
 
         return 'ok';
