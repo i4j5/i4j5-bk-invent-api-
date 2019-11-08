@@ -65,8 +65,10 @@ class SalesapController extends Controller
             $contact = $this->crm->addConcat($contact_phone, $contact_name, $contact_email);
         }
         
-        $this->crm->addОrder($lead_name, $contact->id, $responsibleID, $url, $comment, $roistat, $utm);
-        //return $this->crm->addОrder($lead_name, 0, 0, $url, $comment, $roistat, $utm);
+        //$this->crm->addОrder($lead_name, $contact->id, $responsibleID, $url, $comment, $roistat, $utm);
+        $deal = $this->crm->addDeal($lead_name, $contact->id, $responsibleID, $url, $comment, $utm);
+        
+        if ($deal->data->id) $this->crm->addRoistar(240, $roistat, $deal->data->id);
 
         return 'ok';
     }
@@ -117,7 +119,10 @@ class SalesapController extends Controller
             }
               
             if ($contact) {
-               $this->crm->addОrder("Входящий звонок - $roistat", $contact->id, $responsibleID, '', '', $roistat);
+                //$this->crm->addОrder("Входящий звонок - $roistat", $contact->id, $responsibleID, '', '', $roistat);
+                $deal = $this->crm->addDeal("Входящий звонок - $roistat", $contact->id);
+
+                if ($deal->data->id) $this->crm->addRoistar(240, $roistat, $deal->data->id);
             }
         } elseif ($data['direction'] == 'outgoing') {
             
@@ -133,8 +138,7 @@ class SalesapController extends Controller
                 
                 if ($src->data) {
                     $user = $this->crm->curl->get($src->data->relationships->user->links->related);
-                    if ($user)
-                        $responsibleID = $user->data->id;
+                    if ($user) $responsibleID = $user->data->id;
                 } else {
                    $additional = $data['src_phone_number'];
                 }

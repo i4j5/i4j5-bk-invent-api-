@@ -245,6 +245,103 @@ class SalesapAPI
         return false;
     }
     
+    public function addDeal($name = '', $contactID = 0, $responsibleID = 0, $landing_page = '', $comment = '', $utm = []) 
+    {
+        $url = $this->url . 'deals';
+
+        $contactID = (int) $contactID;
+        $responsibleID = (int) $responsibleID;
+
+        $data = [
+            'data' => [
+                'type' => 'deals',
+                'attributes' => [
+                    'name' => $name,
+                    'description' => $comment,
+                    'customs' => [
+                        'custom-49675' => isset($utm['utm_medium']) && !is_null($utm['utm_medium']) ? $utm['utm_medium'] : '',
+                        'custom-49674' => isset($utm['utm_source']) && !is_null($utm['utm_source']) ? $utm['utm_source'] : '',
+                        'custom-49676' => isset($utm['utm_campaign']) && !is_null($utm['utm_campaign']) ? $utm['utm_campaign'] : '',
+                        'custom-49673' => isset($utm['utm_term']) && !is_null($utm['utm_term']) ? $utm['utm_term'] : '',
+                        'custom-49672' => isset($utm['utm_content']) && !is_null($utm['utm_content']) ? $utm['utm_content'] : '',
+                        'custom-49671' => $landing_page,
+                    ]
+                ],
+                'relationships' => [
+                ]
+            ]
+        ];
+        
+        if ($contactID) {
+            $data['data']['relationships']['contacts'] = [
+                'data' => [
+                    [
+                        'type' => 'contacts',
+                        'id' => $contactID
+                    ]
+                ]
+            ];
+        }
+
+        if ($responsibleID) {
+            $data['data']['relationships']['responsible'] = [
+                'data' => [
+                    'type' => 'users',
+                    'id' => $responsibleID
+                ]
+            ];
+        }
+
+        $this->curl->post($url, $data);
+
+        $response = $this->curl->response;
+       
+        if (!isset($response->error)) {
+            return $response;
+        }
+
+        return false;
+    }
+    
+    public function addRoistar($accountID = null, $visit = null, $entityID = null, $entityType = 'deals')
+    {
+        $url = $this->url . 'roistat-relations';
+        
+        $data = [
+            'data' => [
+                'type' => 'roistat-relations',
+                'attributes' => [
+                    //'roistat-account-id' => '240',
+                    'roistat-visit' => $visit
+                ],
+                'relationships' => [
+                    'account' => [
+                        'data' => [
+                            'id' => $accountID,
+                            'type' => 'roistat-accounts'
+                        ]
+                    ],
+                    'entity' => [
+                        'data' => [
+                            'id' => $entityID,
+                            'type' => $entityType
+                        ]
+                    ]
+                ]
+            ]
+        ];
+        
+        $this->curl->post($url, $data);
+
+        $response = $this->curl->response;
+
+        if (!isset($response->error)) {
+            return $response;
+        }
+
+        return false;
+    }
+
     /**
      * Редактирование сделки
      * @param int $id
