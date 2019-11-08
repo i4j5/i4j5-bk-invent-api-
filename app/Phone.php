@@ -49,7 +49,7 @@ class Phone
             $phone = '7' . $phone;	
         }
         
-        if ($enum == 214340) $enum = 214336;
+        if ($enum == 334469) $enum = 334461;
 
         return [
             'phone' => $phone,
@@ -78,12 +78,10 @@ class Phone
         {
             foreach ( $contact['custom_fields'] as $field )
             {
-                if(isset($field['code']) && $field['code'] == 'PHONE') 
-                {
+                if (isset($field['code']) && $field['code'] == 'PHONE') {
                     foreach ( $field['values'] as $item )
                     {
-                        if ($phone == $item['value']) 
-                        {
+                        if ($phone == $item['value']) {
                             $res = $contact;
                             break(3);
                         }

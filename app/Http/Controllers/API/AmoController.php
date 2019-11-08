@@ -51,23 +51,21 @@ class AmoController extends Controller
         $lead['tags'] = ['Заявка с сайта'];
         
         // Системные
-        $lead->addCustomField(232407, $utm_medium);
-        $lead->addCustomField(232409, $utm_source);
-        //$lead->addCustomField(232411, '-');
-        $lead->addCustomField(232413, $utm_campaign);
-        $lead->addCustomField(232415, $utm_term);
-        $lead->addCustomField(232417, $utm_content);
-        //$lead->addCustomField(232419, '-');
-        $lead->addCustomField(232421, $url);
-        $lead->addCustomField(232423, $utm);
-        $lead->addCustomField(226175, 487647);
-        $lead->addCustomField(240623, $roistat);
+        $lead->addCustomField(234119, $utm_medium);
+        $lead->addCustomField(234115, $utm_source);
+        $lead->addCustomField(234121, $utm_campaign);
+        $lead->addCustomField(234101, $utm_term);
+        $lead->addCustomField(234117, $utm_content);
+        $lead->addCustomField(234099, $url);
+        //$lead->addCustomField(232423, $utm);
+        //$lead->addCustomField(226175, 487647); 
+        $lead->addCustomField(234133, $roistat);
 
         $contact = $this->phone->contactSearch($contact_phone);
         
-		$note = $this->amocrm->note;
-		$note['element_type'] = \AmoCRM\Models\Note::TYPE_CONTACT;
-		$note['note_type'] = \AmoCRM\Models\Note::COMMON;
+        $note = $this->amocrm->note;
+        $note['element_type'] = \AmoCRM\Models\Note::TYPE_CONTACT;
+        $note['note_type'] = \AmoCRM\Models\Note::COMMON;
     
         $comment = $comment . " \n
         ====================\n
@@ -77,12 +75,12 @@ class AmoController extends Controller
         Телефон: $contact_phone \n
         E-mail: $contact_email \n
         ====================\n
-		Страница захвата: $url \n
-		Ключевое слово: $utm_term \n
-		Промокод: $roistat \n
-		";
-		
-		$note['text'] = $comment;
+        Страница захвата: $url \n
+        Ключевое слово: $utm_term \n
+        Промокод: $roistat \n
+        ";
+
+        $note['text'] = $comment;
 
         if(!$contact)
         {
@@ -125,10 +123,10 @@ class AmoController extends Controller
             // Заполнение контакта 
             $contact = $this->amocrm->contact;
             $contact['name'] = $contact_name;
-            $contact->addCustomField('95354', [
+            $contact->addCustomField('233929', [
                 [$contact_phone, 'MOB'],
             ]);
-            $contact->addCustomField('95356', [
+            $contact->addCustomField('233931', [
                 [$contact_email, 'PRIV'],
             ]);
 

@@ -52,18 +52,17 @@ class LeadHunterController extends Controller
         $lead['name'] = $lead_name;
         $lead['tags'] = ['Заявка с сайта'];
         
-        // Системные
-        $lead->addCustomField(232407, $utm_medium);
-        $lead->addCustomField(232409, $utm_source);
-        //$lead->addCustomField(232411, '');
-        $lead->addCustomField(232413, $utm_campaign);
-        $lead->addCustomField(232415, $utm_term);
-        $lead->addCustomField(232417, $utm_content);
-        $lead->addCustomField(232419, $referrer);
-        $lead->addCustomField(232421, $url);
-        $lead->addCustomField(232423, $utm);
-        $lead->addCustomField(226175, 487647);
-        $lead->addCustomField(240623, $roistat);
+        // Системные        
+        $lead->addCustomField(234119, $utm_medium);
+        $lead->addCustomField(234115, $utm_source);
+        $lead->addCustomField(234121, $utm_campaign);
+        $lead->addCustomField(234101, $utm_term);
+        $lead->addCustomField(234117, $utm_content);
+        $lead->addCustomField(234099, $url);
+        $lead->addCustomField(234297, $referrer);
+        //$lead->addCustomField(232423, $utm);
+        //$lead->addCustomField(226175, 487647); 
+        $lead->addCustomField(234133, $roistat);
         
         $note = $this->amocrm->note;
         $note['element_type'] = \AmoCRM\Models\Note::TYPE_CONTACT;
@@ -118,7 +117,7 @@ class LeadHunterController extends Controller
             // Заполнение контакта 
             $contact = $this->amocrm->contact;
             $contact['name'] = $contact_name;
-            $contact->addCustomField('95354', [
+            $contact->addCustomField('233929', [
                 [$contact_phone, 'MOB'],
             ]);
 

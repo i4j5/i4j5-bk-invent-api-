@@ -16,7 +16,6 @@ class PhoneBookController extends Controller
     {
         $this->middleware('auth');
         $this->amocrm = $amocrm;
-        
     }
 
     public function index(Request $request)
@@ -24,8 +23,7 @@ class PhoneBookController extends Controller
 
         $search = $request->query('search');
 
-        if($search) 
-        {
+        if ($search) {
 
             $res = DB::table('amo-contacts')
                     ->join('amo-contact-values', 'amo-contacts.id', '=', 'amo-contact-values.contact_id')

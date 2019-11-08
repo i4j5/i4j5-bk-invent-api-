@@ -48,7 +48,7 @@ class CreateLeadFoldersController extends Controller
 
         foreach ( $data['custom_fields'] as $field )
         {
-            if ((int) $field['id'] == 223913) {
+            if ((int) $field['id'] == 234137) {
                 if ($field['values'][0]['value'] != '') {
                     return;
                 } 
@@ -65,19 +65,19 @@ class CreateLeadFoldersController extends Controller
         
         // ПАПКА СДЕЛКИ
         $leadFolder = $this->service->files->create($file);
-        $lead->addCustomField(223913, "https://drive.google.com/open?id=$leadFolder->id");
+        $lead->addCustomField(235511, "https://drive.google.com/open?id=$leadFolder->id");
         
         // ПАПКА МЕНЕДЖЕРА
         $file->setName('1.1 ПАПКА МЕНЕДЖЕРА');
         $file->setParents([$leadFolder->id]);
         $folder = $this->service->files->create($file);
-        $lead->addCustomField(226185, "https://drive.google.com/open?id=$folder->id");
+        $lead->addCustomField(235513, "https://drive.google.com/open?id=$folder->id");
 
         // ИСХОДНЫЕ ДОКУМЕНТЫ
         $file->setName('1.3 ИСХОДНЫЕ ДОКУМЕНТЫ');
         $file->setParents([$leadFolder->id]);
         $folder = $this->service->files->create($file);
-        $lead->addCustomField(236989, "https://drive.google.com/open?id=$folder->id");
+        $lead->addCustomField(235527, "https://drive.google.com/open?id=$folder->id");
 
         // УСЛУГА
         $file->setName('1.4 УСЛУГА');
@@ -88,7 +88,7 @@ class CreateLeadFoldersController extends Controller
         $file->setName('1.2 ОБСЛЕДОВАНИЕ ОБЪЕКТА');
         $file->setParents([$leadFolder->id]);
         $folder = $this->service->files->create($file);
-        $lead->addCustomField(234517, "https://drive.google.com/open?id=$folder->id");
+        $lead->addCustomField(235515, "https://drive.google.com/open?id=$folder->id");
         $file->setParents([$folder->id]);
         // ФОТО_АДРЕС
         $file->setName('1.2.1 ФОТО_АДРЕС');

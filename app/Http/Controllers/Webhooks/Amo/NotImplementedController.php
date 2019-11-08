@@ -37,6 +37,5 @@ class NotImplementedController extends Controller
         }
         
         return 'ok';
-
     }
 }
