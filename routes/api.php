@@ -21,7 +21,11 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 // WebHooks
 Route::prefix('webhook')->group(function () {
     
-    Route::any('test', function () {return 'ok!';});
+    Route::any('test', function () {
+        $amo = \App\AmoCRM::getInstance();
+        dd($amo);
+        return 'ok!';
+    });
    
     // Исправление ошибок в контактах
     Route::get('find-duplicates/{query?}', 'Webhooks\FindDuplicatesController@handle');
@@ -38,6 +42,9 @@ Route::prefix('webhook')->group(function () {
 
         // Создание папки сделки на Google Drive
         Route::post('create-lead-folders', 'Webhooks\Amo\CreateLeadFoldersController@handle');
+        
+        // Создание проекта в asana
+        Route::post('create-lead-project', 'Webhooks\Amo\CreatLeadProjectController@handle');
         
         // При переходе на этап НЕОБРАБОТАННЫЙ ЛИД
         Route::post('raw-lead', 'Webhooks\Amo\RawLeadController@handle');

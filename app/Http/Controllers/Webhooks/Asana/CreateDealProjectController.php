@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Webhooks\Salesap;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\SalesapAPI;
+use Dotzero\LaravelAmoCrm\AmoCrmManager;
 use \Curl\Curl;
 
 /**
@@ -17,9 +17,9 @@ class CreateDealProjectController extends Controller
     private $crm;
     private $curl;
 
-    public function __construct()
+    public function __construct(AmoCrmManager $amocrm)
     {
-        $this->crm = SalesapAPI::getInstance();
+        $this->crm = $amocrm;
         
         $this->curl = new Curl();
         $this->curl->setHeader('Authorization', 'Bearer ' . env('ASANA_KEY'));
@@ -28,32 +28,30 @@ class CreateDealProjectController extends Controller
 
     public function handle(Request $request)
     {        
-        $deal = $request->all();    
+        $lead_id = $request->input('lead_id');
+        $template_id = $request->input('template_id');
         
-        if (isset($deal['type']) && $deal['type'] == 'Deal')
-        {
-            return $this->create($deal);
+        if (!$template_id || !$lead_id) {
+            return 'error';
         }
         
-        return 'error';
-    }
+        $lead = $this->amocrm->lead->apiList([
+            'id' => $lead_id,
+            'limit_rows' => 1,
+        ])[0];
+        
+        // Проверка есть ли лид
 
-    private function create($deal = [])
-    {
-        if ($deal['data']['custom_48203'] != null) return 'ok';
-        
-        if ($deal['data']['custom_49670'] == null) return 'error';
-        
-        //Получать данные
-        // crm  => asana 
-        $tpl = [
-            
-        ];
-        
-        $tplID = $tpl[ $deal['data']['custom_49670'] ];
-        
+        foreach ($lead['custom_fields'] as $field) {
+            if ((int) $field['id'] == 235541) {
+                if ($field['values'][0]['value'] != '') {
+                    return 'ok';
+                }
+            }
+        }
+
         $data = [
-            'name' => $deal['data']['name'],
+            'name' => $lead['name'],
             'include' => [
                 'task_notes',
                 'task_subtasks',
@@ -62,17 +60,21 @@ class CreateDealProjectController extends Controller
                 'task_attachments',
                 'notes',
             ],
-            'team' => '1571928436701'
+            'team' => '882014108971315'
         ];
         
         //...
         
-        $this->curl->post("https://app.asana.com/api/1.0/projects/$tplID/duplicate", $data);
+        $res = $this->curl->post("https://app.asana.com/api/1.0/projects/$template_id/duplicate", $data);
+        
+        dd($res);
         
         $link = '';
         
         // Заносим данные в CRM
-        $this->crm->editDeal($deal['data']['id'], ['customs' => ['custom-48207' => $link]]);
+        $lead = $this->amocrm->lead;
+        $lead->addCustomField(235541, $link);
+        //$lead->apiUpdate((int) $lead_id, 'now');
         
         return 'ok';
     }
