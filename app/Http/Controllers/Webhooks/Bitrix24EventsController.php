@@ -16,7 +16,7 @@ class Bitrix24EventsController extends Controller
         $this->bitrix24 = new Curl(env('BTRIX24_URL'));
     }
 
-    public function onCrmDealUpdate(Request $request)
+    public function createDealMainResponsible(Request $request)
     {        
         $id = $request->input('id');
         
@@ -39,6 +39,7 @@ class Bitrix24EventsController extends Controller
         }
     }
     
+    // Папка  
     public function createDealFolders(Request $request)
     { 
         //if( isset($request->input('id')) ) return false;
@@ -112,5 +113,116 @@ class Bitrix24EventsController extends Controller
         
         return 'ok';
     }
+    
+    // ASANA
+    public function сreatDealProject(Request $request)
+    {        
+        
+        $deal_id = $request->input('deal_id');
+        $template_id = $request->input('template_id');
+        
+        if (!$template_id || !$deal_id) {
+            return 'error';
+        }
+        
+        $deal = $this->bitrix24->post('crm.deal.get.json', [
+            'id' => $deal_id
+        ])->result;
+        
+       // dd($deal);
+        
+        if($deal->UF_CRM_AMO_235541 != '') return 'ok';
+        
+        $description  = '';
+        
+        if($deal->UF_CRM_AMO_235561 != '') {
+            $description = $description . '
+ География работ (адрес): ' . $deal->UF_CRM_AMO_235561;            
+        }
+        
+        if($deal->UF_CRM_AMO_235561 != '') {
+            $description = $description . '
+ Информация по проекту: ' . $deal->UF_CRM_AMO_235403;            
+        }
+
+        if($deal->UF_CRM_AMO_235561 != '') {
+            $description = $description . '
+ Папка клиента: ' . $deal->UF_CRM_AMO_235511;            
+        }        
+        
+        $description = $description . '
+ ';        
+        
+        $contacts = $this->bitrix24->post('crm.deal.contact.items.get.json', [
+            'id' => $deal_id
+        ])->result;
+
+        foreach ($contacts as $contact) {
+            $res = $this->bitrix24->post('crm.contact.get.json', [
+                'id' => $contact->CONTACT_ID
+            ])->result;
+            
+            $description = $description . '
+ ' . "$res->LAST_NAME $res->NAME $res->SECOND_NAME". '
+ ';            
+            if (isset($res->PHONE)) {
+                foreach ($res->PHONE as $phone) {
+                    $description = $description . '' . $phone->VALUE . ' ';
+                }
+            }
+            
+            if (isset($res->EMAIL)) {
+                foreach ($res->EMAIL as $email) {
+                    $description = $description . '' . $email->VALUE . ' ';
+                }
+            }
+        }
+      
+        $data = [
+            'name' => $deal->TITLE,
+            'include' => [
+                'task_notes',
+                'task_subtasks',
+                'task_projects',
+                'task_assignee',
+                'task_attachments',
+                'notes',
+                //'color',
+            ],
+            'team' => '882014108971315'
+        ];
+        
+        $asana = new Curl();
+        
+        $asana->setHeader('Authorization', 'Bearer ' . env('ASANA_KEY'));
+        $asana->setHeader('Content-Type', 'application/x-www-form-urlencoded');
+        
+        $template = $asana->get("https://app.asana.com/api/1.0/projects/$template_id");
+        
+        $res = $asana->post("https://app.asana.com/api/1.0/projects/$template_id/duplicate", $data);
+        
+        
+        $gid = $res->data->new_project->gid;
+        
+        $link = 'https://app.asana.com/0/' . $gid;
+        
+        $asana->put("https://app.asana.com/api/1.0/projects/$gid", [
+            'notes' => $description,
+            'color' => $template->data->color
+        ]);
+        
+        // Заносим данные в CRM
+        $this->bitrix24->post('crm.deal.update.json', [
+            'id' => $deal_id,
+            'fields' => [
+               'UF_CRM_AMO_235541' => $link
+            ]
+        ])->result;
+        
+        return 'ok';
+    }
+    
+    
+    
 
 }

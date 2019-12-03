@@ -28,8 +28,9 @@ Route::prefix('webhook')->group(function () {
    
     //Битрикс24
     Route::prefix('bitrix24')->group(function () {
-        Route::post('create-deal-main-responsible', 'Webhooks\Bitrix24EventsController@onCrmDealUpdate');
+        Route::post('create-deal-main-responsible', 'Webhooks\Bitrix24EventsController@createDealMainResponsible');
         Route::post('create-deal-folders', 'Webhooks\Bitrix24EventsController@createDealFolders');
+        Route::post('create-deal-project', 'Webhooks\Bitrix24EventsController@сreatDealProject');
     });
 
 });
