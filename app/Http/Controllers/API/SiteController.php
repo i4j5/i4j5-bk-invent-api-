@@ -35,7 +35,19 @@ class SiteController extends Controller
         $utm_content = $request->input('utm_content');
         $url = $request->input('url');
         $comment = $request->input('comment');
-      
+        
+        $contact_phone = str_replace(['+', '(', ')', ' ', '-', '_', '*', '–'], '', $contact_phone);
+        
+        if (strlen($contact_phone) >= 11) {
+            if ($contact_phone[0] == 8) {
+                $contact_phone[0] = 7;
+            }
+        }
+
+        if (strlen($contact_phone) == 10) {
+            $contact_phone = '7' . $contact_phone;
+        }
+
         $comment =  $comment . 
             "<br>
             <b>$lead_name</b> <br>
@@ -62,7 +74,6 @@ class SiteController extends Controller
         $data = [
             'fields' => [
                 'TITLE' => $lead_name,
-               
                 'UTM_CAMPAIGN' => $utm_campaign,
                 'UTM_CONTENT' => $utm_content,
                 'UTM_MEDIUM' => $utm_medium,
@@ -74,7 +85,7 @@ class SiteController extends Controller
         ];
 
         if ($concact_id) {
-             $data['fields']['CONTACT_ID'] = $concact_id;
+            $data['fields']['CONTACT_ID'] = $concact_id;
         } else {
             $data['fields']['NAME'] = $contact_name;
             
