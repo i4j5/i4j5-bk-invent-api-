@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use \Curl\Curl;
+use Illuminate\Support\Facades\Mail;
 
 class SiteController extends Controller
 {
@@ -108,6 +109,39 @@ class SiteController extends Controller
         
         $this->curl->post('crm.lead.add.json', $data);
 
+        return 'ok';
+    }
+    
+    public function createReview(Request $request)
+    {
+        $fio = $request->input('fio');
+        $text = $request->input('text');
+        $email = $request->input('email');
+        
+        $file = $request->file('file');
+        
+        $data = [];
+        $data['fio'] = $fio;
+        $data['text'] = $text;
+        $data['email'] = $email;
+                   
+        $path =[];
+        
+        if ($file) {
+            $file->move(storage_path('app/tmp/') , $file->getClientOriginalName());
+            $path[] = storage_path('app/tmp/' . $file->getClientOriginalName());
+        }
+        
+        Mail::send('email.review', $data, function ($message) use ($path) {
+            $message->to('it@bkinvent.net')->from('support@bk-invent.ru', 'БК Инвент')->subject('Отзыв c сайта');
+            
+            $size = sizeOf($path);
+       
+            for($i=0; $i<$size; $i++){
+                $message->attach($path[$i]);
+            }
+        });
+        
         return 'ok';
     }
 }

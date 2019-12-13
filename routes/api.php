@@ -41,4 +41,10 @@ Route::prefix('site')->group(function () {
 
     // Создание заявки с сайта
     Route::post('create-lead-from-form', 'API\SiteController@createLeadFromForm');
+    
+    // Отзыв
+    Route::post('create-review', 'API\SiteController@createReview');
+    
+    // Вопрос
+    //Route::post('create-question', 'API\SiteController@createQuestion');
 });
