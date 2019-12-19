@@ -26,10 +26,10 @@ class SiteController extends Controller
     public function createLeadFromForm(Request $request)
     {
         $lead_name = $request->input('order');
-        $contact_phone = $request->input('phone');
+        $contact_phone = $request->input('phone') ? $request->input('phone') : '-';
         $contact_name = $request->input('name') ? $request->input('name') : $contact_phone;
 	
-        $contact_email = $request->input('email');
+        $contact_email = $request->input('email') ? $request->input('email') : '-';
         
         $utm_medium = $request->input('utm_medium');
         $utm_source = $request->input('utm_source');
@@ -82,7 +82,7 @@ class SiteController extends Controller
             'utm_campaign' => $utm_campaign, 
             'utm_term' => $utm_term, 
             'utm_content' => $utm_content,
-            'hash_id' => md5($visitor_id . $session_id . $hit_id),
+            'hash_id' => md5($visitor_id . $session_id),
         ]);
         
         

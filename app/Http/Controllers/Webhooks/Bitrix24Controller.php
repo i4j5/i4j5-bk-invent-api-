@@ -225,7 +225,7 @@ class Bitrix24Controller extends Controller
     
     public function complementDeal(Request $request)
     {        
-        $id = $request->input('id');
+        $id = $request->get('id');
         
         $deal = $this->bitrix24->post('crm.deal.get.json', [
             'id' => $id
@@ -235,7 +235,7 @@ class Bitrix24Controller extends Controller
         $hit_id = $deal->UF_CRM_1576677010;
         $session_id = $deal->UF_CRM_1576677025;
         
-        $hash_id = md5($visitor_id . $session_id . $hit_id);
+        $hash_id = md5($visitor_id . $session_id);
         
         $leads = Lead::where('hash_id', $hash_id)->get();
         
