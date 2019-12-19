@@ -28,9 +28,10 @@ Route::prefix('webhook')->group(function () {
    
     //Битрикс24
     Route::prefix('bitrix24')->group(function () {
-        Route::post('create-deal-main-responsible', 'Webhooks\Bitrix24EventsController@createDealMainResponsible');
-        Route::post('create-deal-folders', 'Webhooks\Bitrix24EventsController@createDealFolders');
-        Route::post('create-deal-project', 'Webhooks\Bitrix24EventsController@сreatDealProject');
+        Route::post('create-deal-main-responsible', 'Webhooks\Bitrix24Controller@createDealMainResponsible');
+        Route::post('create-deal-folders', 'Webhooks\Bitrix24Controller@createDealFolders');
+        Route::post('create-deal-project', 'Webhooks\Bitrix24Controller@сreatDealProject');
+        Route::post('complement-deal', 'Webhooks\Bitrix24Controller@complementDeal');
     });
 
 });
@@ -46,5 +47,5 @@ Route::prefix('site')->group(function () {
     Route::post('create-review', 'API\SiteController@createReview');
     
     // Вопрос
-    //Route::post('create-question', 'API\SiteController@createQuestion');
+    Route::post('create-question', 'API\SiteController@createQuestion');
 });

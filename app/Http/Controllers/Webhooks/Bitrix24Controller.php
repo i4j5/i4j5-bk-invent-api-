@@ -5,9 +5,10 @@ namespace App\Http\Controllers\Webhooks;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use \Curl\Curl;
+use App\Models\Lead;
 
 
-class Bitrix24EventsController extends Controller
+class Bitrix24Controller extends Controller
 {
     public $bitrix24;
     
@@ -222,7 +223,46 @@ class Bitrix24EventsController extends Controller
         return 'ok';
     }
     
-    
+    public function complementDeal(Request $request)
+    {        
+        $id = $request->input('id');
+        
+        $deal = $this->bitrix24->post('crm.deal.get.json', [
+            'id' => $id
+        ])->result;
+        
+        $visitor_id = $deal->UF_CRM_1576676929;
+        $hit_id = $deal->UF_CRM_1576677010;
+        $session_id = $deal->UF_CRM_1576677025;
+        
+        $hash_id = md5($visitor_id . $session_id . $hit_id);
+        
+        $leads = Lead::where('hash_id', $hash_id)->get();
+        
+        
+        $comments = ''; 
+        
+        foreach ($leads as $lead) {
+            if ($lead->deal_id == 0) {
+                $comments = $comments . '<hr>' . $lead->comment;
+                 
+                $lead->deal_id = $id;
+                $lead->save();
+            } 
+        }
+        
+        if ($comments != '') {
+            
+            $this->bitrix24->post('crm.deal.update.json', [
+                'id' => $id,
+                'fields' => [
+                   'COMMENTS' => $deal->COMMENTS . $comments
+                ]
+            ]);
+        }
+        
+        return 'ok';
+    }
     
 
 }
