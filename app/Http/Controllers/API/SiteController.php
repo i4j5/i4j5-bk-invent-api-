@@ -31,11 +31,11 @@ class SiteController extends Controller
 	
         $contact_email = $request->input('email') ? $request->input('email') : '-';
         
-        $utm_medium = $request->input('utm_medium');
-        $utm_source = $request->input('utm_source');
-        $utm_campaign = $request->input('utm_campaign');
-        $utm_term = $request->input('utm_term');
-        $utm_content = $request->input('utm_content');
+        $utm_medium = $request->input('utm_medium') ? $request->input('utm_medium') : ' ';
+        $utm_source = $request->input('utm_source') ? $request->input('utm_source') : ' ';
+        $utm_campaign = $request->input('utm_campaign')? $request->input('utm_campaign') : ' ';
+        $utm_term = $request->input('utm_term') ? $request->input('utm_term') : ' ';
+        $utm_content = $request->input('utm_content') ? $request->input('utm_content') : ' ';
         $url = $request->input('url');
         $comment = $request->input('comment');
         
