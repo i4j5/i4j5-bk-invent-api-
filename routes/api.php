@@ -49,3 +49,14 @@ Route::prefix('site')->group(function () {
     // Вопрос
     Route::post('create-question', 'API\SiteController@createQuestion');
 });
+
+
+Route::prefix('analytic')->group(function () {
+
+    Route::post('create-visit', 'API\AnalyticController@createVisit');
+    Route::post('update-trace', 'API\AnalyticController@updateTrace');
+    
+    Route::post('reservation-number', 'API\AnalyticController@reservationNumber');
+    
+    Route::post('create-call', 'API\AnalyticController@createCall');
+});
