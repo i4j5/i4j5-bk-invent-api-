@@ -57,22 +57,17 @@ class Bitrix24
         $default_data = [
             'title' => 'LEAD',
             
-            'contact' => [
-                'name' => '',
-                'phone' => '',
-                'email' => '',
-                
-                'google_client_id' => '',
-                'metrika_client_id' => '',
-            ],
+            'name' => '',
+            'phone' => '',
+            'email' => '-',
+            'google_client_id' => '',
+            'metrika_client_id' => '',
             
-            'utm' => [
-                'utm_source' => '',
-                'utm_medium' => '',
-                'utm_campaign' => '',
-                'utm_content' => '',
-                'utm_term' => '',
-            ],
+            'utm_source' => '',
+            'utm_medium' => '',
+            'utm_campaign' => '',
+            'utm_content' => '',
+            'utm_term' => '',
             
             'source' => 'OTHER',
             
@@ -85,7 +80,7 @@ class Bitrix24
         
         $data = array_merge($default_data, $params);
         
-        $contact_phone = $data['contact']['phone'];
+        $contact_phone = $data['phone'];
         
         $contact_phone = str_replace(['+', '(', ')', ' ', '-', '_', '*', '–'], '', $contact_phone);
         
@@ -111,22 +106,21 @@ class Bitrix24
         $comment = 
             "{$data['comment']} <br>
             <b> {$data['title']} </b> <br>
-            Имя: {$data['contact']['name']} <br>
+            Имя: {$data['name']} <br>
             Телефон: $contact_phone <br>
-            E-mail: {$data['contact']['email']} <br>
+            E-mail: {$data['email']} <br>
             Страница захвата: {$data['landing_page']} <br> 
-            Ключевое слово: {$data['utm']['utm_term']} <br>";
-
+            Ключевое слово: {$data['utm_term']} <br>";
 
         $arr = [
             'fields' => [
                 'TRACE' => $data['trace'],
                 'TITLE' => $data['title'],
-                'UTM_CAMPAIGN' => $data['utm']['utm_campaign'],
-                'UTM_CONTENT' => $data['utm']['utm_content'],
-                'UTM_MEDIUM' => $data['utm']['utm_medium'],
-                'UTM_SOURCE' => $data['utm']['utm_source'],
-                'UTM_TERM' => $data['utm']['utm_term'],
+                'UTM_CAMPAIGN' => $data['utm_campaign'],
+                'UTM_CONTENT' => $data['utm_content'],
+                'UTM_MEDIUM' => $data['utm_medium'],
+                'UTM_SOURCE' => $data['utm_source'],
+                'UTM_TERM' => $data['utm_term'],
                 'COMMENTS' => $comment,
                 'SOURCE_ID' => $data['source'],
                 'ASSIGNED_BY_ID' => 9
@@ -135,11 +129,13 @@ class Bitrix24
                 'REGISTER_SONET_EVENT' => 'Y'
             ]
         ];
+        
+        
 
         if ($concact_id) {
             $arr['fields']['CONTACT_ID'] = $concact_id;
         } else {
-            $arr['fields']['NAME'] = $data['contact']['name'];
+            $arr['fields']['NAME'] = $data['name'];
             
             $arr['fields']['PHONE'] = [
                 [
@@ -149,18 +145,20 @@ class Bitrix24
             ];
         }
         
-        if (preg_match("/^(?:[a-z0-9]+(?:[-_.]?[a-z0-9]+)?@[a-z0-9_.-]+(?:\.?[a-z0-9]+)?\.[a-z]{2,5})$/i", $data['contact']['email'])) {
+        if (preg_match("/^(?:[a-z0-9]+(?:[-_.]?[a-z0-9]+)?@[a-z0-9_.-]+(?:\.?[a-z0-9]+)?\.[a-z]{2,5})$/i", $data['email'])) {
             $arr['fields']['EMAIL'] = [
                 [
-                    'VALUE' => $data['contact']['email'],
+                    'VALUE' => $data['email'],
                     'VALUE_TYPE' => 'MAILING'
                 ]
             ];
         }
         
-        $this->curl->post('crm.lead.add.json', $data);
+//        $arr['fields']['TRACE'] = '{"url":"https://bk-invent.ru/","ref":"https://www.yandex.ru/clck/jsredir?from=yandex.ru;suggest;browser&text=","device":{"isMobile":false},"tags":{"ts":1579501926,"list":{},"gclid":null},"client":{"gaId":"209629315.1579004207","yaId":"1564470991512487271"},"pages":{"list":[["https://bk-invent.ru/individualnoe-proektirovanie-domov-i-zdanij?sas",1579002149,"Индивидуальное проектирование домов и зд"],["https://bk-invent.ru/soglasovannyj-proekt-na-vodu-i-kanalizaciyu",1579004407,"Согласованный проект на воду и канализац"],["https://bk-invent.ru/gazifikatsiya",1579498827,"Газификация жилых и нежилых объектов про"],["https://bk-invent.ru/?utm_source=&b24_tracker_checking_origin=https%3A%2F%2Fbkinvent.bitrix24.ru",1579501926,"ГРУППА КОМПАНИЙ «БК ИНВЕНТ»"],["https://bk-invent.ru/",1579598267,"ГРУППА КОМПАНИЙ «БК ИНВЕНТ»"]]},"gid":null,"previous":{"list":[]}}';
         
-        return '....';
+        return $this->request->post('crm.lead.add.json', $arr);
+        
+        //return '....';
     }
     
 }

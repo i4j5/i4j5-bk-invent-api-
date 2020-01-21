@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use \Curl\Curl;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Lead;
+use App\Bitrix24;
 
 class SiteController extends Controller
 {
@@ -25,25 +26,40 @@ class SiteController extends Controller
      */
     public function createLeadFromForm(Request $request)
     {
-        $lead_name = $request->input('order');
-        $contact_phone = $request->input('phone') ? $request->input('phone') : '-';
-        $contact_name = $request->input('name') ? $request->input('name') : $contact_phone;
-	
-        $contact_email = $request->input('email') ? $request->input('email') : '-';
         
-        $utm_medium = $request->input('utm_medium') ? $request->input('utm_medium') : ' ';
-        $utm_source = $request->input('utm_source') ? $request->input('utm_source') : ' ';
-        $utm_campaign = $request->input('utm_campaign')? $request->input('utm_campaign') : ' ';
-        $utm_term = $request->input('utm_term') ? $request->input('utm_term') : ' ';
-        $utm_content = $request->input('utm_content') ? $request->input('utm_content') : ' ';
-        $url = $request->input('url');
-        $comment = $request->input('comment');
+        $data = [
+            'source' => 'WEB',
+            'utm_source' => 'site'
+        ];
         
-        $site_key = $request->input('site_key');
-        $visitor_id = $request->input('visitor_id');
-        $hit_id = $request->input('hit_id');
-        $session_id = $request->input('session_id');
-        $consultant_server_url = $request->input('consultant_server_url');
+        $request->order ? $data['title'] = $request->order : false;
+        $request->comment ? $data['comment'] = $request->comment : false;
+        $request->url ? $data['landing_page'] = $request->url : false;
+        $request->referrer ? $data['referrer'] = $request->referrer : false;
+        
+        $request->trace ? $data['trace'] = $request->trace : false;
+        
+        
+        $request->phone ? $data['phone'] = $request->phone : false;
+        $request->name ? $data['name'] = $request->name : false;
+        $request->email ? $data['email'] = $request->email : false;
+        $request->google_client_id ? $data['google_client_id'] = $request->google_client_id : false;
+        $request->metrika_client_id ? $data['metrika_client_id'] = $request->metrika_client_id : false;
+        
+        $request->visit ? $data['visit'] = $request->visit : false;
+        $request->comment ? $data['comment'] = $request->comment : false;
+        
+        $request->utm_source ? $data['utm_source'] = $request->utm_source : false;
+        $request->utm_medium ? $data['utm_medium'] = $request->utm_medium : false;
+        $request->utm_campaign ? $data['utm_campaign'] = $request->utm_campaign : false;
+        $request->utm_content ? $data['utm_content'] = $request->utm_content : false;
+        $request->utm_term ? $data['utm_term'] = $request->utm_term : false;
+        
+        //dd($request->trace, $data);
+        
+        Bitrix24::getInstance()->addLead($data);
+        
+        exit;
         
         $contact_phone = str_replace(['+', '(', ')', ' ', '-', '_', '*', '–'], '', $contact_phone);
         

@@ -8,33 +8,50 @@ use \Curl\Curl;
 use App\Models\Visit;
 use App\Models\Number;
 use App\Models\Call;
+use App\Bitrix24;
 
 class AnalyticController extends Controller
 {
-//    public $b24;
 
     public function __construct()
     {
-//        $this->$b24 = new Curl(env('BTRIX24_URL'));
+        
     }
     
     public function createVisit(Request $request)
     {
-        $utm_medium = $request->input('utm_medium') ? $request->input('utm_medium') : '';
-        $utm_source = $request->input('utm_sourse') ? $request->input('utm_source') : '';
-        $utm_campaign = $request->input('utm_campaign')? $request->input('utm_campaign') : '';
-        $utm_term = $request->input('utm_term') ? $request->input('utm_term') : ' ';
-        $utm_content = $request->input('utm_content') ? $request->input('utm_content') : '';
         
-        $google_client_id  = $request->input('google_client_id');
-        $metrika_client_id = $request->input('metrika_client_id');
+        $data = [
+            'google_client_id' => '',
+            'metrika_client_id' => '',
+            
+            'utm_source' => '',
+            'utm_medium' => '',
+            'utm_campaign' => '',
+            'utm_content' => '',
+            'utm_term' => '',
+            
+            'landing_page' => '',
+            'referrer' => '',
+            'trace' => '',
+            
+            'first_visit' => 0
+        ];
         
-        $landing_page = $request->input('landing_page');
-        $referrer= $request->input('referrer');
-        $trace= $request->input('trace');
+        $request->utm_source ? $data['utm_source'] = $request->utm_source : false;
+        $request->utm_medium ? $data['utm_medium'] = $request->utm_medium : false;
+        $request->utm_campaign ? $data['utm_campaign'] = $request->utm_campaign : false;
+        $request->utm_content ? $data['utm_content'] = $request->utm_content : false;
+        $request->utm_term ? $data['utm_term'] = $request->utm_term : false;
         
+        $request->google_client_id ? $data['google_client_id'] = $request->google_client_id : false;
+        $request->metrika_client_id ? $data['metrika_client_id'] = $request->metrika_client_id : false;
         
-        $first_visit = $request->first_visit ? $request->first_visit : 0;
+        $request->landing_page ? $data['landing_page'] = $request->landing_page : false;
+        $request->referrer ? $data['referrer'] = $request->referrer : false;
+        $request->trace ? $data['trace'] = $request->trace : false;
+        
+        $request->first_visit ? $data['first_visit'] = $request->first_visit : false;
         
         
         $visit = Visit::create([
@@ -51,24 +68,27 @@ class AnalyticController extends Controller
             'trace' => $trace,
         ]);
         
-        if (!$first_visit) {
+        if ($data['first_visit'] == 0) {
             $visit->first_visit = $visit->id;
             $visit->save();
-        }
+        } 
         
-//        dd($visit->id);
-        
-        return $visit->id;
+        return [
+            'visit' => $visit->id,
+            'first_visit' => $visit->first_visit,
+        ];
     }
     
     public function updateTrace(Request $request)
     {
         $visit_id = $request->visit;
-        $trace = $request->input('trace');
+        $trace = $request->visit;
+        
+        if(!$visit_id && !$trace) return 'ok';
         
         $visit = Visit::find($visit_id);
         
-        $visit->trace = $trace;
+        $visit->trace = $visit;
         
         $visit->save();
         
@@ -79,13 +99,15 @@ class AnalyticController extends Controller
     {
         $visit_id = $request->visit;
         
+        //Проверка visit по id
+        
         $now = date('Y-m-d H:i:s', time());
         
         $number = Number::where('visit_id', $visit_id)->first();
         
         if(!$number) {
             $number = Number::where([['reservation_at', '<', $now], ['type', '=' ,1]])->first();
-        } 
+        }
         
         if($number){
             
@@ -118,7 +140,9 @@ class AnalyticController extends Controller
         $visit_id = $number->visit_id;
         
         $data = [
-            'phone' => $caller
+            'phone' => $caller,
+            'title' => 'Входящий звонок',
+            'source' => 'CALL',
         ];
         
         if ($number->type = 2) {
@@ -147,9 +171,7 @@ class AnalyticController extends Controller
             'visit_id' => $visit_id,
         ]);
         
-        //
-        // TODO Созданеие лида. 
-        //
+        Bitrix24::getInstance()->addLead($data);
         
         return 'ok';
     }
