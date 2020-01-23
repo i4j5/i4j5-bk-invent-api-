@@ -38,11 +38,11 @@ class AnalyticController extends Controller
             'first_visit' => 0
         ];
         
-        $request->utm_source ? $data['utm_source'] = $request->utm_source : false;
-        $request->utm_medium ? $data['utm_medium'] = $request->utm_medium : false;
-        $request->utm_campaign ? $data['utm_campaign'] = $request->utm_campaign : false;
-        $request->utm_content ? $data['utm_content'] = $request->utm_content : false;
-        $request->utm_term ? $data['utm_term'] = $request->utm_term : false;
+        $request->utm->utm_source ? $data['utm_source'] = $request->utm->utm_source : false;
+        $request->utm->utm_medium ? $data['utm_medium'] = $request->utm->utm_medium : false;
+        $request->utm->utm_campaign ? $data['utm_campaign'] = $request->utm->utm_campaign : false;
+        $request->utm->utm_content ? $data['utm_content'] = $request->utm->utm_content : false;
+        $request->utm->utm_term ? $data['utm_term'] = $request->utm->utm_term : false;
         
         $request->google_client_id ? $data['google_client_id'] = $request->google_client_id : false;
         $request->metrika_client_id ? $data['metrika_client_id'] = $request->metrika_client_id : false;
@@ -54,32 +54,26 @@ class AnalyticController extends Controller
         $request->first_visit ? $data['first_visit'] = $request->first_visit : false;
         
         
-        $visit = Visit::create([
-            'first_visit' => $first_visit, 
-            'google_client_id' => $google_client_id,
-            'metrika_client_id' => $metrika_client_id,
-            'landing_page' => $landing_page, 
-            'referrer' => $referrer,
-            'utm_medium' => $utm_medium, 
-            'utm_sourse' =>  $utm_source, 
-            'utm_campaign' => $utm_campaign, 
-            'utm_term' => $utm_term, 
-            'utm_content' => $utm_content,
-            'trace' => $trace,
-        ]);
+        $visit = Visit::create($data);
         
         if ($data['first_visit'] == 0) {
             $visit->first_visit = $visit->id;
             $visit->save();
         } 
         
+        // Получаем телефон
+        $phone = $this->reservationNumber($visit->id);
+        
         return [
-            'visit' => $visit->id,
-            'first_visit' => $visit->first_visit,
+            'data' => [
+                'visit' => $visit->id,
+                'first_visit' => $visit->first_visit,
+                'phone' => $phone
+            ]
         ];
     }
     
-    public function updateTrace(Request $request)
+    public function updateVisit(Request $request)
     {
         $visit_id = $request->visit;
         $trace = $request->visit;
@@ -92,25 +86,32 @@ class AnalyticController extends Controller
         
         $visit->save();
         
-        return 'ok';
+        $phone = $this->reservationNumber($visit->id);
+        
+        return [
+            'data' => [
+                'visit' => $visit->id,
+                'first_visit' => $visit->first_visit,
+                'phone' => $phone
+            ]
+        ];
     }
     
-    public function reservationNumber(Request $request)
+    private function reservationNumber($visit_id)
     {
-        $visit_id = $request->visit;
-        
-        //Проверка visit по id
+        if ($visit_id) {
+            return false;
+        }
         
         $now = date('Y-m-d H:i:s', time());
         
         $number = Number::where('visit_id', $visit_id)->first();
         
-        if(!$number) {
-            $number = Number::where([['reservation_at', '<', $now], ['type', '=' ,1]])->first();
+        if (!$number) {
+            $number = Number::where([['reservation_at', '<', $now], ['type', '=', 1]])->first();
         }
         
-        if($number){
-            
+        if ($number) {
             $reservation_at = date('Y-m-d H:i:s', time() + (15 * 60));
             
             $number->reservation_at = $reservation_at;
@@ -123,9 +124,7 @@ class AnalyticController extends Controller
             ];
         }
         
-        return [
-            'error' => ''
-        ];
+        return false;
     }
     
     public function createCall(Request $request) {
@@ -170,6 +169,9 @@ class AnalyticController extends Controller
             'callee' => $callee,
             'visit_id' => $visit_id,
         ]);
+        
+        // Отправка цели в google analytics
+        // Отправка цели в яндекс метрику
         
         Bitrix24::getInstance()->addLead($data);
         

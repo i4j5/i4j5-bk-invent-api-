@@ -54,9 +54,6 @@ Route::prefix('site')->group(function () {
 Route::prefix('analytic')->group(function () {
 
     Route::post('create-visit', 'API\AnalyticController@createVisit');
-    Route::post('update-trace', 'API\AnalyticController@updateTrace');
-    
-    Route::post('reservation-number', 'API\AnalyticController@reservationNumber');
-    
+    Route::post('update-visit', 'API\AnalyticController@updateVisit');
     Route::post('create-call', 'API\AnalyticController@createCall');
 });
