@@ -134,6 +134,8 @@ class AnalyticController extends Controller
         $caller = $request->caller_id; //номер звонящего
         $callee = $request->called_did; //номер, на который позвонили
         
+        //78631112233
+        
         $number = Number::where('number', $callee)->first();
         
         $visit_id = $number->visit_id;
