@@ -85,6 +85,11 @@ class AnalyticController extends Controller
         if (!$visit) return ['error' => ''];
         
         $visit->trace = $trace;
+
+        if (!$visit->google_client_id) 
+            $visit->google_client_id = $request->json('google_client_id');
+        if (!$visit->metrika_client_id) 
+            $visit->metrika_client_id = $request->json('metrika_client_id');
         
         $visit->save();
         
