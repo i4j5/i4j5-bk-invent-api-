@@ -20,7 +20,7 @@ class AnalyticController extends Controller
     
     public function createVisit(Request $request)
     {
-        
+
         $data = [
             'google_client_id' => '',
             'metrika_client_id' => '',
@@ -38,22 +38,22 @@ class AnalyticController extends Controller
             'first_visit' => 0
         ];
         
-        $request->utm->utm_source ? $data['utm_source'] = $request->utm->utm_source : false;
-        $request->utm->utm_medium ? $data['utm_medium'] = $request->utm->utm_medium : false;
-        $request->utm->utm_campaign ? $data['utm_campaign'] = $request->utm->utm_campaign : false;
-        $request->utm->utm_content ? $data['utm_content'] = $request->utm->utm_content : false;
-        $request->utm->utm_term ? $data['utm_term'] = $request->utm->utm_term : false;
+        $request->json('utm')['utm_source']? $data['utm_source'] = $request->json('utm')['utm_source'] : false;
+        $request->json('utm')['utm_medium']? $data['utm_medium'] = $request->json('utm')['utm_medium'] : false;
+        $request->json('utm')['utm_campaign'] ? $data['utm_campaign'] = $request->json('utm')['utm_campaign']  : false;
+        $request->json('utm')['utm_content'] ? $data['utm_content'] = $request->json('utm')['utm_content'] : false;
+        $request->json('utm')['utm_term'] ? $data['utm_term'] = $request->json('utm')['utm_term'] : false;
         
-        $request->google_client_id ? $data['google_client_id'] = $request->google_client_id : false;
-        $request->metrika_client_id ? $data['metrika_client_id'] = $request->metrika_client_id : false;
+        $request->json('google_client_id') ? $data['google_client_id'] = $request->json('google_client_id') : false;
+        $request->json('metrika_client_id') ? $data['metrika_client_id'] = $request->json('metrika_client_id') : false;
         
-        $request->landing_page ? $data['landing_page'] = $request->landing_page : false;
-        $request->referrer ? $data['referrer'] = $request->referrer : false;
-        $request->trace ? $data['trace'] = $request->trace : false;
+        $request->json('landing_page') ? $data['landing_page'] = $request->json('landing_page') : false;
+        $request->json('referrer') ? $data['referrer'] = $request->json('referrer') : false;
+        $request->json('trace') ? $data['trace'] = $request->json('trace') : false;
         
-        $request->first_visit ? $data['first_visit'] = $request->first_visit : false;
+        $request->json('first_visit') ? $data['first_visit'] = $request->json('first_visit') : false;
         
-        
+
         $visit = Visit::create($data);
         
         if ($data['first_visit'] == 0) {
@@ -75,14 +75,16 @@ class AnalyticController extends Controller
     
     public function updateVisit(Request $request)
     {
-        $visit_id = $request->visit;
-        $trace = $request->visit;
+        $visit_id = $request->json('visit');
+        $trace = $request->json('trace');
         
-        if(!$visit_id && !$trace) return 'ok';
+        //if (!$visit_id && !$trace) return ['error' => ''];
         
         $visit = Visit::find($visit_id);
+
+        if (!$visit) return ['error' => ''];
         
-        $visit->trace = $visit;
+        $visit->trace = $trace;
         
         $visit->save();
         
@@ -99,7 +101,7 @@ class AnalyticController extends Controller
     
     private function reservationNumber($visit_id)
     {
-        if ($visit_id) {
+        if (!$visit_id) {
             return false;
         }
         
@@ -110,6 +112,8 @@ class AnalyticController extends Controller
         if (!$number) {
             $number = Number::where([['reservation_at', '<', $now], ['type', '=', 1]])->first();
         }
+
+
         
         if ($number) {
             $reservation_at = date('Y-m-d H:i:s', time() + (15 * 60));

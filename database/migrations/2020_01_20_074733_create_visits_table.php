@@ -23,7 +23,7 @@ class CreateVisitsTable extends Migration
             $table->string('landing_page');
             $table->string('referrer');
             
-            $table->string('utm_sourse');
+            $table->string('utm_source');
             $table->string('utm_medium');
             $table->string('utm_campaign');
             $table->string('utm_term');

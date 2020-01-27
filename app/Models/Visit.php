@@ -13,7 +13,7 @@ class Visit extends Model
        'first_visit', 
        'google_client_id', 'metrika_client_id',
        'landing_page', 'referrer',
-       'utm_sourse', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
+       'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
        'trace'
     ];
 }
