@@ -48,6 +48,8 @@ Route::prefix('site')->group(function () {
     
     // Вопрос
     Route::post('create-question', 'API\SiteController@createQuestion');
+
+    Route::get('e', 'API\SiteController@e');
 });
 
 

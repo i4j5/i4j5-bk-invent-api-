@@ -18,6 +18,41 @@ class SiteController extends Controller
         $this->curl = new Curl(env('BTRIX24_URL'));
     }
 
+    public function e()
+    {
+        set_time_limit(0);
+
+        $ids = [];
+        $next = 0;
+
+        $run = true;
+
+        $n = 0;
+
+        while ($run) {
+            $data = $this->curl->post('crm.contact.list',['start' => $next]); //result
+
+            foreach ($data->result as $contact) {
+                $n++;
+
+                if(explode('__', $contact->LAST_NAME . ' ')[0] != $contact->ID) {
+                    
+                    //$this->curl->get("crm.contact.update.json?id={$contact->ID}&fields[LAST_NAME]={$contact->ID}__{$contact->LAST_NAME}");
+
+                    echo "$n crm.contact.update.json?id={$contact->ID}&fields[LAST_NAME]={$contact->ID}__{$contact->LAST_NAME}  <br>";
+
+                }
+            }
+
+            if (!isset($data->next)){
+                $run = false;
+            } else {
+                $next = $data->next;
+            }
+
+        }
+    }
+
     /**
      * Создание заявки с сайта
      * POST
