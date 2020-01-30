@@ -30,18 +30,29 @@ class SiteController extends Controller
         $n = 0;
 
         while ($run) {
+            sleep(1);
             $data = $this->curl->post('crm.contact.list',['start' => $next]); //result
 
-            foreach ($data->result as $contact) {
-                $n++;
+            if(isset($data->result)) {
 
-                if(explode('__', $contact->LAST_NAME . ' ')[0] != $contact->ID) {
-                    
-                    //$this->curl->get("crm.contact.update.json?id={$contact->ID}&fields[LAST_NAME]={$contact->ID}__{$contact->LAST_NAME}");
+                foreach ($data->result as $contact) {
+                    $n++;
 
-                    echo "$n crm.contact.update.json?id={$contact->ID}&fields[LAST_NAME]={$contact->ID}__{$contact->LAST_NAME}  <br>";
+                    if(explode('__', $contact->LAST_NAME . ' ')[0] != $contact->ID) {
 
+                        sleep(10);
+                        
+                        $this->curl->get("crm.contact.update.json?id={$contact->ID}&fields[LAST_NAME]={$contact->ID}__ {$contact->LAST_NAME}");
+
+                        //echo "$n crm.contact.update.json?id={$contact->ID}&fields[LAST_NAME]={$contact->ID}__ {$contact->LAST_NAME}  <br>";
+
+                    }
+
+                    // echo "$n  {$contact->ID} {$contact->LAST_NAME}  <br>";
                 }
+
+            } else {
+                dd($data);
             }
 
             if (!isset($data->next)){
