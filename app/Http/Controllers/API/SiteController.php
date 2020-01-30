@@ -132,7 +132,6 @@ class SiteController extends Controller
             'hash_id' => md5($visitor_id . $session_id),
         ]);
         
-        
         $server = $consultant_server_url . 'api/add_offline_message/';
         
         $data = [
