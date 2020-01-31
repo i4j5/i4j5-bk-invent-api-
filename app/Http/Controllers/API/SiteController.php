@@ -105,13 +105,13 @@ class SiteController extends Controller
         }
 
         $comment =  $comment . 
-            "<br>
-            <b>$lead_name</b> <br>
-            Имя: $contact_name <br>
-            Телефон: $contact_phone <br>
-            E-mail: $contact_email <br>
-            Страница захвата: $url <br> 
-            Ключевое слово: $utm_term <br>";
+            "\n
+            <b>$lead_name</b> \n
+            Имя: $contact_name \n
+            Телефон: $contact_phone \n
+            E-mail: $contact_email \n
+            Страница захвата: $url \n 
+            Ключевое слово: $utm_term \n";
 
         Lead::create([
             'deal_id' => 0, 

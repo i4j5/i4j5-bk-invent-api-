@@ -77,9 +77,11 @@ class AmoCRMController extends Controller
         $folder = $service->files->create($file);
         $deal->addCustomField(75433, "https://drive.google.com/open?id=$folder->id");
         $file->setParents([$folder->id]);
+        
         // ФОТО_АДРЕС
         $file->setName('1.2.1 ФОТО_АДРЕС');
         $folder = $service->files->create($file);
+        
         // РЕЗЮМЕ_АДРЕС
         $file->setName('1.2.2 РЕЗЮМЕ_АДРЕС');
         $folder = $service->files->create($file);
@@ -113,7 +115,6 @@ class AmoCRMController extends Controller
             }
         }
 
-
         $description  = '';
 
         foreach ($deal['custom_fields'] as $field) {
@@ -141,7 +142,6 @@ class AmoCRMController extends Controller
 
             $description = $description . '
             ';   
-
         }
 
               
@@ -180,25 +180,24 @@ class AmoCRMController extends Controller
                 'task_assignee',
                 'task_attachments',
                 'notes',
-                //'color',
             ],
             'team' => '882014108971315'
         ];
         
-        $asana = new Curl();
+        $asana = new Curl('https://app.asana.com/api/1.0/');
         
         $asana->setHeader('Authorization', 'Bearer ' . env('ASANA_KEY'));
         $asana->setHeader('Content-Type', 'application/x-www-form-urlencoded');
         
-        $template = $asana->get("https://app.asana.com/api/1.0/projects/$template_id");
+        $template = $asana->get("projects/$template_id");
         
-        $res = $asana->post("https://app.asana.com/api/1.0/projects/$template_id/duplicate", $data);
+        $res = $asana->post("projects/$template_id/duplicate", $data);
         
         $gid = $res->data->new_project->gid;
         
         $link = 'https://app.asana.com/0/' . $gid;
         
-        $asana->put("https://app.asana.com/api/1.0/projects/$gid", [
+        $asana->put("projects/$gid", [
             'notes' => $description,
             'color' => $template->data->color
         ]);
