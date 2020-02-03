@@ -21,24 +21,27 @@ class AmoCRMController extends Controller
     // Папка  
     public function createDealFolders(Request $request)
     { 
-        //if( isset($request->input('id')) ) return false;
-        
         $deal_id = $request->input('id');
+
+        if (!$deal_id) return 'error';
         
-        $deal = $this->amocrm->lead->apiList([
+        $data = $this->amocrm->lead->apiList([
             'id' => $deal_id ,
             'limit_rows' => 1,
         ])[0];
 
-        foreach ($deal['custom_fields'] as $field) {
+        foreach ($data['custom_fields'] as $field) {
             if ((int) $field['id'] == 75429) {
                 if ($field['values'][0]['value'] != '') {
                     return 'ok';
                 }
             }
         }
+
+        // dd($data);
          
-        ///////
+        $deal = $this->amocrm->lead;
+
         $client = new \Google_Client();
         $client->setAuthConfig(storage_path(env('GOOGLE_API_KEY')));
         $client->addScope(\Google_Service_Drive::DRIVE);
@@ -46,7 +49,7 @@ class AmoCRMController extends Controller
         
         $file = new \Google_Service_Drive_DriveFile([
             'parents' => ['16_u3j93RtbO-eCvpQS9Dw_OGAa3X_Bw5'],
-            'name' => $deal['name'],
+            'name' => $data['name'],
             'mimeType' => 'application/vnd.google-apps.folder'
         ]);
 
@@ -85,8 +88,9 @@ class AmoCRMController extends Controller
         // РЕЗЮМЕ_АДРЕС
         $file->setName('1.2.2 РЕЗЮМЕ_АДРЕС');
         $folder = $service->files->create($file);
+
         
-        $deal->apiAdd();
+        $deal->apiUpdate((int) $deal_id);
         
         return 'ok';
     }
@@ -144,7 +148,6 @@ class AmoCRMController extends Controller
             ';   
         }
 
-              
         
 //         $contacts = $this->bitrix24->post('crm.deal.contact.items.get.json', [
 //             'id' => $deal_id
@@ -184,26 +187,29 @@ class AmoCRMController extends Controller
             'team' => '882014108971315'
         ];
         
-        $asana = new Curl('https://app.asana.com/api/1.0/');
+        
+        $asana = new Curl();
         
         $asana->setHeader('Authorization', 'Bearer ' . env('ASANA_KEY'));
         $asana->setHeader('Content-Type', 'application/x-www-form-urlencoded');
         
-        $template = $asana->get("projects/$template_id");
+        $template = $asana->get("https://app.asana.com/api/1.0/projects/$template_id");
         
-        $res = $asana->post("projects/$template_id/duplicate", $data);
+        $res = $asana->post("https://app.asana.com/api/1.0/projects/$template_id/duplicate", $data);
         
         $gid = $res->data->new_project->gid;
         
         $link = 'https://app.asana.com/0/' . $gid;
         
-        $asana->put("projects/$gid", [
+        $a = $asana->put("https://app.asana.com/api/1.0/projects/$gid", [
             'notes' => $description,
-            'color' => $template->data->color
+            'color' => $template->data->color,
         ]);
         
         // Заносим данные в CRM
-        $deal->addCustomField(75437, $link)->apiAdd();
+        $this->amocrm->lead
+            ->addCustomField(75437, $link)
+            ->apiUpdate((int) $deal_id);
         
         return 'ok';
     }

@@ -34,6 +34,12 @@ Route::prefix('webhook')->group(function () {
         Route::post('complement-deal', 'Webhooks\Bitrix24Controller@complementDeal');
     });
 
+    //amoCRM
+    Route::prefix('amocrm')->group(function () {
+        Route::post('create-deal-folders', 'Webhooks\AmoCRMController@createDealFolders');
+        Route::post('create-deal-project', 'Webhooks\AmoCRMController@сreatDealProject');
+    });
+
 });
 
 
