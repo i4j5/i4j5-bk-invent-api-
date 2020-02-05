@@ -8,7 +8,7 @@ use \Curl\Curl;
 use App\Models\Visit;
 use App\Models\Number;
 use App\Models\Call;
-use App\Bitrix24;
+use App\AmoCRM;
 
 class AnalyticController extends Controller
 {
@@ -76,7 +76,8 @@ class AnalyticController extends Controller
     public function updateVisit(Request $request)
     {
         $visit_id = $request->json('visit');
-        $trace = $request->json('trace');
+        $trace = '';
+        $request->json('trace') ? $trace = $request->json('trace') : false;
         
         //if (!$visit_id && !$trace) return ['error' => ''];
         
@@ -118,8 +119,6 @@ class AnalyticController extends Controller
             $number = Number::where([['reservation_at', '<', $now], ['type', '=', 1]])->first();
         }
 
-
-        
         if ($number) {
             $reservation_at = date('Y-m-d H:i:s', time() + (15 * 60));
             
@@ -136,7 +135,9 @@ class AnalyticController extends Controller
         return false;
     }
     
-    public function createCall(Request $request) {
+    public function createCall(Request $request) 
+    {
+        if (isset($_GET['zd_echo'])) exit($_GET['zd_echo']);
         
         if ($request->event != 'NOTIFY_START') return 'ok';
         
@@ -152,7 +153,6 @@ class AnalyticController extends Controller
         $data = [
             'phone' => $caller,
             'title' => 'Входящий звонок',
-            'source' => 'CALL',
         ];
         
         if ($number->type = 2) {
@@ -175,7 +175,7 @@ class AnalyticController extends Controller
             ]);
         }
         
-        Visit::create([
+        Call::create([
             'caller' => $caller,
             'callee' => $callee,
             'visit_id' => $visit_id,
@@ -184,7 +184,7 @@ class AnalyticController extends Controller
         // Отправка цели в google analytics
         // Отправка цели в яндекс метрику
         
-        Bitrix24::getInstance()->addLead($data);
+        AmoCRM::getInstance()->addLead($data);
         
         return 'ok';
     }
