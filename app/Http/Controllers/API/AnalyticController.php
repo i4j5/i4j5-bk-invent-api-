@@ -139,12 +139,10 @@ class AnalyticController extends Controller
     {
         if (isset($_GET['zd_echo'])) exit($_GET['zd_echo']);
         
-        if ($request->event != 'NOTIFY_START') return 'ok';
+        if ($request->event != 'NOTIFY_START') return '!NOTIFY_START';
         
         $caller = $request->caller_id; //номер звонящего
         $callee = $request->called_did; //номер, на который позвонили
-        
-        //78631112233
         
         $number = Number::where('number', $callee)->first();
         
@@ -154,11 +152,11 @@ class AnalyticController extends Controller
             'phone' => $caller,
             'title' => 'Входящий звонок',
         ];
+      
         
-        if ($number->type = 2) {
+        if ($number->type == 2) {
             $data['utm_sourse'] = $number->sourse;
         } else {
-            
             $visit = Visit::find($visit_id);
             
             $data = array_merge($data, [
@@ -176,12 +174,13 @@ class AnalyticController extends Controller
         }
         
         Call::create([
-            'caller' => $caller,
-            'callee' => $callee,
-            'visit_id' => $visit_id,
+           'caller' => $caller,
+           'callee' => $callee,
+           'visit_id' => $visit_id,
         ]);
         
         // Отправка цели в google analytics
+
         // Отправка цели в яндекс метрику
         
         AmoCRM::getInstance()->addLead($data);

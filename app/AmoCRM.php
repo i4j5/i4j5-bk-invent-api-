@@ -3,7 +3,7 @@
 namespace App;
 
 use \Curl\Curl;
-use Dotzero\LaravelAmoCrm\AmoCrmManager;
+use \Dotzero\LaravelAmoCrm\AmoCrmManager;
 use App\Phone;
 
 class AmoCRM 
@@ -11,9 +11,9 @@ class AmoCRM
     private $amocrm;
     protected static $_instance;
 
-    public function __construct(AmoCrmManager $amocrm)
+    public function __construct()
     {
-        $this->amocrm = $amocrm;
+        $this->amocrm = \Dotzero\LaravelAmoCrm\Facades\AmoCrm::getClient();
         // $this->request = new Curl('https://' . env('AMO_DOMAIN') . '.amocrm.ru/api/v2/');
 
         // $this->request->setOpt(CURLOPT_RETURNTRANSFER, TRUE);
