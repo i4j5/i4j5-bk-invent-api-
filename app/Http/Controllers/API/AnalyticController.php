@@ -145,8 +145,11 @@ class AnalyticController extends Controller
         $callee = $request->called_did; //номер, на который позвонили
         
         $number = Number::where('number', $callee)->first();
+        // Проверка сесии
         
         $visit_id = $number->visit_id;
+
+        //dd($number);
         
         $data = [
             'phone' => $caller,
@@ -178,14 +181,79 @@ class AnalyticController extends Controller
            'callee' => $callee,
            'visit_id' => $visit_id,
         ]);
-        
-        // Отправка цели в google analytics
 
         // Отправка цели в яндекс метрику
+
+       // dd( $data);
+        
         
         AmoCRM::getInstance()->addLead($data);
+
+        return $this->googleAalytics([
+            'client_id' => $data['google_client_id'],
+            'event-сategory' => 'CoMagic',
+            'event-action' => 'calls',
+            // 'utm_medium' => $data['utm_medium'], 
+            // 'utm_sourse' =>  $data['utm_sourse'], 
+            // 'utm_campaign' => $data['utm_campaign'], 
+            // 'utm_term' => $data['utm_term'], 
+            // 'utm_content' => $data['utm_content'],
+            // 'price' => 111
+        ]);
+    }
+
+    private function googleAalytics($params)
+    {
+
+        if (!isset($params['client_id']) || !$params['client_id']) return 'error';
+
+        $default_data = [
+            'v' => '1',
+            't' => 'event',
+            'ni' => '1',
+            'tds' => 'api',
+            'ua' => 'UA-124050216-1',
+            'ec' => '',
+            'ea' => '',
+            'z' => '',
+            'cid' => '',
+            'cd4' => '',
+        ];
+
+        $price = 0;
+
+        $utm = [];
+        // $params['utm_sourse'] ? $utm['cs'] = $params['utm_sourse']: false; //utm_sourse
+        // $params['utm_medium']? $utm['cm'] = $params['utm_medium']: false; //utm_medium
+        // $params['utm_campaign'] ? $utm['cn'] = $params['utm_campaign']: false; //utm_campaign
+        // $params['utm_content'] ? $utm['cc'] = $params['utm_content']: false; //utm_content
+        // $params['utm_term'] ? $utm['ck'] = $params['ckutm_term']: false; //utm_term
+
+        isset($params['price']) ? $price = $params['price']: false;
+
+        $data = array_merge($default_data, $utm, [
+            'cid' => $params['client_id'],
+            'cd4' => $params['client_id'],
+            'ec' => $params['event-сategory'],
+            'ea' => $params['event-action'],
+        ]);
+
+
+        // $z = $data['cid'] . $data['ec'] . $data['ea'] . $price;
+        // foreach ($utm as $key => $value) {
+        //     $z = $z . $value;
+        // }
+
+        $data['z'] = md5($data['cid'] . $data['ec'] . $data['ea'] . $price);
+
+        if ($price) $data['cm3'] = $price;
+
+        $curl = new Curl();
+        $curl->get('http://google-analytics.com/collect', $data);
         
-        return 'ok';
+        return $data;
     }
 
 }
+
+
