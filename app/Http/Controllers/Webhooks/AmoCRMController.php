@@ -126,53 +126,63 @@ class AmoCRMController extends Controller
             if ((int) $field['id'] == 75401) {
                 if ($field['values'][0]['value'] != '') {
                     $description = $description . '
- География работ (адрес): ' . $field['values'][0]['value'];
+';
+                    $description = $description . 'География работ (адрес): ' . $field['values'][0]['value'];
                 }
             }
 
             if ((int) $field['id'] == 75417) {
                 if ($field['values'][0]['value'] != '') {
                     $description = $description . '
- Информация по проекту: ' . $field['values'][0]['value'];
+';
+                    $description = $description . 'Информация по проекту: ' . $field['values'][0]['value'];
                 }
             }
 
             if ((int) $field['id'] == 75429) {
                 if ($field['values'][0]['value'] != '') {
                     $description = $description . '
- Папка клиента: ' . $field['values'][0]['value'];
+';
+                    $description = $description . 'Папка клиента: ' . $field['values'][0]['value'];
+                }
+            }
+        }
+        
+
+        if(isset($deal['main_contact_id'])) {
+
+            $contact = $this->amocrm->contact->apiList([
+                'id' => $deal['main_contact_id'],
+                'limit_rows' => 1,
+                'type' => 'contact' 
+            ])[0];
+
+            $description = $description . '
+';
+
+            $description = $description . $contact['name'];
+
+            foreach ( $contact['custom_fields'] as $field )
+            {
+                if (isset($field['code']) && $field['code'] == 'PHONE') {
+                    foreach ( $field['values'] as $item )
+                    {
+
+                        $description = $description . ' ' . $item['value'] . ' ';
+                    }  
+                }
+
+                if (isset($field['code']) && $field['code'] == 'EMAIL') {
+                    foreach ( $field['values'] as $item )
+                    {
+
+                        $description = $description . ' ' . $item['value'] . ' ';
+                    }  
                 }
             }
 
-            $description = $description . '
-            ';   
         }
 
-        
-//         $contacts = $this->bitrix24->post('crm.deal.contact.items.get.json', [
-//             'id' => $deal_id
-//         ])->result;
-
-//         foreach ($contacts as $contact) {
-//             $res = $this->bitrix24->post('crm.contact.get.json', [
-//                 'id' => $contact->CONTACT_ID
-//             ])->result;
-            
-//             $description = $description . '
-//  ' . "$res->LAST_NAME $res->NAME $res->SECOND_NAME". '
-//  ';            
-//             if (isset($res->PHONE)) {
-//                 foreach ($res->PHONE as $phone) {
-//                     $description = $description . '' . $phone->VALUE . ' ';
-//                 }
-//             }
-            
-//             if (isset($res->EMAIL)) {
-//                 foreach ($res->EMAIL as $email) {
-//                     $description = $description . '' . $email->VALUE . ' ';
-//                 }
-//             }
-//         }
       
         $data = [
             'name' => $deal['name'],

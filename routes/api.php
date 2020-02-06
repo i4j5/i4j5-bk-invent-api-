@@ -40,6 +40,8 @@ Route::prefix('webhook')->group(function () {
         Route::post('create-deal-project', 'Webhooks\AmoCRMController@сreatDealProject');
     });
 
+    Route::get('find-duplicates', 'Webhooks\FindDuplicatesController@handle');
+
 });
 
 
