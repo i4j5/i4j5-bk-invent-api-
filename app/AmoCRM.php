@@ -109,6 +109,7 @@ class AmoCRM
         $lead->addCustomField(75469, $data['metrika_client_id']);
         $lead->addCustomField(75451, $data['landing_page']);
         $lead->addCustomField(75465, $data['referrer']);
+        $lead->addCustomField(173485, $data['visit']);
 
         $note = $this->amocrm->note;
         $note['element_type'] = \AmoCRM\Models\Note::TYPE_CONTACT;
