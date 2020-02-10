@@ -9,6 +9,7 @@ use App\Models\Visit;
 use App\Models\Number;
 use App\Models\Call;
 use App\AmoCRM;
+use Irazasyed\LaravelGAMP\Facades\GAMP;
 
 class AnalyticController extends Controller
 {
@@ -38,8 +39,8 @@ class AnalyticController extends Controller
             'first_visit' => 0
         ];
         
-        $request->json('utm')['utm_source']? $data['utm_source'] = $request->json('utm')['utm_source'] : false;
-        $request->json('utm')['utm_medium']? $data['utm_medium'] = $request->json('utm')['utm_medium'] : false;
+        $request->json('utm')['utm_source'] ? $data['utm_source'] = $request->json('utm')['utm_source'] : false;
+        $request->json('utm')['utm_medium'] ? $data['utm_medium'] = $request->json('utm')['utm_medium'] : false;
         $request->json('utm')['utm_campaign'] ? $data['utm_campaign'] = $request->json('utm')['utm_campaign']  : false;
         $request->json('utm')['utm_content'] ? $data['utm_content'] = $request->json('utm')['utm_content'] : false;
         $request->json('utm')['utm_term'] ? $data['utm_term'] = $request->json('utm')['utm_term'] : false;
@@ -145,11 +146,10 @@ class AnalyticController extends Controller
         $callee = $request->called_did; //номер, на который позвонили
         
         $number = Number::where('number', $callee)->first();
-        // Проверка сесии
+        
+        // TODO Проверка сесии
         
         $visit_id = $number->visit_id;
-
-        //dd($number);
         
         $data = [
             'phone' => $caller,
@@ -186,7 +186,6 @@ class AnalyticController extends Controller
 
        // dd( $data);
         
-        
         AmoCRM::getInstance()->addLead($data);
 
         return $this->googleAalytics([
@@ -211,8 +210,8 @@ class AnalyticController extends Controller
             'v' => '1',
             't' => 'event',
             'ni' => '1',
-            'tds' => 'api',
-            'ua' => 'UA-124050216-1',
+            'ds' => 'api',
+            'tid' => 'UA-124050216-1',
             'ec' => '',
             'ea' => '',
             'z' => '',
@@ -249,7 +248,7 @@ class AnalyticController extends Controller
         if ($price) $data['cm3'] = $price;
 
         $curl = new Curl();
-        $curl->get('http://google-analytics.com/collect', $data);
+        $curl->get('https://google-analytics.com/collect', $data);
         
         return $data;
     }
