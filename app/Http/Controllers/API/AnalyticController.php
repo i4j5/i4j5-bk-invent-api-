@@ -173,6 +173,7 @@ class AnalyticController extends Controller
                 'utm_term' => $visit->utm_term, 
                 'utm_content' => $visit->utm_content,
                 'trace' => $visit->trace,
+                'visit' => $visit_id,
             ]);
         }
         
