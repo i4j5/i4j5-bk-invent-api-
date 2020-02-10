@@ -35,6 +35,7 @@ class AnalyticController extends Controller
             'landing_page' => '',
             'referrer' => '',
             'trace' => '',
+            'roistat' => '',
             
             'first_visit' => 0
         ];
@@ -51,6 +52,8 @@ class AnalyticController extends Controller
         $request->json('landing_page') ? $data['landing_page'] = $request->json('landing_page') : false;
         $request->json('referrer') ? $data['referrer'] = $request->json('referrer') : false;
         $request->json('trace') ? $data['trace'] = $request->json('trace') : false;
+
+        $request->json('roistat') ? $data['roistat'] = $request->json('roistat') : false;
         
         $request->json('first_visit') ? $data['first_visit'] = $request->json('first_visit') : false;
         
@@ -78,7 +81,10 @@ class AnalyticController extends Controller
     {
         $visit_id = $request->json('visit');
         $trace = '';
+        $roistat = '';
+
         $request->json('trace') ? $trace = $request->json('trace') : false;
+        $request->json('roistat') ? $roistat = $request->json('roistat') : false;
         
         //if (!$visit_id && !$trace) return ['error' => ''];
         
@@ -87,6 +93,11 @@ class AnalyticController extends Controller
         if (!$visit) return ['error' => ''];
         
         $visit->trace = $trace;
+        
+        if ($roistat) {
+            $visit->roistat = $roistat;
+        }
+        
 
         if (!$visit->google_client_id) 
             $visit->google_client_id = $request->json('google_client_id');
@@ -174,6 +185,7 @@ class AnalyticController extends Controller
                 'utm_content' => $visit->utm_content,
                 'trace' => $visit->trace,
                 'visit' => $visit_id,
+                'roistat' => $visit->roistat,
             ]);
         }
         
@@ -191,8 +203,8 @@ class AnalyticController extends Controller
 
         return $this->googleAalytics([
             'client_id' => $data['google_client_id'],
-            'event-сategory' => 'CoMagic',
-            'event-action' => 'calls',
+            'event-сategory' => 'call',
+            'event-action' => 'tracking',
             // 'utm_medium' => $data['utm_medium'], 
             // 'utm_sourse' =>  $data['utm_sourse'], 
             // 'utm_campaign' => $data['utm_campaign'], 

@@ -77,6 +77,7 @@ class AmoCRM
             'tags'=> [],
             'comment' => '',
             'visit' => '',
+            'roistat' => '',
         ];
 
         $data = array_merge($default_data, $params);
@@ -110,6 +111,7 @@ class AmoCRM
         $lead->addCustomField(75451, $data['landing_page']);
         $lead->addCustomField(75465, $data['referrer']);
         $lead->addCustomField(173485, $data['visit']);
+        $lead->addCustomField(75463, $data['roistat']);
 
         $note = $this->amocrm->note;
         $note['element_type'] = \AmoCRM\Models\Note::TYPE_CONTACT;

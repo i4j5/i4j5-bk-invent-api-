@@ -14,6 +14,7 @@ class Visit extends Model
        'google_client_id', 'metrika_client_id',
        'landing_page', 'referrer',
        'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
-       'trace'
+       'trace',
+       'roistat'
     ];
 }

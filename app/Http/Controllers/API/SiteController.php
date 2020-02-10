@@ -55,6 +55,7 @@ class SiteController extends Controller
         $request->referrer ? $data['referrer'] = $request->referrer : false;
         
         $request->visit ? $data['visit'] = $request->visit : false;
+        $request->roistat ? $data['roistat'] = $request->roistat : false;
         
         $request->phone ? $data['phone'] =  $this->phone->fix($request->phone)['phone'] : false;
         $request->name ? $data['name'] = $request->name : false;
