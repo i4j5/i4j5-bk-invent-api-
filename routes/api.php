@@ -38,6 +38,7 @@ Route::prefix('webhook')->group(function () {
     Route::prefix('amocrm')->group(function () {
         Route::post('create-deal-folders', 'Webhooks\AmoCRMController@createDealFolders');
         Route::post('create-deal-project', 'Webhooks\AmoCRMController@сreatDealProject');
+        Route::post('raw-lead', 'Webhooks\AmoCRMController@rawLead');
     });
 
     Route::get('find-duplicates', 'Webhooks\FindDuplicatesController@handle');

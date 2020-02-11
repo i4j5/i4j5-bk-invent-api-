@@ -172,21 +172,23 @@ class AnalyticController extends Controller
             $data['utm_sourse'] = $number->sourse;
         } else {
             $visit = Visit::find($visit_id);
-            
-            $data = array_merge($data, [
-                'google_client_id' => $visit->google_client_id,
-                'metrika_client_id' => $visit->metrika_client_id,
-                'landing_page' => $visit->landing_page, 
-                'referrer' => $visit->referrer,
-                'utm_medium' => $visit->utm_medium, 
-                'utm_sourse' =>  $visit->utm_source, 
-                'utm_campaign' => $visit->utm_campaign, 
-                'utm_term' => $visit->utm_term, 
-                'utm_content' => $visit->utm_content,
-                'trace' => $visit->trace,
-                'visit' => $visit_id,
-                'roistat' => $visit->roistat,
-            ]);
+
+            if ($visit) {
+                $data = array_merge($data, [
+                    'google_client_id' => $visit->google_client_id,
+                    'metrika_client_id' => $visit->metrika_client_id,
+                    'landing_page' => $visit->landing_page, 
+                    'referrer' => $visit->referrer,
+                    'utm_medium' => $visit->utm_medium, 
+                    'utm_sourse' =>  $visit->utm_source, 
+                    'utm_campaign' => $visit->utm_campaign, 
+                    'utm_term' => $visit->utm_term, 
+                    'utm_content' => $visit->utm_content,
+                    'trace' => $visit->trace,
+                    'visit' => $visit_id,
+                    'roistat' => $visit->roistat,
+                ]);
+            }
         }
         
         Call::create([
@@ -195,23 +197,23 @@ class AnalyticController extends Controller
            'visit_id' => $visit_id,
         ]);
 
-        // Отправка цели в яндекс метрику
-
-       // dd( $data);
-        
         AmoCRM::getInstance()->addLead($data);
 
-        return $this->googleAalytics([
-            'client_id' => $data['google_client_id'],
-            'event-сategory' => 'call',
-            'event-action' => 'tracking',
-            // 'utm_medium' => $data['utm_medium'], 
-            // 'utm_sourse' =>  $data['utm_sourse'], 
-            // 'utm_campaign' => $data['utm_campaign'], 
-            // 'utm_term' => $data['utm_term'], 
-            // 'utm_content' => $data['utm_content'],
-            // 'price' => 111
-        ]);
+        return 'ok';
+
+         // Отправка цели в яндекс метрику
+
+        // return $this->googleAalytics([
+        //     'client_id' => $data['google_client_id'],
+        //     'event-сategory' => 'call',
+        //     'event-action' => 'tracking',
+        //     // 'utm_medium' => $data['utm_medium'], 
+        //     // 'utm_sourse' =>  $data['utm_sourse'], 
+        //     // 'utm_campaign' => $data['utm_campaign'], 
+        //     // 'utm_term' => $data['utm_term'], 
+        //     // 'utm_content' => $data['utm_content'],
+        //     // 'price' => 111
+        // ]);
     }
 
     private function googleAalytics($params)

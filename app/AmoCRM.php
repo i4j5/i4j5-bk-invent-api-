@@ -57,6 +57,29 @@ class AmoCRM
         return $res;
     }
 
+    public function addContact($params)
+    {
+        $default_data = [
+            'name' => '',
+            'phone' => '',
+            'email' => '',
+        ];
+
+        $data = array_merge($default_data, $params);
+
+        $contact = $this->amocrm->contact;
+        $contact['name'] = $data['name'];
+        $contact->addCustomField('75087', [
+            [$data['phone'], 'MOB'],
+        ]);
+        $contact->addCustomField('75089', [
+            [$data['email'], 'WORK'],
+        ]);
+
+        return $contact->apiAdd();
+
+    }
+
     public function addLead($params)
     {
         $default_data = [
@@ -188,7 +211,7 @@ class AmoCRM
             // Добавление неразобранной заявки с типом FORMS
             $unsortedId = $unsorted->apiAddForms();
         } else {
-            if(isset($contact['responsible_user_id'])) {
+            if (isset($contact['responsible_user_id'])) {
                 $lead['responsible_user_id'] = $contact['responsible_user_id'];
             }
 
