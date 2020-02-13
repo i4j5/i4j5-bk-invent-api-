@@ -20,8 +20,8 @@ class CreateVisitsTable extends Migration
             $table->string('google_client_id');
             $table->string('metrika_client_id');
             
-            $table->string('landing_page');
-            $table->string('referrer');
+            $table->text('landing_page');
+            $table->text('referrer');
             
             $table->string('utm_source');
             $table->string('utm_medium');
