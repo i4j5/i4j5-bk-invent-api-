@@ -183,7 +183,6 @@ class AmoCRMController extends Controller
 
         }
 
-      
         $data = [
             'name' => $deal['name'],
             'include' => [
@@ -308,15 +307,28 @@ class AmoCRMController extends Controller
             $lead['tags'] = $tags;
             $lead->apiUpdate((int) $lead_id, 'now');
             return 'Дубль - ' . $lead_id;
-        }e
+        }
 
 
        //$contact->addCustomField('95354', $dataPhones);
        //$contact->apiUpdate((int) $contact_id, 'now');
        
-       return 'ok' ;
+       return 'ok';
     }
 
+    public function unsorted(Request $request) {
 
+        if (!$request->phone) return ['error' => ''];
 
+        $res = \App\AmoCRM::getInstance()->searchConcat($request->phone);
+
+        if ($res) {
+            return [
+                'data' => $res
+            ];
+        }
+
+        return ['error' => ''];
+
+    }
 }
