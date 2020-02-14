@@ -171,6 +171,7 @@ class AnalyticController extends Controller
         
         if ($number->type == 2) {
             $data['utm_sourse'] = $number->sourse;
+            $data['roistat'] = $number->roistat;
         } else {
             $visit = Visit::find($visit_id);
 

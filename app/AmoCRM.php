@@ -240,7 +240,7 @@ class AmoCRM
                 $task['element_id'] = $lead_id;
                 $task['element_type'] = 2;
                 $task['task_type'] = 1;
-                $task['text'] = "@A Связаться с клиентом.";
+                $task['text'] = "@A Обработать заявку";
                 $task['responsible_user_id'] = $contact['responsible_user_id'];
                 $task['complete_till'] = '+20 minutes';
                 $task->apiAdd();
