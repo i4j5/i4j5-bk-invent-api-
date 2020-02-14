@@ -165,6 +165,7 @@ class AnalyticController extends Controller
         $data = [
             'phone' => $caller,
             'title' => 'Входящий звонок',
+            'sudo' => true,
         ];
       
         

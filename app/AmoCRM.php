@@ -76,7 +76,11 @@ class AmoCRM
             [$data['email'], 'WORK'],
         ]);
 
-        return $contact->apiAdd();
+        $id = $contact->apiAdd();
+
+        return [
+            'id' => $id
+        ];
 
     }
 
@@ -101,6 +105,7 @@ class AmoCRM
             'comment' => '',
             'visit' => '',
             'roistat' => '',
+            'sudo' => false,
         ];
 
         $data = array_merge($default_data, $params);
@@ -154,6 +159,14 @@ class AmoCRM
         ";
 
         $note['text'] = $data['comment'];
+
+        if(!$contact && $data['sudo']) {
+            $contact = $this->addContact([
+                'name' => $data['name'],
+                'phone' => $data['phone'],
+                'email' => $data['email'],
+            ]);
+        }
 
         if (!$contact) {
             $lead['notes'] = $note;
@@ -221,15 +234,17 @@ class AmoCRM
             $note['element_id'] = $contact['id'];
             $note->apiAdd();
 
-            // Добавить задачу
-            $task = $this->amocrm->task;
-            $task['element_id'] = $lead_id;
-            $task['element_type'] = 2;
-            $task['task_type'] = 1;
-            $task['text'] = "@A Связаться с клиентом.";
-            $task['responsible_user_id'] = $contact['responsible_user_id'];
-            $task['complete_till'] = '+20 minutes';
-            $task->apiAdd();
+            if (isset($contact['responsible_user_id'])) {
+                // Добавить задачу
+                $task = $this->amocrm->task;
+                $task['element_id'] = $lead_id;
+                $task['element_type'] = 2;
+                $task['task_type'] = 1;
+                $task['text'] = "@A Связаться с клиентом.";
+                $task['responsible_user_id'] = $contact['responsible_user_id'];
+                $task['complete_till'] = '+20 minutes';
+                $task->apiAdd();
+            }
 
             $link = $this->amocrm->links;
             $link['from'] = 'leads';
