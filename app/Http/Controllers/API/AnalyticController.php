@@ -170,7 +170,7 @@ class AnalyticController extends Controller
       
         
         if ($number->type == 2) {
-            $data['utm_sourse'] = $number->sourse;
+            $data['utm_source'] = $number->sourse;
             $data['roistat'] = $number->roistat;
         } else {
             $visit = Visit::find($visit_id);
@@ -182,7 +182,7 @@ class AnalyticController extends Controller
                     'landing_page' => $visit->landing_page, 
                     'referrer' => $visit->referrer,
                     'utm_medium' => $visit->utm_medium, 
-                    'utm_sourse' =>  $visit->utm_source, 
+                    'utm_source' =>  $visit->utm_source, 
                     'utm_campaign' => $visit->utm_campaign, 
                     'utm_term' => $visit->utm_term, 
                     'utm_content' => $visit->utm_content,
