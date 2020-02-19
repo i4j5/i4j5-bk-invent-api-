@@ -168,9 +168,8 @@ class AnalyticController extends Controller
             'sudo' => true,
         ];
       
-        
         if ($number->type == 2) {
-            $data['utm_source'] = $number->sourse;
+            $data['utm_source'] = $number->source;
             $data['roistat'] = $number->roistat;
         } else {
             $visit = Visit::find($visit_id);
