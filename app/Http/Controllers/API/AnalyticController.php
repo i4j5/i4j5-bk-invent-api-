@@ -164,13 +164,14 @@ class AnalyticController extends Controller
         
         $data = [
             'phone' => $caller,
-            'title' => 'Входящий звонок',
+            'title' => "Новая сделка по звонку с $caller",
             'sudo' => true,
         ];
       
         if ($number->type == 2) {
             $data['utm_source'] = $number->source;
             $data['roistat'] = $number->roistat;
+            $data['tags'] = [$number->roistat];
         } else {
             $visit = Visit::find($visit_id);
 
@@ -188,6 +189,7 @@ class AnalyticController extends Controller
                     'trace' => $visit->trace,
                     'visit' => $visit_id,
                     'roistat' => $visit->roistat,
+                    'tags' => ['Звонок с сайта'],
                 ]);
             }
         }

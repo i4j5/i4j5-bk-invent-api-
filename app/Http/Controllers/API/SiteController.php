@@ -47,6 +47,7 @@ class SiteController extends Controller
             'trace' => '',
             'comment' => '',
             'visit' => '',
+            'tags' => ['Заявка с сайта'],
         ];
         
         $request->order ? $data['title'] = $request->order : false;
