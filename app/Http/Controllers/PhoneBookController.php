@@ -14,7 +14,7 @@ class PhoneBookController extends Controller
 
     public function __construct(AmoCrmManager $amocrm)
     {
-        $this->middleware('auth');
+
         $this->amocrm = $amocrm;
     }
 
@@ -47,7 +47,22 @@ class PhoneBookController extends Controller
         return view('phonebook/main')->with('contacts', $contacts)->with('search', $search);
     }
 
+    public function xml()
+    {
+        $this->getContacts();
+        
+        $contacts = AmoContact::all();
+        
+        return view('phonebook.xml')->with('contacts', $contacts);
+    }
+
     public function update()
+    {
+        $this->getContacts();
+        return redirect()->to('phonebook');
+    }
+
+    private function getContacts() 
     {
         $data = [];
         $run = true;
@@ -139,8 +154,6 @@ class PhoneBookController extends Controller
             $contact->values()->saveMany($_values);
             
         }
-
-        return redirect()->to('phonebook');
     }
 
 }

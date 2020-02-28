@@ -21,6 +21,8 @@ Auth::routes(['register' => false]);
 Route::get('login', ['as' => 'login', 'uses' => 'Auth\LoginController@redirectToProvider']);
 Route::get('login/google/callback', 'Auth\LoginController@handleProviderCallback')->name('login.google.callback');
 
+Route::get('/phonebook/xml', 'PhoneBookController@xml')->name('phonebook.xml');
+
 Route::group(['middleware' => 'auth'], function(){
 
     Route::get('/home', 'HomeController@index')->name('home');
@@ -28,6 +30,9 @@ Route::group(['middleware' => 'auth'], function(){
     Route::get('/phonebook', 'PhoneBookController@index')->name('phonebook');
     Route::get('/phonebook/update', 'PhoneBookController@update')->name('phonebook.update');
     Route::post('/phonebook', 'PhoneBookController@index')->name('phonebook.search');
+
+   
+    
 
     app(\App\PageRoutes::class)->routes();
 

@@ -63,7 +63,6 @@ Route::prefix('site')->group(function () {
     Route::get('e', 'API\SiteController@e');
 });
 
-
 Route::prefix('analytic')->group(function () {
 
     Route::post('create-visit', 'API\AnalyticController@createVisit');
