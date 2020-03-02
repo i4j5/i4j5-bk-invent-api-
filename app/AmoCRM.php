@@ -224,34 +224,42 @@ class AmoCRM
             // Добавление неразобранной заявки с типом FORMS
             $unsortedId = $unsorted->apiAddForms();
         } else {
-            if (isset($contact['responsible_user_id'])) {
-                $lead['responsible_user_id'] = $contact['responsible_user_id'];
+
+            if (isset($contact['linked_leads_id']) && $data['sudo'] && count($contact['linked_leads_id']) >= 1) {
+
+                // ? 
+                
+            } else {
+                if (isset($contact['responsible_user_id'])) {
+                    $lead['responsible_user_id'] = $contact['responsible_user_id'];
+                }
+    
+                $lead_id = $lead->apiAdd();
+    
+                //Добавить коментарий
+                $note['element_id'] = $contact['id'];
+                $note->apiAdd();
+    
+                if (isset($contact['responsible_user_id'])) {
+                    // Добавить задачу
+                    $task = $this->amocrm->task;
+                    $task['element_id'] = $lead_id;
+                    $task['element_type'] = 2;
+                    $task['task_type'] = 1;
+                    $task['text'] = "@A Обработать заявку";
+                    $task['responsible_user_id'] = $contact['responsible_user_id'];
+                    $task['complete_till'] = '+20 minutes';
+                    $task->apiAdd();
+                }
+    
+                $link = $this->amocrm->links;
+                $link['from'] = 'leads';
+                $link['from_id'] = $lead_id;
+                $link['to'] = 'contacts';
+                $link['to_id'] = $contact['id'];
+                $link->apiLink();
             }
-
-            $lead_id = $lead->apiAdd();
-
-            //Добавить коментарий
-            $note['element_id'] = $contact['id'];
-            $note->apiAdd();
-
-            if (isset($contact['responsible_user_id'])) {
-                // Добавить задачу
-                $task = $this->amocrm->task;
-                $task['element_id'] = $lead_id;
-                $task['element_type'] = 2;
-                $task['task_type'] = 1;
-                $task['text'] = "@A Обработать заявку";
-                $task['responsible_user_id'] = $contact['responsible_user_id'];
-                $task['complete_till'] = '+20 minutes';
-                $task->apiAdd();
-            }
-
-            $link = $this->amocrm->links;
-            $link['from'] = 'leads';
-            $link['from_id'] = $lead_id;
-            $link['to'] = 'contacts';
-            $link['to_id'] = $contact['id'];
-            $link->apiLink();
+ 
         }
 
         //return $lead_id;
