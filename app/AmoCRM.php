@@ -225,11 +225,35 @@ class AmoCRM
             $unsortedId = $unsorted->apiAddForms();
         } else {
 
+            $lead_create = true;
+
             if (isset($contact['linked_leads_id']) && $data['sudo'] && count($contact['linked_leads_id']) >= 1) {
 
-                // ? 
+                //$lead_create = false;
+                $status = [];
+
+                foreach ( $contact['linked_leads_id'] as $id )
+                {
+                    $lead_data = $this->amocrm->lead->apiList([
+                        'id' => $id,
+                        'limit_rows' => 1,
+                    ])[0];
+
+                    $status[] = $lead_data['status_id'];
+                }
+
+                foreach ( $status as $key => $value )
+                {
+                    if ($value != 143) {
+                        $lead_create = false;
+                        break(1);
+                    }
+                }
                 
-            } else {
+            }
+
+            if ($lead_create) {
+
                 if (isset($contact['responsible_user_id'])) {
                     $lead['responsible_user_id'] = $contact['responsible_user_id'];
                 }
