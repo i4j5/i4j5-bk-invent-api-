@@ -69,7 +69,7 @@ class PhoneBookController extends Controller
         for($limit_offset = 0; $run; $limit_offset++) 
         {
             $res = $this->amocrm->contact->apiList([
-                'id' => '9524841',
+                //'id' => '9524841',
                 'limit_rows' => 500,
                 'limit_offset' => $limit_offset * 500,
                 'type' => 'all'
@@ -80,9 +80,9 @@ class PhoneBookController extends Controller
             if (count($res) < 500) $run = false;
         }
 
-        $items = [];
+        //dd($data);
 
-        dd($data);
+        $items = [];
 
         foreach ( $data as $contact )
         {
@@ -133,6 +133,8 @@ class PhoneBookController extends Controller
         
         AmoContact::truncate();
         AmoContactValue::truncate();
+
+        //dd($items);
 
         foreach ($items as $item) {
 
