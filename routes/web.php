@@ -22,13 +22,13 @@ Route::get('login', ['as' => 'login', 'uses' => 'Auth\LoginController@redirectTo
 Route::get('login/google/callback', 'Auth\LoginController@handleProviderCallback')->name('login.google.callback');
 
 Route::get('/phonebook/xml', 'PhoneBookController@xml')->name('phonebook.xml');
+Route::get('/phonebook/update', 'PhoneBookController@update')->name('phonebook.update');
 
 Route::group(['middleware' => 'auth'], function(){
 
     Route::get('/home', 'HomeController@index')->name('home');
 
     Route::get('/phonebook', 'PhoneBookController@index')->name('phonebook');
-    Route::get('/phonebook/update', 'PhoneBookController@update')->name('phonebook.update');
     Route::post('/phonebook', 'PhoneBookController@index')->name('phonebook.search');
 
    

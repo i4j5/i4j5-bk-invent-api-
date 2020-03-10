@@ -49,7 +49,7 @@ class PhoneBookController extends Controller
 
     public function xml()
     {
-        $this->getContacts();
+        //$this->getContacts();
         
         $contacts = AmoContact::all();
         
