@@ -99,10 +99,12 @@ class AmoCRMController extends Controller
     public function сreatDealProject(Request $request)
     {        
         
-        $deal_id = $request->input('deal_id');
-        $template_id = $request->input('template_id');
-        
-        if (!$template_id || !$deal_id) {
+        $deal_id = $request->input('deal');
+        $project_id = $request->input('project');
+        $task_id = $request->input('task');
+        $section_id = $request->input('section');
+
+        if (!$project_id || !$deal_id) {
             return 'error';
         }
         
@@ -183,38 +185,72 @@ class AmoCRMController extends Controller
 
         }
 
-        $data = [
-            'name' => $deal['name'],
-            'include' => [
-                'task_notes',
-                'task_subtasks',
-                'task_projects',
-                'task_assignee',
-                'task_attachments',
-                'notes',
-            ],
-            'team' => '882014108971315'
-        ];
-        
-        
         $asana = new Curl();
         
         $asana->setHeader('Authorization', 'Bearer ' . env('ASANA_KEY'));
         $asana->setHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+        $link = '';
+
+        if($task_id) {
+
+            $data = [
+                'name' => $deal['name'],
+                'include' => [
+                    'notes',
+                    'assignee',
+                    'subtasks',
+                    'attachments',
+                    'tags',
+                    'followers',
+                    'projects',
+                    'dates',
+                    'parent',
+                ]
+            ];
+
+            $res = $asana->post("https://app.asana.com/api/1.0/tasks/$task_id/duplicate", $data);
+            
+            $gid = $res->data->new_task->gid;
+            
+            $link = "https://app.asana.com/0/$project_id/$gid";
+            
+            if($section_id) {
+                $asana->post("https://app.asana.com/api/1.0/sections/$section_id/addTask", [
+                    'task' => $gid
+                ]);
+            }
+
+        } else {
+
+            $data = [
+                'name' => $deal['name'],
+                'include' => [
+                    'task_notes',
+                    'task_subtasks',
+                    'task_projects',
+                    'task_assignee',
+                    'task_attachments',
+                    'notes',
+                ],
+                'team' => '882014108971315'
+            ];
+
+            $template = $asana->get("https://app.asana.com/api/1.0/projects/$project_id");
         
-        $template = $asana->get("https://app.asana.com/api/1.0/projects/$template_id");
-        
-        $res = $asana->post("https://app.asana.com/api/1.0/projects/$template_id/duplicate", $data);
-        
-        $gid = $res->data->new_project->gid;
-        
-        $link = 'https://app.asana.com/0/' . $gid;
-        
-        $a = $asana->put("https://app.asana.com/api/1.0/projects/$gid", [
-            'notes' => $description,
-            'color' => $template->data->color,
-        ]);
-        
+            $res = $asana->post("https://app.asana.com/api/1.0/projects/$project_id/duplicate", $data);
+            
+            $gid = $res->data->new_project->gid;
+            
+            $link = 'https://app.asana.com/0/' . $gid;
+            
+            $a = $asana->put("https://app.asana.com/api/1.0/projects/$gid", [
+                'notes' => $description,
+                'color' => $template->data->color,
+            ]);
+
+        }
+
         // Заносим данные в CRM
         $this->amocrm->lead
             ->addCustomField(75437, $link)

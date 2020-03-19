@@ -202,21 +202,23 @@ class AnalyticController extends Controller
 
         AmoCRM::getInstance()->addLead($data);
 
-        return 'ok';
-
          // Отправка цели в яндекс метрику
 
-        // return $this->googleAalytics([
-        //     'client_id' => $data['google_client_id'],
-        //     'event-сategory' => 'call',
-        //     'event-action' => 'tracking',
-        //     // 'utm_medium' => $data['utm_medium'], 
-        //     // 'utm_sourse' =>  $data['utm_sourse'], 
-        //     // 'utm_campaign' => $data['utm_campaign'], 
-        //     // 'utm_term' => $data['utm_term'], 
-        //     // 'utm_content' => $data['utm_content'],
-        //     // 'price' => 111
-        // ]);
+        if (isset($data['google_client_id']) || $data['google_client_id']) {
+            $this->googleAalytics([
+                'client_id' => $data['google_client_id'],
+                'event-сategory' => 'call',
+                'event-action' => 'tracking',
+                // 'utm_medium' => $data['utm_medium'], 
+                // 'utm_sourse' =>  $data['utm_sourse'], 
+                // 'utm_campaign' => $data['utm_campaign'], 
+                // 'utm_term' => $data['utm_term'], 
+                // 'utm_content' => $data['utm_content'],
+                // 'price' => 111
+            ]);
+        }
+
+        return 'ok';
     }
 
     private function googleAalytics($params)
@@ -270,6 +272,8 @@ class AnalyticController extends Controller
         
         return $data;
     }
+
+    // 
 
 }
 
