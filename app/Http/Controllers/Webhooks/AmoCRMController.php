@@ -221,6 +221,10 @@ class AmoCRMController extends Controller
                 ]);
             }
 
+            $asana->put("https://app.asana.com/api/1.0/tasks/$gid", [
+                'notes' => $description
+            ]);
+
         } else {
 
             $data = [
