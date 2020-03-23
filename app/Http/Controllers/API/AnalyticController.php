@@ -204,7 +204,7 @@ class AnalyticController extends Controller
 
          // Отправка цели в яндекс метрику
 
-        if (isset($data['google_client_id']) || $data['google_client_id']) {
+        if (isset($data['google_client_id']) && $data['google_client_id']) {
             $this->googleAalytics([
                 'client_id' => $data['google_client_id'],
                 'event-сategory' => 'call',
@@ -263,7 +263,7 @@ class AnalyticController extends Controller
         //     $z = $z . $value;
         // }
 
-        $data['z'] = md5($data['cid'] . $data['ec'] . $data['ea'] . $price);
+        $data['z'] = md5($data['cid'] . $data['ec'] . $data['ea'] . $price . date('dmY'));
 
         if ($price) $data['cm3'] = $price;
 
