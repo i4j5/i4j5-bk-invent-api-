@@ -31,8 +31,6 @@ Route::group(['middleware' => 'auth'], function(){
     Route::get('/phonebook', 'PhoneBookController@index')->name('phonebook');
     Route::post('/phonebook', 'PhoneBookController@index')->name('phonebook.search');
 
-   
-    
 
     app(\App\PageRoutes::class)->routes();
 

@@ -69,5 +69,5 @@ Route::prefix('analytic')->group(function () {
     Route::post('update-visit', 'API\AnalyticController@updateVisit');
     Route::post('create-call', 'API\AnalyticController@createCall');
 
-    Route::get('test', 'API\AnalyticController@test');
+    Route::post('crm/{event}', 'API\AnalyticController@crm');
 });

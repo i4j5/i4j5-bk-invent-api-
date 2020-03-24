@@ -289,4 +289,16 @@ class AmoCRM
         //return $lead_id;
 
     }
+
+
+    public function getLead($id)
+    {
+
+        $data = $this->amocrm->lead->apiList([
+            'id' => $id,
+            'limit_rows' => 1,
+        ])[0];
+
+        return $data;
+    }
 }

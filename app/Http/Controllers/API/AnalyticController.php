@@ -286,6 +286,63 @@ class AnalyticController extends Controller
         return $data;
     }
 
+    public function crm(Request $request) 
+    {
+
+        $lead_id = isset($request->input('leads')['add'][0]['id']) ? (int) $request->input('leads')['add'][0]['id'] : (int) $request->input('leads')['status'][0]['id'];
+
+        $deal = AmoCRM::getInstance()->getLead($lead_id);
+
+        $google_client_id = false;
+        $price = (int) $deal['price'];
+
+        foreach ( $deal['custom_fields'] as $field )
+        {
+            if ( isset($field['name']) ) {
+
+                if ($field['name'] == 'google_client_id') {
+                    $google_client_id = $field['values'][0]['value'];
+                } 
+
+                if($field['name'] == 'Себестоимость') {
+                    // Привести к числу
+                    $price = $price - ((int) $field['values'][0]['value']);
+                }
+
+            }
+        }
+
+        $data = [
+            'client_id' => '',
+            'event-сategory' => 'CRM',
+            'event-action' => '',
+        ];
+
+        if ($google_client_id) {
+            $data['client_id'] = $google_client_id;
+        } else {
+            return 'error';
+        }
+
+        switch ($request->event) {
+            //Провальная Cделка
+            case 'FailureDeal':
+                $data['event-action'] = 'FailureDeal';
+                break;
+
+            //Удачная Сделка
+            case 'SuccessDeal':
+                $data['event-action'] = 'SuccessDeal';
+                $data['price'] = $price;
+                break;
+
+            default:
+                return 'error';
+        }
+
+       return $this->googleAalytics($data);
+    }
+
 }
 
 
