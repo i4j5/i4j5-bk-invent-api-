@@ -336,6 +336,16 @@ class AnalyticController extends Controller
                 $data['price'] = $price;
                 break;
 
+            //Проведена квалификация
+            case 'Qualified':
+                $data['event-action'] = 'Qualified';
+                break;
+            
+            //Передан в производство
+            case 'Production':
+                $data['event-action'] = 'Production';
+                break;
+
             default:
                 return 'error';
         }
