@@ -46,6 +46,9 @@ class AmoCRMController extends Controller
         $client->setAuthConfig(storage_path(env('GOOGLE_API_KEY')));
         $client->addScope(\Google_Service_Drive::DRIVE);
         $service = new \Google_Service_Drive($client);
+      
+
+
         
         $file = new \Google_Service_Drive_DriveFile([
             'parents' => ['16_u3j93RtbO-eCvpQS9Dw_OGAa3X_Bw5'],
@@ -56,7 +59,8 @@ class AmoCRMController extends Controller
         // ПАПКА СДЕЛКИ
         $dealFolder = $service->files->create($file);
         $deal->addCustomField(75429, "https://drive.google.com/open?id=$dealFolder->id");
-
+      
+      
         // ПАПКА МЕНЕДЖЕРА
         $file->setName('1.1 ПАПКА МЕНЕДЖЕРА');
         $file->setParents([$dealFolder->id]);
@@ -80,6 +84,15 @@ class AmoCRMController extends Controller
         $folder = $service->files->create($file);
         $deal->addCustomField(75433, "https://drive.google.com/open?id=$folder->id");
         $file->setParents([$folder->id]);
+      
+      	$tz = new \Google_Service_Drive_DriveFile([
+            'parents' => [$folder->id],
+            'name' => 'ТЗ.doc',
+            'mimeType' => 'application/vnd.google-apps.document'
+        ]);
+      
+        $fileTZ = $service->files->create($tz);
+       	$deal->addCustomField(284979, "https://drive.google.com/open?id=$fileTZ->id");
         
         // ФОТО_АДРЕС
         $file->setName('1.2.1 ФОТО_АДРЕС');
@@ -146,6 +159,14 @@ class AmoCRMController extends Controller
                     $description = $description . '
 ';
                     $description = $description . 'Папка клиента: ' . $field['values'][0]['value'];
+                }
+            }
+          
+            if ((int) $field['id'] == 284979) {
+                if ($field['values'][0]['value'] != '') {
+                    $description = $description . '
+';
+                    $description = $description . 'ТЗ: ' . $field['values'][0]['value'];
                 }
             }
         }
