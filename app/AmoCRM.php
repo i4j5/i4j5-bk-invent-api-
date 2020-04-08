@@ -290,7 +290,6 @@ class AmoCRM
 
     }
 
-
     public function getLead($id)
     {
 

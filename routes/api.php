@@ -71,3 +71,10 @@ Route::prefix('analytic')->group(function () {
 
     Route::post('crm/{event}', 'API\AnalyticController@crm');
 });
+
+
+Route::prefix('amo')->group(function () {
+
+    Route::get('auth', 'API\AmoController@auth');
+    Route::get('refresh-token', 'API\AmoController@refreshToken');
+});
