@@ -12,5 +12,6 @@ class Token extends Model
        'type', 
        'value',
        'expires',
+       'active',
     ];
 }

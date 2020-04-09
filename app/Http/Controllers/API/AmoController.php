@@ -17,15 +17,6 @@ class AmoController extends Controller
     
     public function auth(Request $request)
     {
-
-
-        $a = $this->amo->request('/api/v2/account');
-
-        dd($a); 
-
-
-
-
         if (!isset($_GET['code'])) {
             $this->amo->authorization();
             exit;
@@ -39,24 +30,17 @@ class AmoController extends Controller
             return 'Invalid state'; 
         
         } else {
-            if($this->amo->acessToken($_GET['code'])) {
-                return 'ok';
-            }
+            if ( $this->amo->acessToken($_GET['code']) ) return 'ok';
         }
 
         return 'error';
-
     }
 
     public function refreshToken(Request $request)
     {
-        // if ($this->amo->refreshToken()) {
-        //     return 'ok';
-        // }
+        if ( $this->amo->refreshToken() ) return 'ok';
 
-        // return 'error';
-
-        return $this->amo->refreshToken();
+        return 'error';
     }
 
 }
