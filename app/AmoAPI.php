@@ -13,9 +13,9 @@ class AmoAPI
     public function __construct()
     {
         $this->provider = new \League\OAuth2\Client\Provider\GenericProvider([
-            'clientId' => env('AMO_CLIENT_ID'),
-            'clientSecret' => env('AMO_CLIENT_SECRET'),
-            'redirectUri' => env('AMO_REDIRECT_URI'),
+            'clientId'                => env('AMO_CLIENT_ID'),
+            'clientSecret'            => env('AMO_CLIENT_SECRET'),
+            'redirectUri'             => env('AMO_REDIRECT_URI'),
             'urlAuthorize'            => 'https://www.amocrm.ru/oauth',
             'urlAccessToken'          => 'https://' . env('AMO_DOMAIN') . '.amocrm.ru/oauth2/access_token',
             'urlResourceOwnerDetails' => 'https://' . env('AMO_DOMAIN') . '.amocrm.ru/v3/user'
@@ -42,8 +42,18 @@ class AmoAPI
         $authorizationUrl = $this->provider->getAuthorizationUrl();
         
         $_SESSION['oauth2state'] = $this->provider->getState();
-        
+
         header('Location: ' . $authorizationUrl);
+    }
+
+    public function error($text = '') 
+    {
+        $icq = new Curl();
+        $icq->get('https://api.icq.net/bot/v1/messages/sendText', [
+            'token' => env('ICQ_TOKEN'),
+            'chatId' => env('ICQ_CHAT_ID'),
+            'text' => $text,
+        ]);
     }
 
     public function saveTokins($token) 
@@ -77,7 +87,8 @@ class AmoAPI
 
             return true;
     
-        } catch (\Exception $e) {    
+        } catch (\Exception $e) {
+            $this->error('ERROR: amoCRM acessToken');    
             return false;
         }
     }
@@ -111,7 +122,8 @@ class AmoAPI
 
                 return $newAccessToken;
 
-            } catch (\Exception $e) {    
+            } catch (\Exception $e) {  
+                $this->error('ERROR: amoCRM refreshToken');  
                 return false;
             }
 
