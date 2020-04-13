@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use \Curl\Curl;
 use Dotzero\LaravelAmoCrm\AmoCrmManager;
+use App\Models\User;
 
 
 class AmoCRMController extends Controller
@@ -110,8 +111,7 @@ class AmoCRMController extends Controller
     
     // ASANA
     public function сreatDealProject(Request $request)
-    {        
-        
+    {   
         $deal_id = $request->input('deal');
         $project_id = $request->input('project');
         $task_id = $request->input('task');
@@ -213,6 +213,8 @@ class AmoCRMController extends Controller
 
         $link = '';
 
+        $new_project_id = 0;
+
         if($task_id) {
 
             $data = [
@@ -268,6 +270,8 @@ class AmoCRMController extends Controller
             $gid = $res->data->new_project->gid;
             
             $link = 'https://app.asana.com/0/' . $gid;
+
+            $new_project_id = $gid;
             
             $a = $asana->put("https://app.asana.com/api/1.0/projects/$gid", [
                 'notes' => $description,
@@ -281,7 +285,79 @@ class AmoCRMController extends Controller
             ->addCustomField(75437, $link)
             ->apiUpdate((int) $deal_id);
         
+        return $new_project_id;
+    }
+
+    public function updeteDealProject(Request $request)
+    {
+
+        $gid = $request->input('gid');
+        // $type = $request->input('type');
+        $amo_user_id = $request->input('user_id');
+
+        $asana_user_id = 0;
+        if ($amo_user_id) {
+            $user = User::where('amo_user_id', $amo_user_id)->first();
+
+            if($user) {
+                $asana_user_id = $user->asana_user_id;
+            }
+
+        }
+
+        sleep(120);
+
+        $asana = new Curl();
+        $asana->setHeader('Authorization', 'Bearer ' . env('ASANA_KEY'));
+        $asana->setHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+        $tasks = $asana->get("https://app.asana.com/api/1.0/projects/$gid/tasks")->data;
+
+        foreach ( $tasks as $task )
+        {
+
+            $rename = false;
+
+            $data = [];
+
+            $name = $task->name;
+
+            $name = str_replace("%date%", "", $name, $count);
+            if ($count > 0) {
+
+                $data['due_on'] = date("Y-m-d");
+
+                $rename = true;
+            }
+
+            $name = str_replace("%date+1day%", "", $name, $count);
+            if ($count > 0) {
+
+                $data['due_on'] = date("Y-m-d", microtime(true)+(60*60*24));
+
+                $rename = true;
+            }
+
+            $name = str_replace("%crm%", "", $name, $count);
+            if ($count > 0) {
+
+                if($asana_user_id) $data['assignee'] = $asana_user_id;
+
+                $rename = true;
+            }
+
+
+            if($rename) {
+
+                $data['name'] = $name;
+
+                $asana->put("https://app.asana.com/api/1.0/tasks/$task->gid", $data);
+            } 
+
+        }
+
         return 'ok';
+
     }
 
     public function rawLead(Request $request)
