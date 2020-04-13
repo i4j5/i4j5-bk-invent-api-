@@ -67,6 +67,15 @@ class AmoCRMController extends Controller
         $folder = $service->files->create($file);
         $deal->addCustomField(75431, "https://drive.google.com/open?id=$folder->id");
 
+        $tz = new \Google_Service_Drive_DriveFile([
+            'parents' => [$folder->id],
+            'name' => 'ТЗ.doc',
+            'mimeType' => 'application/vnd.google-apps.document'
+        ]);
+      
+        $fileTZ = $service->files->create($tz);
+       	$deal->addCustomField(284979, "https://drive.google.com/open?id=$fileTZ->id");
+
         // ИСХОДНЫЕ ДОКУМЕНТЫ
         $file->setName('1.3 ИСХОДНЫЕ ДОКУМЕНТЫ');
         $file->setParents([$dealFolder->id]);
@@ -84,15 +93,6 @@ class AmoCRMController extends Controller
         $folder = $service->files->create($file);
         $deal->addCustomField(75433, "https://drive.google.com/open?id=$folder->id");
         $file->setParents([$folder->id]);
-      
-      	$tz = new \Google_Service_Drive_DriveFile([
-            'parents' => [$folder->id],
-            'name' => 'ТЗ.doc',
-            'mimeType' => 'application/vnd.google-apps.document'
-        ]);
-      
-        $fileTZ = $service->files->create($tz);
-       	$deal->addCustomField(284979, "https://drive.google.com/open?id=$fileTZ->id");
         
         // ФОТО_АДРЕС
         $file->setName('1.2.1 ФОТО_АДРЕС');
