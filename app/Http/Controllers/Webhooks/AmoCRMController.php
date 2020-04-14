@@ -110,7 +110,7 @@ class AmoCRMController extends Controller
     }
     
     // ASANA
-    public function сreatDealProject(Request $request)
+    public function createDealProject(Request $request)
     {   
         $deal_id = $request->input('deal');
         $project_id = $request->input('project');
@@ -120,90 +120,84 @@ class AmoCRMController extends Controller
         if (!$project_id || !$deal_id) {
             return 'error';
         }
-        
-        $deal = $this->amocrm->lead->apiList([
-            'id' => $deal_id ,
-            'limit_rows' => 1,
-        ])[0];
 
-        foreach ($deal['custom_fields'] as $field) {
-            if ((int) $field['id'] == 75437) {
-                if ($field['values'][0]['value'] != '') {
-                    return 'ok';
+        $amo = \App\AmoAPI::getInstance();
+
+        $deal = $amo->request('/api/v2/leads','get', ['id'=>$deal_id])->_embedded->items[0];
+
+        $description = $deal->name . '
+';
+        $description = $description . 'https://' . env('AMO_DOMAIN') . '.amocrm.ru/leads/detail/' . $deal->id . '
+';
+
+        foreach ($deal->custom_fields as $field) {
+
+            if ((int) $field->id == 75401) {
+                if ($field->values[0]->value != '') {
+                    $description = $description . '
+';
+                    $description = $description . 'География работ (адрес): ' . $field->values[0]->value;
                 }
             }
+
+            if ((int) $field->id == 75417) {
+                if ($field->values[0]->value != '') {
+                    $description = $description . '
+';
+                    $description = $description . 'Информация по проекту: ' . $field->values[0]->value;
+                }
+            }
+
+            if ((int) $field->id == 75429) {
+                if ($field->values[0]->value != '') {
+                    $description = $description . '
+';
+                    $description = $description . 'Папка клиента: ' . $field->values[0]->value;
+                }
+            }
+
+            if ((int) $field->id == 284979) {
+                if ($field->values[0]->value != '') {
+                    $description = $description . '
+';
+                    $description = $description . 'ТЗ: ' . $field->values[0]->value;
+                }
+            }
+
         }
 
-        $description  = '';
+        $contacts = $amo->request($deal->contacts->_links->self->href)->_embedded->items;
 
-        foreach ($deal['custom_fields'] as $field) {
+        $description = $description . '
 
-            if ((int) $field['id'] == 75401) {
-                if ($field['values'][0]['value'] != '') {
-                    $description = $description . '
 ';
-                    $description = $description . 'География работ (адрес): ' . $field['values'][0]['value'];
+
+        foreach ($contacts as $contact )
+        {
+
+            $description = $description . $contact->name . '
+';
+
+            foreach ($contact->custom_fields as $field )
+            {
+                if (isset($field->code) && $field->code == 'PHONE') {
+                    foreach ( $field->values as $item )
+                    {
+                        $description = $description . '   ' . $item->value . '
+';
+                    }  
+                }
+
+                if (isset($field->code) && $field->code == 'EMAIL') {
+                    foreach ( $field->values as $item )
+                    {
+                        $description = $description . '   ' . $item->value . '
+';
+                    }  
                 }
             }
-
-            if ((int) $field['id'] == 75417) {
-                if ($field['values'][0]['value'] != '') {
-                    $description = $description . '
-';
-                    $description = $description . 'Информация по проекту: ' . $field['values'][0]['value'];
-                }
-            }
-
-            if ((int) $field['id'] == 75429) {
-                if ($field['values'][0]['value'] != '') {
-                    $description = $description . '
-';
-                    $description = $description . 'Папка клиента: ' . $field['values'][0]['value'];
-                }
-            }
-          
-            if ((int) $field['id'] == 284979) {
-                if ($field['values'][0]['value'] != '') {
-                    $description = $description . '
-';
-                    $description = $description . 'ТЗ: ' . $field['values'][0]['value'];
-                }
-            }
-        }
-        
-
-        if(isset($deal['main_contact_id'])) {
-
-            $contact = $this->amocrm->contact->apiList([
-                'id' => $deal['main_contact_id'],
-                'limit_rows' => 1,
-                'type' => 'contact' 
-            ])[0];
-
             $description = $description . '
 ';
-
-            $description = $description . $contact['name'];
-
-            foreach ( $contact['custom_fields'] as $field )
-            {
-                if (isset($field['code']) && $field['code'] == 'PHONE') {
-                    foreach ( $field['values'] as $item )
-                    {
-
-                        $description = $description . ' ' . $item['value'] . ' ';
-                    }  
-                }
-
-                if (isset($field['code']) && $field['code'] == 'EMAIL') {
-                    foreach ( $field['values'] as $item )
-                    {
-
-                        $description = $description . ' ' . $item['value'] . ' ';
-                    }  
-                }
-            }
-
         }
 
         $asana = new Curl();
@@ -213,12 +207,17 @@ class AmoCRMController extends Controller
 
         $link = '';
 
-        $new_project_id = 0;
+        $new_project = [
+            'gid' => 0,
+            'responsible' => $deal->responsible_user_id,
+            'type' => ''
+        ];
+
 
         if($task_id) {
 
             $data = [
-                'name' => $deal['name'],
+                'name' => $deal->name,
                 'include' => [
                     'notes',
                     'assignee',
@@ -248,10 +247,13 @@ class AmoCRMController extends Controller
                 'notes' => $description
             ]);
 
+            $new_project['gid'] = $gid;
+            $new_project['type'] = 'task';
+
         } else {
 
             $data = [
-                'name' => $deal['name'],
+                'name' => $deal->name,
                 'include' => [
                     'task_notes',
                     'task_subtasks',
@@ -271,38 +273,55 @@ class AmoCRMController extends Controller
             
             $link = 'https://app.asana.com/0/' . $gid;
 
-            $new_project_id = $gid;
+            $new_project['gid'] = $gid;
+            $new_project['type'] = 'project';
             
-            $a = $asana->put("https://app.asana.com/api/1.0/projects/$gid", [
+            $asana->put("https://app.asana.com/api/1.0/projects/$gid", [
                 'notes' => $description,
                 'color' => $template->data->color,
             ]);
 
         }
 
-        // Заносим данные в CRM
-        $this->amocrm->lead
-            ->addCustomField(75437, $link)
-            ->apiUpdate((int) $deal_id);
         
-        return $new_project_id;
+        $update_data = [
+            'update' => []
+        ];
+
+        $update_data['update'][] = [
+            'id' => $deal_id,
+            'updated_at' => time(),
+            'custom_fields' => [
+                [
+                    'id' => 75437,
+                    'values' => [
+                        ['value' => $link]
+                    ]
+                ]
+            ] 
+        ];
+
+        $amo->request('/api/v2/leads', 'post', $update_data);
+        
+        return $new_project;
     }
 
     public function updeteDealProject(Request $request)
     {
-
         $gid = $request->input('gid');
-        // $type = $request->input('type');
-        $amo_user_id = $request->input('user_id');
+        $type = $request->input('type');
+        $amo_user_id = $request->input('responsible');
 
         $asana_user_id = 0;
+        $description = '';
+        $tasks = [];
+
         if ($amo_user_id) {
             $user = User::where('amo_user_id', $amo_user_id)->first();
 
             if($user) {
                 $asana_user_id = $user->asana_user_id;
             }
-
         }
 
         sleep(120);
@@ -311,11 +330,25 @@ class AmoCRMController extends Controller
         $asana->setHeader('Authorization', 'Bearer ' . env('ASANA_KEY'));
         $asana->setHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-        $tasks = $asana->get("https://app.asana.com/api/1.0/projects/$gid/tasks")->data;
+        if ($type == 'project') {
+            $project = $asana->get("https://app.asana.com/api/1.0/projects/$gid");
+
+            $description = $project->data->notes;
+
+            $tasks = $asana->get("https://app.asana.com/api/1.0/projects/$gid/tasks")->data;
+
+        }
+        
+        if ($type == 'task') {
+            $project = $asana->get("https://app.asana.com/api/1.0/tasks/$gid");
+            
+            $description = $project->data->notes;
+
+            $tasks = $asana->get("https://app.asana.com/api/1.0/tasks/$gid/subtasks")->data;
+        }
 
         foreach ( $tasks as $task )
         {
-
             $rename = false;
 
             $data = [];
@@ -324,36 +357,38 @@ class AmoCRMController extends Controller
 
             $name = str_replace("%date%", "", $name, $count);
             if ($count > 0) {
-
                 $data['due_on'] = date("Y-m-d");
-
                 $rename = true;
             }
 
             $name = str_replace("%date+1day%", "", $name, $count);
             if ($count > 0) {
-
                 $data['due_on'] = date("Y-m-d", microtime(true)+(60*60*24));
-
                 $rename = true;
             }
 
             $name = str_replace("%crm%", "", $name, $count);
             if ($count > 0) {
-
                 if($asana_user_id) $data['assignee'] = $asana_user_id;
-
                 $rename = true;
             }
 
+            $name = str_replace("%crm%", "", $name, $count);
+            if ($count > 0) {
+                if($asana_user_id) $data['assignee'] = $asana_user_id;
+                $rename = true;
+            }
+
+            $name = str_replace("%description%", "", $name, $count);
+            if ($count > 0) {
+                $data['notes'] = $description;
+                $rename = true;
+            }
 
             if($rename) {
-
                 $data['name'] = $name;
-
                 $asana->put("https://app.asana.com/api/1.0/tasks/$task->gid", $data);
             } 
-
         }
 
         return 'ok';
