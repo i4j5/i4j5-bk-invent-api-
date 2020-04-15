@@ -244,7 +244,8 @@ class AmoCRMController extends Controller
             }
 
             $asana->put("https://app.asana.com/api/1.0/tasks/$gid", [
-                'notes' => $description
+                'notes' => $description,
+                'due_on' => date('Y-m-d')
             ]);
 
             $new_project['gid'] = $gid;
@@ -306,8 +307,11 @@ class AmoCRMController extends Controller
         return $new_project;
     }
 
-    public function updeteDealProject(Request $request)
+    public function updateDealProject(Request $request)
     {
+        set_time_limit(0);
+        sleep(120);
+
         $gid = $request->input('gid');
         $type = $request->input('type');
         $amo_user_id = $request->input('responsible');
@@ -323,8 +327,6 @@ class AmoCRMController extends Controller
                 $asana_user_id = $user->asana_user_id;
             }
         }
-
-        sleep(120);
 
         $asana = new Curl();
         $asana->setHeader('Authorization', 'Bearer ' . env('ASANA_KEY'));
@@ -357,19 +359,13 @@ class AmoCRMController extends Controller
 
             $name = str_replace("%date%", "", $name, $count);
             if ($count > 0) {
-                $data['due_on'] = date("Y-m-d");
+                $data['due_on'] = date('Y-m-d');
                 $rename = true;
             }
 
             $name = str_replace("%date+1day%", "", $name, $count);
             if ($count > 0) {
                 $data['due_on'] = date("Y-m-d", microtime(true)+(60*60*24));
-                $rename = true;
-            }
-
-            $name = str_replace("%crm%", "", $name, $count);
-            if ($count > 0) {
-                if($asana_user_id) $data['assignee'] = $asana_user_id;
                 $rename = true;
             }
 
@@ -388,6 +384,7 @@ class AmoCRMController extends Controller
             if($rename) {
                 $data['name'] = $name;
                 $asana->put("https://app.asana.com/api/1.0/tasks/$task->gid", $data);
+                usleep(100);
             } 
         }
 
