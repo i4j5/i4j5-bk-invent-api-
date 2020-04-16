@@ -310,7 +310,7 @@ class AmoCRMController extends Controller
     public function updateDealProject(Request $request)
     {
         set_time_limit(0);
-        sleep(120);
+        sleep(60);
 
         $gid = $request->input('gid');
         $type = $request->input('type');
@@ -339,9 +339,7 @@ class AmoCRMController extends Controller
 
             $tasks = $asana->get("https://app.asana.com/api/1.0/projects/$gid/tasks")->data;
 
-        }
-        
-        if ($type == 'task') {
+        } else if ($type == 'task') {
             $project = $asana->get("https://app.asana.com/api/1.0/tasks/$gid");
             
             $description = $project->data->notes;
@@ -363,11 +361,11 @@ class AmoCRMController extends Controller
                 $rename = true;
             }
 
-            $name = str_replace("%date+1day%", "", $name, $count);
-            if ($count > 0) {
-                $data['due_on'] = date("Y-m-d", microtime(true)+(60*60*24));
-                $rename = true;
-            }
+            // $name = str_replace("%date+1day%", "", $name, $count);
+            // if ($count > 0) {
+            //     $data['due_on'] = date("Y-m-d", microtime(true)+(60*60*24));
+            //     $rename = true;
+            // }
 
             $name = str_replace("%crm%", "", $name, $count);
             if ($count > 0) {
@@ -384,7 +382,7 @@ class AmoCRMController extends Controller
             if($rename) {
                 $data['name'] = $name;
                 $asana->put("https://app.asana.com/api/1.0/tasks/$task->gid", $data);
-                usleep(100);
+                usleep(50);
             } 
         }
 
