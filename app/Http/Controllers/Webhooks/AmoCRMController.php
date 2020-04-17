@@ -310,7 +310,7 @@ class AmoCRMController extends Controller
     public function updateDealProject(Request $request)
     {
         set_time_limit(0);
-        sleep(60);
+        sleep(10);
 
         $gid = $request->input('gid');
         $type = $request->input('type');
