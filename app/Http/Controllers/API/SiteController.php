@@ -22,6 +22,64 @@ class SiteController extends Controller
         $this->phone = Phone::getInstance();
     }
 
+    public function e(AmoCrmManager $amocrm)
+    {
+        set_time_limit(0);
+
+        $amo = \App\AmoAPI::getInstance();
+        $regexp = '/\d+__/';
+
+        $data = [];
+        $run = true;
+        for($limit_offset = 0; $run; $limit_offset++) 
+        {
+            sleep(1);
+            $res = $amo->request('/api/v2/contacts','get', ['limit_rows' => 500, 'limit_offset' => ($limit_offset * 500)])->_embedded->items;
+
+            // dd($res->_embedded->items);
+
+            $data = array_merge($data, $res);
+
+            if (count($res) < 500) $run = false;
+        }
+
+        // dd($data);
+
+        foreach ($data as $key => $contact) {
+            $result = preg_match($regexp, $contact->name, $match);
+            if($result) {
+
+                $name = str_replace($match[0], '', $contact->name, $count);
+
+                $update_data = [];
+                $update_data['update'][] = [
+                    'id' => $contact->id,
+                    'updated_at' => time(),
+                    'name' => $name
+                ];
+        
+                $amo->request('/api/v2/contacts', 'post', $update_data);
+
+                //dd($match, $contact->id, $contact->name, $name);
+            }
+        }
+
+        
+        // $result = preg_match($regexp, $text, $match);
+        // var_dump(
+        //     $result,
+        //     $match
+        // );
+
+        // $update_data = [
+        //     'update' => []
+        // ];
+
+       
+
+        dd($data);
+    }
+
     /**
      * Создание заявки с сайта
      * POST

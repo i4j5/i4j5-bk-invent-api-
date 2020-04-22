@@ -164,9 +164,45 @@ class AmoCRMController extends Controller
                 }
             }
 
+            if ((int) $field->id == 290561) {
+                if ($field->values[0]->value != '') {
+                    $description = $description . '
+';
+                    $description = $description . 'Дата начала подачи заявки: ' . $field->values[0]->value;
+                }
+            }
+
+            if ((int) $field->id == 290563) {
+                if ($field->values[0]->value != '') {
+                    $description = $description . '
+';
+                    $description = $description . 'Дата окончания подачи заявки: ' . $field->values[0]->value;
+                }
+            }
+
+            if ((int) $field->id == 290557) {
+                if ($field->values[0]->value != '') {
+                    $description = $description . '
+';
+                    $description = $description . 'Номер закупки: ' . $field->values[0]->value;
+                }
+            }
+
+            if ((int) $field->id == 290559) {
+                if ($field->values[0]->value != '') {
+                    $description = $description . '
+';
+                    $description = $description . 'Ссылка на тендер ' . $field->values[0]->value;
+                }
+            }
+
         }
 
-        $contacts = $amo->request($deal->contacts->_links->self->href)->_embedded->items;
+        $contacts = [];
+
+        if (isset($deal->contacts->_links)) {
+            $contacts = $amo->request($deal->contacts->_links->self->href)->_embedded->items;
+        }
 
         $description = $description . '
 
