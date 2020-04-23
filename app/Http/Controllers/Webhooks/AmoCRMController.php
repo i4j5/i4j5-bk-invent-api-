@@ -273,11 +273,15 @@ class AmoCRMController extends Controller
             
             $link = "https://app.asana.com/0/$project_id/$gid";
             
-            if($section_id) {
+            if ($section_id) {
                 $asana->post("https://app.asana.com/api/1.0/sections/$section_id/addTask", [
                     'task' => $gid
                 ]);
             }
+
+            $asana->post("https://app.asana.com/api/1.0/tasks/$gid/removeProject", [
+                'project' => 1172502221110985
+            ]);
 
             $asana->put("https://app.asana.com/api/1.0/tasks/$gid", [
                 'notes' => $description,
