@@ -10,12 +10,22 @@
                         <div class="col-lg-6 col-mb-6 col-sm-8">
                             <form method="GET" class="form-inline my-2 my-lg-0" action="{{ route('phonebook.search') }}">
                                 {{-- {{ csrf_field() }}  --}}
-                            <input class="form-control mr-sm-2" name="search" type="search" value="{{ $search }}" placeholder="Поиск" aria-label="Поиск">
+                            <div class="form-group">
+                                <select name="group" class="form-control">
+                                    <option value="" @if ($group == '') selected @endif>Все</option>
+                                    @foreach($groups as $el)
+                                        <option value="{{ $el }}" @if ($el == $group) selected @endif>{{ $el }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <input class="form-control ml-sm-2 mr-sm-2" name="search" type="search" value="{{ $search }}" placeholder="Поиск" aria-label="Поиск">
                                 <button type="submit" class="btn btn-primary my-2 my-sm-0">Поиск</button>
                             </form>
                         </div>
                         <div class="col-lg-6 col-mb-6 col-mb-4 text-right">
-                            
+                            <div class="text-right">
+                                <a class="btn btn-success" href="{{ route('phonebook.create') }}">Добавить</a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -30,11 +40,15 @@
                                             @if($contact->type == 'company')
                                                 <small class="float-right badge badge-pill badge-warning">Компания</small>
                                             @endif
+                                            @if ($contact->group != "")
+                                                <small class="float-right badge badge-pill badge-secondary">{{ $contact->group }}</small>
+                                            @endif
                                             {{ $contact->name }}
                                         </b>
                                         
                                     </div>
                                     <div class="card-body">
+                                        <p>{{ $contact->description }}</p>
                                         @foreach ($contact->values as $field)
                                             @if($field->type == 'PHONE')
                                                 <a href="tel:{{ $field->value }}">{{ $field->value }}</a>
@@ -56,7 +70,7 @@
                             </div>
                         @endforeach
                     </div>
-                    {{ $contacts->appends(['search' => $search])->links('pagination/bootstrap-4') }}
+                    {{ $contacts->appends(['search' => $search, 'group' => $group])->links('pagination/bootstrap-4') }}
                     <div class="text-right">
                         <a class="btn btn-outline-info" href="{{ route('phonebook.update') }}">Обновить базу</a>
                     </div>

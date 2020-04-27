@@ -88,7 +88,7 @@ class AmoAPI
             return true;
     
         } catch (\Exception $e) {
-            $this->error('ERROR: amoCRM acessToken');    
+            $this->error('ERROR amoCRM: ' . $e->getMessage());    
             return false;
         }
     }

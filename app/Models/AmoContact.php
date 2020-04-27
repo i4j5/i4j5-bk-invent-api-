@@ -12,6 +12,8 @@ class AmoContact extends Model
         'name', 
         'amo_id', 
         'type', 
+        'group',
+        'description'
     ];
 
     public function values()

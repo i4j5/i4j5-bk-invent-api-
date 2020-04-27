@@ -28,8 +28,15 @@ Route::group(['middleware' => 'auth'], function(){
 
     Route::get('/home', 'HomeController@index')->name('home');
 
+    // Route::resource('phonebook', 'PhoneBookController', [
+    //     //'only' => ['create', 'show']
+    //     'only' => ['create', 'store']
+    // ]);
+
     Route::get('/phonebook', 'PhoneBookController@index')->name('phonebook');
     Route::post('/phonebook', 'PhoneBookController@index')->name('phonebook.search');
+    Route::get('/phonebook/create', 'PhoneBookController@create')->name('phonebook.create');
+    Route::post('/phonebook/store', 'PhoneBookController@store')->name('phonebook.store');
 
 
     app(\App\PageRoutes::class)->routes();
