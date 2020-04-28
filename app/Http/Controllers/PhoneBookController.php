@@ -119,6 +119,7 @@ class PhoneBookController extends Controller
 
         $data['add'][] = [
             'name' => $request->name,
+            'tags' => \Auth::user()->email,
             'created_at' => time(),
             'custom_fields' => $custom_fields
         ];
