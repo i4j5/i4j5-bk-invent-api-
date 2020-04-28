@@ -18,6 +18,7 @@ class PhoneBookController extends Controller
         'Поставщик',
         'Партнер',
         'Конкурент',
+        'Сотрудник',
         'Спам'
     ];
 
