@@ -38,8 +38,6 @@ class AmoCRMController extends Controller
                 }
             }
         }
-
-        // dd($data);
          
         $deal = $this->amocrm->lead;
 
@@ -49,8 +47,6 @@ class AmoCRMController extends Controller
         $service = new \Google_Service_Drive($client);
       
 
-
-        
         $file = new \Google_Service_Drive_DriveFile([
             'parents' => ['16_u3j93RtbO-eCvpQS9Dw_OGAa3X_Bw5'],
             'name' => $data['name'],
@@ -432,95 +428,79 @@ class AmoCRMController extends Controller
 
     public function rawLead(Request $request)
     {        
+         
         $lead_id = isset($request->input('leads')['add'][0]['id']) ? (int) $request->input('leads')['add'][0]['id'] : (int) $request->input('leads')['status'][0]['id'];
-
-        $data = $this->amocrm->lead->apiList([
-            'id' => $lead_id,
-            'limit_rows' => 1,
-        ])[0];
-
-        $tags = [];
-        foreach ( $data['tags'] as $tag )
-        {
-            array_push($tags, $tag['name']);
-        }
         
-        $contact_id = $data['main_contact_id'];
+        $amo = \App\AmoAPI::getInstance();
 
-        $data = $this->amocrm->contact->apiList([
-            'id' => $contact_id,
-            'limit_rows' => 1,
-        ])[0];
+        $deal = $amo->request('/api/v2/leads','get', ['id'=>$lead_id])->_embedded->items[0];
 
-        $contact = $this->amocrm->contact;
+        $responsible = 0;
 
-        $phones = [];
-        $dataPhones = [];
-        foreach ( $data['custom_fields'] as $field )
+        $events = $amo->request('/api/v2/events','get', [
+            'filter[entity_id]'=> $deal->main_contact->id,
+            'filter[entity]' => 'contact'
+        ])->_embedded->events;
+
+        $incoming_calls = [];
+        foreach ($events as $event) 
         {
-            if (isset($field['code']) && $field['code'] == 'PHONE') {
-
-                foreach ( $field['values'] as $item )
-                {
-                    $phone = $item['value'];
-                    $enum = $item['enum'];
-
-                    // $res = Phone::getInstance()->fix($phone, $enum);
-
-                    // \App\AmoCRM::getInstance()->addLead($data);
-
-                    // $dataPhones[] = [$res['phone'], $res['enum']];
-                    $phones[] = $phone;
-                }  
+            if ($event->type == 'incoming_call') {
+                $incoming_calls[] = [
+                    'id' => $event->value_after[0]->note->id,
+                    'created_at' => $event->created_at
+                ];
             }
         }
 
-        $double = false;
+        usort($incoming_calls, function($a, $b) {
+            return ($a['created_at'] > $b['created_at']);
+        });
 
-        foreach ( $phones as $phone ) {
+        foreach ($incoming_calls as $item) 
+        {
+            $note = $amo->request('/api/v2/notes','get', [
+                'id'=>$item['id'],
+            ])->_embedded->items[0];
 
-            $items = $this->amocrm->contact->apiList([
-                'query' => $phone,
-                'type' => 'contact',
-            ]);
+            if (isset($note->params)) {
+                if ($note->params->call_status == 4) {
 
-            //if($double) return;
-            
-            foreach ( $items as $item )
-            {
-                
-                if ($item['id'] == $contact_id) break;
-                
-                foreach ( $item['custom_fields'] as $field )
-                {
-                    if (isset($field['code']) && $field['code'] == 'PHONE') {
-                        foreach ( $field['values'] as $el )
-                        {
-                            if (in_array($el['value'], $phones)) {
-                                $double = true;
-                                break(4);
-                            }
-                        }  
-                    }
+                    $responsible = $note->responsible_user_id;
+
+                    break; 
                 }
             }
-           
-        }
-
-        if($double) {
-            // Добавить тек к сделке 
-            $lead = $this->amocrm->lead;
-            array_push($tags, 'Дубль');
-            $lead['tags'] = $tags;
-            $lead->apiUpdate((int) $lead_id, 'now');
-            return 'Дубль - ' . $lead_id;
         }
 
 
-       //$contact->addCustomField('95354', $dataPhones);
-       //$contact->apiUpdate((int) $contact_id, 'now');
+        if ($responsible) {
+            $deal_data = [
+                'update' => []
+            ];
+    
+            $deal_data['update'][] = [
+                'id' => $lead_id,
+                'updated_at' => time(),
+                'responsible_user_id' => $responsible
+            ];
+    
+            $amo->request('/api/v2/leads', 'post', $deal_data);
+
+            $contact_data = [
+                'update' => []
+            ];
+    
+            $contact_data['update'][] = [
+                'id' => $deal->main_contact->id,
+                'updated_at' => time(),
+                'responsible_user_id' => $responsible
+            ];
+    
+            $amo->request('/api/v2/contacts', 'post', $contact_data);
+        }
        
-       return 'ok';
+        return 'ok';
     }
 
     public function unsorted(Request $request) {
