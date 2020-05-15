@@ -473,12 +473,10 @@ class AmoCRMController extends Controller
             }
         }
 
-
         if ($responsible) {
             $deal_data = [
                 'update' => []
             ];
-    
             $deal_data['update'][] = [
                 'id' => $lead_id,
                 'updated_at' => time(),
@@ -490,7 +488,6 @@ class AmoCRMController extends Controller
             $contact_data = [
                 'update' => []
             ];
-    
             $contact_data['update'][] = [
                 'id' => $deal->main_contact->id,
                 'updated_at' => time(),
