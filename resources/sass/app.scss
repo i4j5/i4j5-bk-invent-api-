@@ -22,13 +22,19 @@
 }
 
 .bd-sidebar {
-    margin: -1.5rem 0 !important;
-    padding: 1.5rem 15px !important;
-    background-color: rgba(0,0,0,.03);
-    border-right: 1px solid rgba(0,0,0,.125);
-    position: sticky;
-    height: 100vh;
     img {
         max-width: 100%;
     }
+    padding: 20px;
+    @media (min-width: 768px) {
+      display: block !important;
+    }
+}
+
+.bd-sidebar-wrapper {
+  @media (max-width: 768px) {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 15px;
+  }
 }
