@@ -91,12 +91,12 @@ class AmoCRMController extends Controller
         $deal->addCustomField(75433, "https://drive.google.com/open?id=$folder->id");
         $file->setParents([$folder->id]);
         
-        // ФОТО_АДРЕС
-        $file->setName('1.2.1 ФОТО_АДРЕС');
+        // ФОТООТЧЁТ
+        $file->setName('1.2.1 ФОТООТЧЁТ');
         $folder = $service->files->create($file);
         
-        // РЕЗЮМЕ_АДРЕС
-        $file->setName('1.2.2 РЕЗЮМЕ_АДРЕС');
+        // РЕЗЮМЕ
+        $file->setName('1.2.2 РЕЗЮМЕ');
         $folder = $service->files->create($file);
 
         
