@@ -7,7 +7,8 @@ use App\Http\Controllers\Controller;
 use \Curl\Curl;
 use Dotzero\LaravelAmoCrm\AmoCrmManager;
 use App\Models\User;
-
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class AmoCRMController extends Controller
 {
@@ -515,4 +516,5 @@ class AmoCRMController extends Controller
         return ['error' => ''];
 
     }
+
 }

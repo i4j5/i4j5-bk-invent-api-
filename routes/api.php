@@ -26,13 +26,13 @@ Route::prefix('webhook')->group(function () {
         return 'ok!';
     });
    
-    //Битрикс24
-    Route::prefix('bitrix24')->group(function () {
-        Route::post('create-deal-main-responsible', 'Webhooks\Bitrix24Controller@createDealMainResponsible');
-        Route::post('create-deal-folders', 'Webhooks\Bitrix24Controller@createDealFolders');
-        Route::post('create-deal-project', 'Webhooks\Bitrix24Controller@сreatDealProject');
-        Route::post('complement-deal', 'Webhooks\Bitrix24Controller@complementDeal');
-    });
+    // //Битрикс24
+    // Route::prefix('bitrix24')->group(function () {
+    //     Route::post('create-deal-main-responsible', 'Webhooks\Bitrix24Controller@createDealMainResponsible');
+    //     Route::post('create-deal-folders', 'Webhooks\Bitrix24Controller@createDealFolders');
+    //     Route::post('create-deal-project', 'Webhooks\Bitrix24Controller@сreatDealProject');
+    //     Route::post('complement-deal', 'Webhooks\Bitrix24Controller@complementDeal');
+    // });
 
     //amoCRM
     Route::prefix('amocrm')->group(function () {
@@ -42,6 +42,8 @@ Route::prefix('webhook')->group(function () {
         Route::post('raw-lead', 'Webhooks\AmoCRMController@rawLead');
 
         Route::post('unsorted', 'Webhooks\AmoCRMController@unsorted');
+
+        Route::get('email-banner', 'Webhooks\AmoCRMController@emailBanner');
     });
 
     Route::get('find-duplicates', 'Webhooks\FindDuplicatesController@handle');
@@ -73,9 +75,7 @@ Route::prefix('analytic')->group(function () {
     Route::post('crm/{event}', 'API\AnalyticController@crm');
 });
 
-
 Route::prefix('amo')->group(function () {
-
     Route::get('auth', 'API\AmoController@auth');
     Route::get('refresh-token', 'API\AmoController@refreshToken');
 });
