@@ -24,6 +24,39 @@ Route::get('login/google/callback', 'Auth\LoginController@handleProviderCallback
 Route::get('/phonebook/xml', 'PhoneBookController@xml')->name('phonebook.xml');
 Route::get('/phonebook/update', 'PhoneBookController@update')->name('phonebook.update');
 
+
+Route::get('email-banner/{contactid}', function ($contactid)
+{
+    $path = null;
+    
+    $files = Storage::disk('local')->files('public/mail/banners');
+
+    foreach ($files as $key => $value) {
+        if ($value == 'public/mail/banners/.gitignore') {
+            unset($files[$key]);
+        }
+    }
+
+    if(!$files) {
+        $path = storage_path('app/public/mail/banner.png');
+    } else {
+        $i = array_rand($files);
+        $path = storage_path('app/' . $files[$i]);
+    }
+
+    if (!File::exists($path)) {
+        abort(404);
+    }
+
+    $file = File::get($path);
+    $type = File::mimeType($path);
+
+    $response = Response::make($file, 200);
+    $response->header('Content-Type', $type);
+
+    return $response;
+});
+
 Route::group(['middleware' => 'auth'], function(){
 
     Route::get('/home', 'HomeController@index')->name('home');
@@ -58,40 +91,7 @@ Route::group(['middleware' => 'auth'], function(){
         return $response;
     });
 
-    Route::get('email-banner', function ()
-    {
-
-        $path = null;
-        
-        $files = Storage::disk()->files('public/mail/banners');
-
-        foreach ($files as $key => $value) {
-            if ($value == 'public/mail/banners/.gitignore') {
-                unset($files[$key]);
-            }
-        }
-
-        if(!$files) {
-            $path = storage_path('app/public/mail/banner.png');
-        } else {
-            $i = array_rand($files);
-            $path = storage_path('app/' . $files[$i]);
-        }
-
-        if (!File::exists($path)) {
-            abort(404);
-        }
-
-        $file = File::get($path);
-        $type = File::mimeType($path);
-
-        $response = Response::make($file, 200);
-        $response->header('Content-Type', $type);
-
-        return $response;
-
-    });
-
+   
 
     Route::group(['middleware' => 'admin'], function(){
         Route::match(['get', 'post'], 'pages/sidebar', 'PagesController@sidebar')->name('pages.sidebar');
