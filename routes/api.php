@@ -48,6 +48,11 @@ Route::prefix('webhook')->group(function () {
 
     Route::get('find-duplicates', 'Webhooks\FindDuplicatesController@handle');
 
+
+    
+    Route::any('amocrm-whatsapp/{scope_id}', 'API\WhatsAppController@amocrmWebhook');
+    Route::any('whatsapp', 'API\WhatsAppController@whatsappWebhook');
+
 });
 
 

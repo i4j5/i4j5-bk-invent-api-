@@ -516,5 +516,4 @@ class AmoCRMController extends Controller
         return ['error' => ''];
 
     }
-
 }
