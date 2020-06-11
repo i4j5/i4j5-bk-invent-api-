@@ -38,8 +38,21 @@ class WhatsAppController extends Controller
         $phone = $data['receiver']['phone'];
 
         // dd((int) $data['timestamp']);
+
+        if (Message::where('amo_message_id', $data['message']['id'])->first()) return 'ДУБЛЬ';
         
         $chat = Chat::where('phone', $phone)->first();
+
+        // if (!$chat) {
+        //     Chat::create([
+        //         'phone' => $phone,
+        //         'name' => $phone,
+        //         'amo_chat_id' => $data['conversation']['id']
+        //     ]);
+        // } else if (!$chat->amo_chat_id) {
+        //     $chat->amo_chat_id = $data['conversation']['id'];
+        //     $chat->save();
+        // }
 
         if (!$chat) {
             Chat::create([
@@ -47,11 +60,11 @@ class WhatsAppController extends Controller
                 'name' => $phone,
                 'amo_chat_id' => $data['conversation']['id']
             ]);
-        } else if (!$chat->amo_chat_id) {
+        } else {
             $chat->amo_chat_id = $data['conversation']['id'];
             $chat->save();
         }
-        
+
         $message = Message::create([
             'type' => $data['message']['type'],
             'status' => 0,
@@ -126,8 +139,10 @@ class WhatsAppController extends Controller
 
             //if ((bool) $item['fromMe'] && (bool) $item['self']) continue;
 
-            if ($item['fromMe']) {
+            if ((bool) $item['fromMe']) {
                 $message = Message::where('whatsapp_message_id', $whatsapp_message_id)->first();
+
+                // Гаписать примечание у контакте 
 
                 if ($message) continue;
             }
