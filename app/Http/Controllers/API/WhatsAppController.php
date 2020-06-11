@@ -81,7 +81,6 @@ class WhatsAppController extends Controller
             ]);
         }
 
-
         $curl = new Curl(env('WHATSAPP_URL'));
 
         $url = $methot . '?token=' . env('WHATSAPP_TOKEN');
@@ -109,17 +108,29 @@ class WhatsAppController extends Controller
 
         foreach ($messages as $item) {
 
-            if ($item['fromMe'] && $item['self']) {
-                //return $item;
-                continue;
-            }
-
             $whatsapp_message_id = (int) $item['id'];
             $phone = explode('@', $item['chatId'])[0];
             $author = explode('@', $item['author'])[0];
             $nane = $item['senderName'];
+            $avatar = false;
 
-            //return $phone;
+            $chat_api = new Curl(env('WHATSAPP_URL'));
+    
+            $dialogs = $chat_api->get('dialogs?token=' . env('WHATSAPP_TOKEN'))->dialogs;
+
+            foreach ($dialogs as $dialog) {
+                if ($dialog->id == $item['chatId']) {
+                    $avatar = $dialog->image;
+                }
+            }
+
+            //if ((bool) $item['fromMe'] && (bool) $item['self']) continue;
+
+            if ($item['fromMe']) {
+                $message = Message::where('whatsapp_message_id', $whatsapp_message_id)->first();
+
+                if ($message) continue;
+            }
 
             $dataMessage = [];
 
@@ -178,8 +189,6 @@ class WhatsAppController extends Controller
                 ]);
             }
 
-            //dd($dataMessage);
-
             $timestamp = time();
 
             $message = Message::create([
@@ -196,6 +205,7 @@ class WhatsAppController extends Controller
             ]);
 
 
+
             // Формируем данные для amoCRM
 
             $body = [
@@ -205,7 +215,7 @@ class WhatsAppController extends Controller
                     'msgid' => uniqid(),
                     'conversation_id' => $phone,
                     'sender' => [
-                        'id' => $phone,
+                        'id' => $author,
                         'name' => $nane,
                         'profile' => [
                             'phone' => $phone
@@ -214,6 +224,10 @@ class WhatsAppController extends Controller
                     'message' => $dataMessage
                 ]
             ];
+
+            if ($avatar) {
+                $body['payload']['sender']['avatar'] = $avatar;
+            }
 
             if ($chat->amo_chat_id) {
                 $body['payload']['conversation_ref_id'] = $chat->amo_chat_id;
@@ -238,7 +252,7 @@ class WhatsAppController extends Controller
 
             $message = Message::where('whatsapp_message_id', $item['id'])->first();
 
-            $status = 0; //ОтправленоJnghfdktyj
+            $status = 0; //Отправлено
 
             if ($item['status'] == 'delivered') {
                 $status = 1; //Доставлено
@@ -264,12 +278,75 @@ class WhatsAppController extends Controller
 
                 $message->status = $status;
                 $message->save();
-
             }
         }
 
 
         return 'ok';
+
+    }
+
+
+    public function d(Request $request)
+    {
+        // dd(\App\AmoAPI::getInstance()->request('/api/v4/events', 'get', [
+        //     //'with' => '',
+        //     'filter[type]' => 'incoming_call',
+        //     'filter[entity]' => 'contact',
+        //     'filter[entity_id]' => '17055471'
+        // ]));
+
+
+        // $id = isset($request->input('leads')['add'][0]['id']) ? (int) $request->input('leads')['add'][0]['id'] : (int) $request->input('leads')['status'][0]['id'];
+        
+        $amo = \App\AmoAPI::getInstance();
+
+        $id = 11568897;
+        $lead = $amo->request('/api/v4/leads', 'get', [
+            'id' => $id,
+            'with' => 'contacts'
+
+        ])->_embedded->leads[0];
+
+
+
+        $main_contact_id = null;
+
+        foreach ($lead->_embedded->contacts as $contact) {
+            if ($contact->is_main) $main_contact_id = $contact->id;
+        }
+
+        dd($main_contact_id);
+
+        $incoming_calls = $amo->request('/api/v4/events','get', [
+            'filter[entity_id]'=> $main_contact_id,
+            'filter[entity]' => 'contact',
+            'filter[type]' => 'incoming_call',
+        ])->_embedded->events;
+
+
+        dd($incoming_calls);
+       
+
+        foreach ($incoming_calls as $item) 
+        {
+
+            $note = $amo->request('/api/v2/notes','get', [
+                'id' =>  $item->value_after[0]->note->id,
+            ])->_embedded->items[0];
+
+            if (isset($note->params)) {
+
+                echo dd($note->params);
+                if ($note->params->call_status == 4) {
+
+                   dd($note->params->PHONE );
+
+                   //continue; 
+                }
+            }
+        }
+
 
     }
 

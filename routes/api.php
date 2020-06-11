@@ -52,6 +52,7 @@ Route::prefix('webhook')->group(function () {
     
     Route::any('amocrm-whatsapp/{scope_id}', 'API\WhatsAppController@amocrmWebhook');
     Route::any('whatsapp', 'API\WhatsAppController@whatsappWebhook');
+    Route::any('d', 'API\WhatsAppController@d');
 
 });
 
