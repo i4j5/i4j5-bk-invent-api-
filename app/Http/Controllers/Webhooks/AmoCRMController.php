@@ -344,6 +344,131 @@ class AmoCRMController extends Controller
         return $new_project;
     }
 
+    public function asanaWebhook(Request $request)
+    {
+
+        $secret = $request->header('X-Hook-Secret');
+        
+        $deal_id = $request->query('deal_id');
+        if (!$deal_id) $deal_id = $request->input('deal');
+
+        $events = $request->input('events') ? $request->input('events') : [];
+        
+        $amo = \App\AmoAPI::getInstance();
+        $res = $amo->request('/api/v4/leads', 'get', ['id'=>$deal_id]);
+        $deal = $res->_embedded->leads[0];
+
+        if ($secret) {
+            if (!$deal_id) return response('No Content', 204)->header('X-Hook-Secret', $secret);
+            return response('OK', 200)->header('X-Hook-Secret', $secret);
+        } 
+
+        $asana = new Curl();
+        $asana->setHeader('Authorization', 'Bearer ' . env('ASANA_KEY'));
+        $asana->setHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+        $amo = \App\AmoAPI::getInstance();
+
+        foreach ($events as $event) 
+        {
+            $user_name = $asana->get('https://app.asana.com/api/1.0/users/' . $event['user']['gid'])->data->name;
+
+            $change = isset($event['change']) ? $event['change'] : null;
+
+            //$event['resource']['resource_type'] == 'attachment' прикрепил файл...
+
+            // Перенос задачи в секцию 
+            if (
+                $event['action'] == 'added' && 
+                $event['resource']['resource_type'] == 'task' && 
+                $event['parent']['resource_type'] == 'section'
+            ) {
+
+                $text = "ASANA: Пользователь $user_name перенёс задачу";
+
+                $task = $asana->get('https://app.asana.com/api/1.0/tasks/' . $event['resource']['gid']);
+                $text = "$text «{$task->data->name}»";
+
+                $section = $asana->get('https://app.asana.com/api/1.0/sections/' . $event['parent']['gid']);
+
+                $text = "$text в секцию «{$section->data->name}»";
+
+                $data_notes = [
+                    'add' => []
+                ];
+
+                $data_notes['add'][] = [
+                    'element_id' => $deal_id,
+                    'element_type' => 2,
+                    'note_type' => 4,
+                    'created_at' => time(),
+                    'text' => $text,
+                ];
+
+                $amo->request('/api/v2/notes', 'post', $data_notes);
+            }
+
+            // Комментарий добавлен 
+            if ($event['action'] == 'added' && $event['resource']['resource_type'] == 'story' && $event['resource']['resource_subtype'] == 'comment_added') {
+
+                $text = "ASANA: Пользователь $user_name добавил комментарий";
+
+                $resource = $asana->get('https://app.asana.com/api/1.0/stories/' . $event['resource']['gid']);
+
+                if ($resource->data->type == 'comment') {
+                    $text = $text . ' "' . $resource->data->text . '"';
+                }
+
+                if ($event['parent']['resource_type'] == 'task') {
+                    $task = $asana->get('https://app.asana.com/api/1.0/tasks/' . $event['parent']['gid']);
+
+                    $text = "$text к задаче «{$task->data->name}»";
+                }
+
+                $data_notes = [
+                    'add' => []
+                ];
+
+                $data_notes['add'][] = [
+                    'element_id' => $deal_id,
+                    'element_type' => 2,
+                    'note_type' => 4,
+                    'created_at' => time(),
+                    'text' => $text,
+                ];
+
+                $amo->request('/api/v2/notes', 'post', $data_notes);
+            }
+
+            // Задача закрыта
+            if (isset($change['field'])) {
+                if ($change['field'] == 'completed' && $event['resource']['resource_type'] == 'task') {
+
+                    $resource = $asana->get('https://app.asana.com/api/1.0/tasks/' . $event['resource']['gid']);
+    
+                    $text = "ASANA: Пользователь $user_name закрыл задачу «{$resource->data->name}»";
+
+                    $data_notes = [
+                        'add' => []
+                    ];
+
+                    $data_notes['add'][] = [
+                        'element_id' => $deal_id,
+                        'element_type' => 2,
+                        'note_type' => 4,
+                        'created_at' => time(),
+                        'text' => $text,
+                    ];
+
+                    $amo->request('/api/v2/notes', 'post', $data_notes);
+                }
+            }
+
+        }
+
+        return 'ok';
+    }
+
     public function updateDealProject(Request $request)
     {
         set_time_limit(0);
@@ -514,6 +639,81 @@ class AmoCRMController extends Controller
         }
 
         return ['error' => ''];
+
+    }
+
+    public function dd(Request $request)
+    {
+        $client = new \Google_Client();
+        $client->setAuthConfig(storage_path(env('GOOGLE_API_KEY')));
+        $client->addScope(\Google_Service_Drive::DRIVE);
+        $service = new \Google_Service_Drive($client);
+      
+
+        // $file = new \Google_Service_Drive_DriveFile([
+        //     'parents' => ['16_u3j93RtbO-eCvpQS9Dw_OGAa3X_Bw5'],
+        //     'name' => 'ntcnfdf.doc',
+        //     'mimeType' => 'application/vnd.google-apps.folder'
+        // ]);
+      
+      
+        // // ПАПКА МЕНЕДЖЕРА
+        // $file->setName('1.1 ПАПКА МЕНЕДЖЕРА');
+        // $file->setParents([$dealFolder->id]);
+        // $folder = $service->files->create($file);
+        // $deal->addCustomField(75431, "https://drive.google.com/open?id=$folder->id");
+
+        // $tz = new \Google_Service_Drive_DriveFile([
+        //     'parents' => ['1zoQFVrbKF2suaIUTiK5nJWlW7UAGUYZT'],
+        //     'name' => 'ТЗ.doc',
+        //     'mimeType' => 'text/HTML',
+        //     // 'mimeType' => 'application/vnd.oasis.opendocument.text',
+        //     'convert' => true,
+        //     //'uploadType' => 'application/vnd.oasis.opendocument.text',
+        //     'data' => '123123'
+        // ]);
+
+        // // dd($tz);
+      
+        // $fileTZ = $service->files->create($tz);
+
+        // $file = '123123.doc';
+        // $data = '333333';  //file_get_contents( storage_path('app/public/zzz.docx') );
+
+        // dd( $data);
+
+        $copyTitle = 'Copy Title';
+        $copy = new \Google_Service_Drive_DriveFile(array(
+            'name' => $copyTitle,
+            'parents' => ['1zoQFVrbKF2suaIUTiK5nJWlW7UAGUYZT'],
+        ));
+        $driveResponse = $service->files->copy('1RTpqkKm5Foq-aMFuREkcBtGtRYFNdKKEbMj2hSj3Dhg', $copy);
+        // $documentCopyId = $driveResponse->id;
+
+
+        // $f = new \Google_Service_Drive_DriveFile([
+        //     'parents' => ['1zoQFVrbKF2suaIUTiK5nJWlW7UAGUYZT'],
+        //     'name' => $file,
+        //     'data' => $data,
+        //     'mimeType' => 'application/vnd.google-apps.document',
+        //     //'uploadType' => 'media',
+        //     // 'convert' => true,
+        // ]);
+
+        // $n = $service->files->create($f);
+
+        // dd( $n );
+
+        //$ddd = $service->files->get('1UWBVgvZSbI7wK5KvbZKiEmy_VS9ovpXLuGI-010DLhQ');
+
+        // $service->files->copy([
+        //     'fileId' => '1acKfHY2ImYp9MJxJ8XjIMM7VwU4GlPkxb4wP8yqR8kY'
+        // ]);
+
+        //dd($ddd->description);
+
+        return '123';
+
 
     }
 }

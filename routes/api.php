@@ -44,6 +44,11 @@ Route::prefix('webhook')->group(function () {
         Route::post('unsorted', 'Webhooks\AmoCRMController@unsorted');
 
         Route::get('email-banner', 'Webhooks\AmoCRMController@emailBanner');
+        Route::any('dd', 'Webhooks\AmoCRMController@dd');
+    });
+
+    Route::prefix('asana')->group(function () {
+        Route::any('', 'Webhooks\AmoCRMController@asanaWebhook');
     });
 
     Route::get('find-duplicates', 'Webhooks\FindDuplicatesController@handle');

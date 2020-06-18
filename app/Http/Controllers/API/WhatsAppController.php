@@ -100,9 +100,27 @@ class WhatsAppController extends Controller
 
         $res = $curl->post($url, $body);
 
-        if (isset($res->error)) return $res->error;
+        // if (isset($res->error)) return $res->error;
 
-        if (!$res->sent) return $res->message;
+        // if (!$res->sent) {
+
+        //     $amo_secret = env('AMO_CHANNEL_SECRET_KEY');
+        //     $amo_scope_id = env('AMO_CHANNEL_SCOPE_ID');
+
+        //     $body = [
+        //         'delivery_status' => '-1',
+        //     ];
+
+        //     $signature = hash_hmac('sha1', json_encode($body), $amo_secret);
+
+        //     $curl = new Curl();
+        //     $curl->setHeader('cache-contro', 'no-cache');
+        //     $curl->setHeader('content-type', 'application/json');
+        //     $curl->setHeader('x-signature', $signature);
+        //     $curl->post("https://amojo.amocrm.ru/v2/origin/custom/{$amo_scope_id}/{$message->amo_message_id}/delivery_status", $body);
+
+        //     //return $res->message;
+        // }
         
         $message->whatsapp_message_id = $res->id;
         $message->save();
@@ -115,6 +133,19 @@ class WhatsAppController extends Controller
     {
         $messages = $request->input('messages') ? $request->input('messages') : [];
         $ack = $request->input('ack') ? $request->input('ack') : [];
+
+        $status = $request->input('status') ? $request->input('acstatusk') : false;
+
+        if ($status == 'got qr code') {
+
+            $icq = new Curl();
+            $icq->get('https://api.icq.net/bot/v1/messages/sendText', [
+                'token' => env('ICQ_TOKEN'),
+                'chatId' => env('ICQ_CHAT_ID'),
+                'text' => 'WhatsApp: есть qr-код',
+            ]);
+
+        }
 
         $amo_secret = env('AMO_CHANNEL_SECRET_KEY');
         $amo_scope_id = env('AMO_CHANNEL_SCOPE_ID');
