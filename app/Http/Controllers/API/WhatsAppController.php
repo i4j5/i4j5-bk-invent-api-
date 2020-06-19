@@ -27,7 +27,6 @@ class WhatsAppController extends Controller
         }
 
         return $file_size;
-
     }
     
     public function amocrmWebhook(Request $request)
@@ -37,22 +36,9 @@ class WhatsAppController extends Controller
 
         $phone = $data['receiver']['phone'];
 
-        // dd((int) $data['timestamp']);
-
         if (Message::where('amo_message_id', $data['message']['id'])->first()) return 'ДУБЛЬ';
         
         $chat = Chat::where('phone', $phone)->first();
-
-        // if (!$chat) {
-        //     Chat::create([
-        //         'phone' => $phone,
-        //         'name' => $phone,
-        //         'amo_chat_id' => $data['conversation']['id']
-        //     ]);
-        // } else if (!$chat->amo_chat_id) {
-        //     $chat->amo_chat_id = $data['conversation']['id'];
-        //     $chat->save();
-        // }
 
         if (!$chat) {
             Chat::create([
@@ -84,7 +70,6 @@ class WhatsAppController extends Controller
             'body' => $message->text, 
         ];
         
-        
         if ($message->type == 'file' || $message->type == 'picture' || $message->type == 'video') {
             $methot = 'sendFile';
             $body = array_merge($body, [
@@ -94,37 +79,12 @@ class WhatsAppController extends Controller
             ]);
         }
 
-        $curl = new Curl(env('WHATSAPP_URL'));
-
         $url = $methot . '?token=' . env('WHATSAPP_TOKEN');
-
+        $curl = new Curl(env('WHATSAPP_URL'));
         $res = $curl->post($url, $body);
-
-        // if (isset($res->error)) return $res->error;
-
-        // if (!$res->sent) {
-
-        //     $amo_secret = env('AMO_CHANNEL_SECRET_KEY');
-        //     $amo_scope_id = env('AMO_CHANNEL_SCOPE_ID');
-
-        //     $body = [
-        //         'delivery_status' => '-1',
-        //     ];
-
-        //     $signature = hash_hmac('sha1', json_encode($body), $amo_secret);
-
-        //     $curl = new Curl();
-        //     $curl->setHeader('cache-contro', 'no-cache');
-        //     $curl->setHeader('content-type', 'application/json');
-        //     $curl->setHeader('x-signature', $signature);
-        //     $curl->post("https://amojo.amocrm.ru/v2/origin/custom/{$amo_scope_id}/{$message->amo_message_id}/delivery_status", $body);
-
-        //     //return $res->message;
-        // }
         
         $message->whatsapp_message_id = $res->id;
         $message->save();
-
 
         return 'ok';
     }
@@ -133,18 +93,15 @@ class WhatsAppController extends Controller
     {
         $messages = $request->input('messages') ? $request->input('messages') : [];
         $ack = $request->input('ack') ? $request->input('ack') : [];
-
-        $status = $request->input('status') ? $request->input('acstatusk') : false;
+        $status = $request->input('status') ? $request->input('status') : false;
 
         if ($status == 'got qr code') {
-
             $icq = new Curl();
             $icq->get('https://api.icq.net/bot/v1/messages/sendText', [
                 'token' => env('ICQ_TOKEN'),
                 'chatId' => env('ICQ_CHAT_ID'),
                 'text' => 'WhatsApp: есть qr-код',
             ]);
-
         }
 
         $amo_secret = env('AMO_CHANNEL_SECRET_KEY');
@@ -168,15 +125,12 @@ class WhatsAppController extends Controller
                 }
             }
 
-            //if ((bool) $item['fromMe'] && (bool) $item['self']) continue;
-
             if ((bool) $item['fromMe']) {
                 $message = Message::where('whatsapp_message_id', $whatsapp_message_id)->first();
 
-                // Гаписать примечание у контакте 
-
                 if ($message) continue;
             }
+
 
             $dataMessage = [];
 
@@ -249,8 +203,7 @@ class WhatsAppController extends Controller
                 'amo_message_id' => '',
                 'whatsapp_message_id' => $whatsapp_message_id,
             ]);
-
-
+            
 
             // Формируем данные для amoCRM
 
@@ -329,71 +282,6 @@ class WhatsAppController extends Controller
 
 
         return 'ok';
-
-    }
-
-
-    public function d(Request $request)
-    {
-        // dd(\App\AmoAPI::getInstance()->request('/api/v4/events', 'get', [
-        //     //'with' => '',
-        //     'filter[type]' => 'incoming_call',
-        //     'filter[entity]' => 'contact',
-        //     'filter[entity_id]' => '17055471'
-        // ]));
-
-
-        // $id = isset($request->input('leads')['add'][0]['id']) ? (int) $request->input('leads')['add'][0]['id'] : (int) $request->input('leads')['status'][0]['id'];
-        
-        $amo = \App\AmoAPI::getInstance();
-
-        $id = 11568897;
-        $lead = $amo->request('/api/v4/leads', 'get', [
-            'id' => $id,
-            'with' => 'contacts'
-
-        ])->_embedded->leads[0];
-
-
-
-        $main_contact_id = null;
-
-        foreach ($lead->_embedded->contacts as $contact) {
-            if ($contact->is_main) $main_contact_id = $contact->id;
-        }
-
-        dd($main_contact_id);
-
-        $incoming_calls = $amo->request('/api/v4/events','get', [
-            'filter[entity_id]'=> $main_contact_id,
-            'filter[entity]' => 'contact',
-            'filter[type]' => 'incoming_call',
-        ])->_embedded->events;
-
-
-        dd($incoming_calls);
-       
-
-        foreach ($incoming_calls as $item) 
-        {
-
-            $note = $amo->request('/api/v2/notes','get', [
-                'id' =>  $item->value_after[0]->note->id,
-            ])->_embedded->items[0];
-
-            if (isset($note->params)) {
-
-                echo dd($note->params);
-                if ($note->params->call_status == 4) {
-
-                   dd($note->params->PHONE );
-
-                   //continue; 
-                }
-            }
-        }
-
-
     }
 
 }

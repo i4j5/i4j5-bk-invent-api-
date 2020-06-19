@@ -44,20 +44,19 @@ Route::prefix('webhook')->group(function () {
         Route::post('unsorted', 'Webhooks\AmoCRMController@unsorted');
 
         Route::get('email-banner', 'Webhooks\AmoCRMController@emailBanner');
+        Route::any('deal/{event}', 'Webhooks\AmoCRMController@deal');
         Route::any('dd', 'Webhooks\AmoCRMController@dd');
     });
 
     Route::prefix('asana')->group(function () {
-        Route::any('', 'Webhooks\AmoCRMController@asanaWebhook');
+        Route::any('{deal_id}/{project_id}', 'Webhooks\AmoCRMController@asanaWebhook');
     });
 
     Route::get('find-duplicates', 'Webhooks\FindDuplicatesController@handle');
-
-
     
     Route::any('amocrm-whatsapp/{scope_id}', 'API\WhatsAppController@amocrmWebhook');
     Route::any('whatsapp', 'API\WhatsAppController@whatsappWebhook');
-    Route::any('d', 'API\WhatsAppController@d');
+    // Route::any('dd', 'API\WhatsAppController@dd');
 
 });
 

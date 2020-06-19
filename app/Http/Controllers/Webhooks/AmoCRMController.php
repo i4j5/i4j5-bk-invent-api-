@@ -19,6 +19,42 @@ class AmoCRMController extends Controller
     {
         $this->amocrm = $amocrm;
     }
+
+    //   
+    public function deal(Request $request, $event)
+    {
+
+        $deal_id = null;
+
+        if ($event == 'delete') {
+            $deal_id = $request->input('leads')['delete'][0]['id'];
+        }
+
+        if ($event == 'closing') {
+            $deal_id = $request->input('leads')['status'][0]['id'];
+        }
+
+        if (!$deal_id) return 'error';
+
+        $asana = new Curl();
+        $asana->setHeader('Authorization', 'Bearer ' . env('ASANA_KEY'));
+        $asana->setHeader('Content-Type', 'application/x-www-form-urlencoded');
+        
+        $asana_webhooks = $asana->get('https://app.asana.com/api/1.0/webhooks?workspace=' . env('ASANA_WORKSPACE_ID'))->data;
+
+        foreach ($asana_webhooks as $webhook) {
+            
+            $arr = explode('/', $webhook->target);
+            $i = ((int) count($arr)) - 2;
+
+            if ($arr[$i] == $deal_id) {
+                $asana->delete("https://app.asana.com/api/1.0/webhooks/$webhook->gid");
+            }
+
+        }
+
+        return 'ok';
+    }
     
     // Папка  
     public function createDealFolders(Request $request)
@@ -243,7 +279,8 @@ class AmoCRMController extends Controller
         $new_project = [
             'gid' => 0,
             'responsible' => $deal->responsible_user_id,
-            'type' => ''
+            'type' => '',
+            'deal_id' => $deal_id,
         ];
 
 
@@ -344,19 +381,16 @@ class AmoCRMController extends Controller
         return $new_project;
     }
 
-    public function asanaWebhook(Request $request)
+    public function asanaWebhook(Request $request, $deal_id, $project_id)
     {
-
-        $secret = $request->header('X-Hook-Secret');
-        
-        $deal_id = $request->query('deal_id');
-        if (!$deal_id) $deal_id = $request->input('deal');
-
+        $secret = $request->header('X-Hook-Secret');;
         $events = $request->input('events') ? $request->input('events') : [];
+
+        // return $events;
         
-        $amo = \App\AmoAPI::getInstance();
-        $res = $amo->request('/api/v4/leads', 'get', ['id'=>$deal_id]);
-        $deal = $res->_embedded->leads[0];
+        // $amo = \App\AmoAPI::getInstance();
+        // $res = $amo->request('/api/v4/leads', 'get', ['id'=>$deal_id]);
+        // $deal = $res->_embedded->leads[0];
 
         if ($secret) {
             if (!$deal_id) return response('No Content', 204)->header('X-Hook-Secret', $secret);
@@ -371,7 +405,26 @@ class AmoCRMController extends Controller
 
         foreach ($events as $event) 
         {
-            $user_name = $asana->get('https://app.asana.com/api/1.0/users/' . $event['user']['gid'])->data->name;
+
+            if ($event['action'] == 'sync_error') {
+                $icq = new Curl();
+                $icq->get('https://api.icq.net/bot/v1/messages/sendText', [
+                    'token' => env('ICQ_TOKEN'),
+                    'chatId' => env('ICQ_CHAT_ID'),
+                    'text' => 'ASANA: ' . $event['message'],
+                ]);
+                
+                continue;
+            }
+
+            $user_name = '';
+            if (
+                isset($event['user']) &&
+                isset($event['user']['gid']) 
+            ) {
+                $user_name = $asana->get('https://app.asana.com/api/1.0/users/' . $event['user']['gid'])->data->name;
+                // usleep(10);
+            }
 
             $change = isset($event['change']) ? $event['change'] : null;
 
@@ -464,6 +517,8 @@ class AmoCRMController extends Controller
                 }
             }
 
+            usleep(50);
+
         }
 
         return 'ok';
@@ -471,12 +526,28 @@ class AmoCRMController extends Controller
 
     public function updateDealProject(Request $request)
     {
+        
         set_time_limit(0);
-        sleep(10);
 
         $gid = $request->input('gid');
         $type = $request->input('type');
         $amo_user_id = $request->input('responsible');
+        $deal_id = $request->input('deal_id');
+
+
+        $asana = new Curl();
+        $asana->setHeader('Authorization', 'Bearer ' . env('ASANA_KEY'));
+        $asana->setHeader('Content-Type', 'application/x-www-form-urlencoded');
+        
+        //TODO: проверить есть ли вебхук с $deal_id
+        // Подписать на события
+        $asana->post('https://app.asana.com/api/1.0/webhooks', [
+            'target' => "https://private.bk-invent.ru/api/webhook/asana/$deal_id/$gid",
+            'resource' => $gid,
+        ]);
+
+        sleep(8);
+
 
         $asana_user_id = 0;
         $description = '';
@@ -489,10 +560,6 @@ class AmoCRMController extends Controller
                 $asana_user_id = $user->asana_user_id;
             }
         }
-
-        $asana = new Curl();
-        $asana->setHeader('Authorization', 'Bearer ' . env('ASANA_KEY'));
-        $asana->setHeader('Content-Type', 'application/x-www-form-urlencoded');
 
         if ($type == 'project') {
             $project = $asana->get("https://app.asana.com/api/1.0/projects/$gid");
@@ -549,7 +616,6 @@ class AmoCRMController extends Controller
         }
 
         return 'ok';
-
     }
 
     public function rawLead(Request $request)
@@ -644,6 +710,39 @@ class AmoCRMController extends Controller
 
     public function dd(Request $request)
     {
+        $deal_id = 0;
+        $gid = 1130170808950250;
+
+        $asana = new Curl();
+        $asana->setHeader('Authorization', 'Bearer ' . env('ASANA_KEY'));
+        $asana->setHeader('Content-Type', 'application/x-www-form-urlencoded');
+        //TODO: проверить есть ли вебхук с $deal_id
+        // Подписать на события
+
+        $data = [];
+        
+        $filters = [];
+        $filters[] =  [
+            'action' => 'added',
+            // 'fields' => [
+            //     'due_at',
+            //     'due_on',
+            //     'dependencies'
+            //  ],
+            'resource_type' => 'task',
+        ];
+
+        $data['data'] = [
+            'target' => "https://private.bk-invent.ru/api/webhook/asana/$deal_id/$gid",
+            'resource' => $gid,
+            'filters' => $filters, 
+        ];
+
+        $res = $asana->post('https://app.asana.com/api/1.0/webhooks', $data);
+        dd($res);
+
+
+
         $client = new \Google_Client();
         $client->setAuthConfig(storage_path(env('GOOGLE_API_KEY')));
         $client->addScope(\Google_Service_Drive::DRIVE);
@@ -688,7 +787,37 @@ class AmoCRMController extends Controller
             'parents' => ['1zoQFVrbKF2suaIUTiK5nJWlW7UAGUYZT'],
         ));
         $driveResponse = $service->files->copy('1RTpqkKm5Foq-aMFuREkcBtGtRYFNdKKEbMj2hSj3Dhg', $copy);
-        // $documentCopyId = $driveResponse->id;
+        $documentCopyId = $driveResponse->id;
+
+        // $serviceDocs = new \Google_Service_Docs($client);
+
+        // dd($driveResponse);
+
+        // dd( $script->scripts->run('1bHLEee-VOeWBmxd1UCVbI5R16QhM7AYvr2czbeOkvDAqvBGcOA5xlZfP') );
+
+
+        $script = new \Google_Service_Script($client);
+
+        $scriptBody = new \Google_Service_Script_ExecutionRequest();
+        $scriptBody->setFunction('doPost');
+        //$scriptBody->setParameters([]);
+        $scriptBody->setDevMode(true);
+
+        //DocumentApp.getActiveDocument().getId()
+        $result = $script->scripts->run('177Vt54Z-diSzUqV9TWEXcAlPAHcPYkhBRSmGEtsza60', $scriptBody);
+
+        dd($result);
+
+        //Project key
+        //$result = $script->scripts->run('Mvdxvn6AxcoJR2H1wIsro6gRkjHxb-ANQ', $scriptBody);
+
+        //SDC key
+        //$result = $script->scripts->run('b553ab21c0abcc1f', $scriptBody);
+
+        //Script ID
+        //$result = $script->scripts->run('1i-Z0JC-VzfPNcUW10kZro-DgzaNUsesAbY4a95LWjKa1vG2_kcYSAG_g', $scriptBody);
+
+
 
 
         // $f = new \Google_Service_Drive_DriveFile([
