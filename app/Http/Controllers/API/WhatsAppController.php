@@ -242,7 +242,6 @@ class WhatsAppController extends Controller
             $curl->setHeader('x-signature', $signature);
             $res = $curl->post("https://amojo.amocrm.ru/v2/origin/custom/{$amo_scope_id}", $body);
 
-
             $message->amo_message_id = $res->new_message->msgid;
             $message->save();
         }

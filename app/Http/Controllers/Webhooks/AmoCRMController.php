@@ -426,6 +426,8 @@ class AmoCRMController extends Controller
                 // usleep(10);
             }
 
+            $text = "ASANA: Пользователь $user_name";
+
             $change = isset($event['change']) ? $event['change'] : null;
 
             //$event['resource']['resource_type'] == 'attachment' прикрепил файл...
@@ -437,34 +439,43 @@ class AmoCRMController extends Controller
                 $event['parent']['resource_type'] == 'section'
             ) {
 
-                $text = "ASANA: Пользователь $user_name перенёс задачу";
-
                 $task = $asana->get('https://app.asana.com/api/1.0/tasks/' . $event['resource']['gid']);
-                $text = "$text «{$task->data->name}»";
+                $text = "$text перенёс задачу «{$task->data->name}»";
 
                 $section = $asana->get('https://app.asana.com/api/1.0/sections/' . $event['parent']['gid']);
 
                 $text = "$text в секцию «{$section->data->name}»";
 
-                $data_notes = [
-                    'add' => []
-                ];
+                // $data_notes = [
+                //     'add' => []
+                // ];
 
-                $data_notes['add'][] = [
-                    'element_id' => $deal_id,
-                    'element_type' => 2,
-                    'note_type' => 4,
-                    'created_at' => time(),
-                    'text' => $text,
-                ];
+                // $data_notes['add'][] = [
+                //     'element_id' => $deal_id,
+                //     'element_type' => 2,
+                //     'note_type' => 4,
+                //     'created_at' => time(),
+                //     'text' => $text,
+                // ];
 
-                $amo->request('/api/v2/notes', 'post', $data_notes);
+                // $amo->request('/api/v2/notes', 'post', $data_notes);
+
+                $data_notes = [];
+                $data_notes[] = [
+                    'note_type' => 'invoice_paid',
+                    'params' => [
+                        'text' => $text,
+                        'service' => 'ASANA',
+                        'icon_url' => 'https://bk-invent.ru/images/asana.png',
+                    ]
+                ];
+                $amo->request("/api/v4/leads/$deal_id/notes", 'post', $data_notes);
             }
 
             // Комментарий добавлен 
             if ($event['action'] == 'added' && $event['resource']['resource_type'] == 'story' && $event['resource']['resource_subtype'] == 'comment_added') {
 
-                $text = "ASANA: Пользователь $user_name добавил комментарий";
+                $text = "$text добавил комментарий";
 
                 $resource = $asana->get('https://app.asana.com/api/1.0/stories/' . $event['resource']['gid']);
 
@@ -478,19 +489,30 @@ class AmoCRMController extends Controller
                     $text = "$text к задаче «{$task->data->name}»";
                 }
 
-                $data_notes = [
-                    'add' => []
-                ];
+                // $data_notes = [
+                //     'add' => []
+                // ];
 
-                $data_notes['add'][] = [
-                    'element_id' => $deal_id,
-                    'element_type' => 2,
-                    'note_type' => 4,
-                    'created_at' => time(),
-                    'text' => $text,
-                ];
+                // $data_notes['add'][] = [
+                //     'element_id' => $deal_id,
+                //     'element_type' => 2,
+                //     'note_type' => 4,
+                //     'created_at' => time(),
+                //     'text' => $text,
+                // ];
 
-                $amo->request('/api/v2/notes', 'post', $data_notes);
+                // $amo->request('/api/v2/notes', 'post', $data_notes);
+
+                $data_notes = [];
+                $data_notes[] = [
+                    'note_type' => 'invoice_paid',
+                    'params' => [
+                        'text' => $text,
+                        'service' => 'ASANA',
+                        'icon_url' => 'https://bk-invent.ru/images/asana.png',
+                    ]
+                ];
+                $amo->request("/api/v4/leads/$deal_id/notes", 'post', $data_notes);
             }
 
             // Задача закрыта
@@ -499,21 +521,32 @@ class AmoCRMController extends Controller
 
                     $resource = $asana->get('https://app.asana.com/api/1.0/tasks/' . $event['resource']['gid']);
     
-                    $text = "ASANA: Пользователь $user_name закрыл задачу «{$resource->data->name}»";
+                    $text = "$text закрыл задачу «{$resource->data->name}»";
 
-                    $data_notes = [
-                        'add' => []
+                    // $data_notes = [
+                    //     'add' => []
+                    // ];
+
+                    // $data_notes['add'][] = [
+                    //     'element_id' => $deal_id,
+                    //     'element_type' => 2,
+                    //     'note_type' => 4,
+                    //     'created_at' => time(),
+                    //     'text' => $text,
+                    // ];
+
+                    // $amo->request('/api/v2/notes', 'post', $data_notes);
+
+                    $data_notes = [];
+                    $data_notes[] = [
+                        'note_type' => 'invoice_paid',
+                        'params' => [
+                            'text' => $text,
+                            'service' => 'ASANA',
+                            'icon_url' => 'https://bk-invent.ru/images/asana.png',
+                        ]
                     ];
-
-                    $data_notes['add'][] = [
-                        'element_id' => $deal_id,
-                        'element_type' => 2,
-                        'note_type' => 4,
-                        'created_at' => time(),
-                        'text' => $text,
-                    ];
-
-                    $amo->request('/api/v2/notes', 'post', $data_notes);
+                    $amo->request("/api/v4/leads/$deal_id/notes", 'post', $data_notes);
                 }
             }
 
@@ -538,16 +571,8 @@ class AmoCRMController extends Controller
         $asana = new Curl();
         $asana->setHeader('Authorization', 'Bearer ' . env('ASANA_KEY'));
         $asana->setHeader('Content-Type', 'application/x-www-form-urlencoded');
-        
-        //TODO: проверить есть ли вебхук с $deal_id
-        // Подписать на события
-        $asana->post('https://app.asana.com/api/1.0/webhooks', [
-            'target' => "https://private.bk-invent.ru/api/webhook/asana/$deal_id/$gid",
-            'resource' => $gid,
-        ]);
 
-        sleep(8);
-
+        sleep(4);
 
         $asana_user_id = 0;
         $description = '';
@@ -614,6 +639,13 @@ class AmoCRMController extends Controller
                 usleep(50);
             } 
         }
+
+        //TODO: проверить есть ли вебхук с $deal_id
+        // Подписать на события
+        $asana->post('https://app.asana.com/api/1.0/webhooks', [
+            'target' => "https://private.bk-invent.ru/api/webhook/asana/$deal_id/$gid",
+            'resource' => $gid,
+        ]);
 
         return 'ok';
     }
@@ -710,139 +742,6 @@ class AmoCRMController extends Controller
 
     public function dd(Request $request)
     {
-        $deal_id = 0;
-        $gid = 1130170808950250;
-
-        $asana = new Curl();
-        $asana->setHeader('Authorization', 'Bearer ' . env('ASANA_KEY'));
-        $asana->setHeader('Content-Type', 'application/x-www-form-urlencoded');
-        //TODO: проверить есть ли вебхук с $deal_id
-        // Подписать на события
-
-        $data = [];
-        
-        $filters = [];
-        $filters[] =  [
-            'action' => 'added',
-            // 'fields' => [
-            //     'due_at',
-            //     'due_on',
-            //     'dependencies'
-            //  ],
-            'resource_type' => 'task',
-        ];
-
-        $data['data'] = [
-            'target' => "https://private.bk-invent.ru/api/webhook/asana/$deal_id/$gid",
-            'resource' => $gid,
-            'filters' => $filters, 
-        ];
-
-        $res = $asana->post('https://app.asana.com/api/1.0/webhooks', $data);
-        dd($res);
-
-
-
-        $client = new \Google_Client();
-        $client->setAuthConfig(storage_path(env('GOOGLE_API_KEY')));
-        $client->addScope(\Google_Service_Drive::DRIVE);
-        $service = new \Google_Service_Drive($client);
-      
-
-        // $file = new \Google_Service_Drive_DriveFile([
-        //     'parents' => ['16_u3j93RtbO-eCvpQS9Dw_OGAa3X_Bw5'],
-        //     'name' => 'ntcnfdf.doc',
-        //     'mimeType' => 'application/vnd.google-apps.folder'
-        // ]);
-      
-      
-        // // ПАПКА МЕНЕДЖЕРА
-        // $file->setName('1.1 ПАПКА МЕНЕДЖЕРА');
-        // $file->setParents([$dealFolder->id]);
-        // $folder = $service->files->create($file);
-        // $deal->addCustomField(75431, "https://drive.google.com/open?id=$folder->id");
-
-        // $tz = new \Google_Service_Drive_DriveFile([
-        //     'parents' => ['1zoQFVrbKF2suaIUTiK5nJWlW7UAGUYZT'],
-        //     'name' => 'ТЗ.doc',
-        //     'mimeType' => 'text/HTML',
-        //     // 'mimeType' => 'application/vnd.oasis.opendocument.text',
-        //     'convert' => true,
-        //     //'uploadType' => 'application/vnd.oasis.opendocument.text',
-        //     'data' => '123123'
-        // ]);
-
-        // // dd($tz);
-      
-        // $fileTZ = $service->files->create($tz);
-
-        // $file = '123123.doc';
-        // $data = '333333';  //file_get_contents( storage_path('app/public/zzz.docx') );
-
-        // dd( $data);
-
-        $copyTitle = 'Copy Title';
-        $copy = new \Google_Service_Drive_DriveFile(array(
-            'name' => $copyTitle,
-            'parents' => ['1zoQFVrbKF2suaIUTiK5nJWlW7UAGUYZT'],
-        ));
-        $driveResponse = $service->files->copy('1RTpqkKm5Foq-aMFuREkcBtGtRYFNdKKEbMj2hSj3Dhg', $copy);
-        $documentCopyId = $driveResponse->id;
-
-        // $serviceDocs = new \Google_Service_Docs($client);
-
-        // dd($driveResponse);
-
-        // dd( $script->scripts->run('1bHLEee-VOeWBmxd1UCVbI5R16QhM7AYvr2czbeOkvDAqvBGcOA5xlZfP') );
-
-
-        $script = new \Google_Service_Script($client);
-
-        $scriptBody = new \Google_Service_Script_ExecutionRequest();
-        $scriptBody->setFunction('doPost');
-        //$scriptBody->setParameters([]);
-        $scriptBody->setDevMode(true);
-
-        //DocumentApp.getActiveDocument().getId()
-        $result = $script->scripts->run('177Vt54Z-diSzUqV9TWEXcAlPAHcPYkhBRSmGEtsza60', $scriptBody);
-
-        dd($result);
-
-        //Project key
-        //$result = $script->scripts->run('Mvdxvn6AxcoJR2H1wIsro6gRkjHxb-ANQ', $scriptBody);
-
-        //SDC key
-        //$result = $script->scripts->run('b553ab21c0abcc1f', $scriptBody);
-
-        //Script ID
-        //$result = $script->scripts->run('1i-Z0JC-VzfPNcUW10kZro-DgzaNUsesAbY4a95LWjKa1vG2_kcYSAG_g', $scriptBody);
-
-
-
-
-        // $f = new \Google_Service_Drive_DriveFile([
-        //     'parents' => ['1zoQFVrbKF2suaIUTiK5nJWlW7UAGUYZT'],
-        //     'name' => $file,
-        //     'data' => $data,
-        //     'mimeType' => 'application/vnd.google-apps.document',
-        //     //'uploadType' => 'media',
-        //     // 'convert' => true,
-        // ]);
-
-        // $n = $service->files->create($f);
-
-        // dd( $n );
-
-        //$ddd = $service->files->get('1UWBVgvZSbI7wK5KvbZKiEmy_VS9ovpXLuGI-010DLhQ');
-
-        // $service->files->copy([
-        //     'fileId' => '1acKfHY2ImYp9MJxJ8XjIMM7VwU4GlPkxb4wP8yqR8kY'
-        // ]);
-
-        //dd($ddd->description);
-
-        return '123';
-
-
+        return 'dd';
     }
 }

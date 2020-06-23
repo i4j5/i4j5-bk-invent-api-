@@ -139,7 +139,7 @@ class AmoAPI
         $request = new Curl('https://' . env('AMO_DOMAIN') . '.amocrm.ru');
         
         $request->setHeader('Authorization', 'Bearer ' . $accessToken);
-        //$request->setHeader('Content-Type', 'application/x-www-form-urlencoded');
+        $request->setHeader('Content-Type', 'application/json');
 
         $res = $request->{$method}($url, $data);
 
