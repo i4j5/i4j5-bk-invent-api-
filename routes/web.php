@@ -15,6 +15,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/whatsapp', 'WhatsappController@index')->name('whatsapp.index');
+
+
 
 // Авторизация
 Auth::routes(['register' => false]);

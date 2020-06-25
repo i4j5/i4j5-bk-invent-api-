@@ -35,6 +35,9 @@
                         <li class="nav-item">
                            <a class="nav-link" href="{{ route('phonebook') }}">Телефонная книга</a>
                         </li> 
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url('/whatsapp') }}">WhatsApp</a>
+                        </li> 
 
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url('/main.html') }}">Вики</a>

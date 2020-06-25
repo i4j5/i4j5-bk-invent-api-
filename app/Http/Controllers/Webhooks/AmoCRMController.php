@@ -742,6 +742,23 @@ class AmoCRMController extends Controller
 
     public function dd(Request $request)
     {
+
+        $amo = \App\AmoAPI::getInstance();
+    
+        $data_notes = [];
+        $data_notes[] = [
+            'note_type' => 'geolocation',
+            'params' => [
+                "text" => "Геолокация",
+                "address" => "ул. Пушкина, дом Колотушкина",
+                "longitude" => "-13",
+                "latitude" => "32",
+            ]
+        ];
+        $res = $amo->request("/api/v4/leads/12048809/notes", 'post', $data_notes);
+
+        dd($res);
+
         return 'dd';
     }
 }
