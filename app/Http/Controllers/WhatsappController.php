@@ -30,12 +30,12 @@ class WhatsappController extends Controller
 
         $status = $curl->get('status' . $token);
 
-        //dd($status);
+        // dd($status);
 
         //accountStatus
         //qrCode
 
-        if ($status->accountStatus == 'loading') {
+        if (isset($status->accountStatus) && $status->accountStatus == 'loading') {
             $curl->get('takeover' . $token);
 
             $status = $curl->get('status' . $token);

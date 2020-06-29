@@ -745,19 +745,26 @@ class AmoCRMController extends Controller
 
         $amo = \App\AmoAPI::getInstance();
     
-        $data_notes = [];
-        $data_notes[] = [
-            'note_type' => 'geolocation',
-            'params' => [
-                "text" => "Геолокация",
-                "address" => "ул. Пушкина, дом Колотушкина",
-                "longitude" => "-13",
-                "latitude" => "32",
+        $calls = $amo->request('/api/v4/events', 'get', [
+            'filter' => [
+                'type' => 'incoming_call,outgoing_call',
+                'entity' => 'contact',
+                'entity_id' => '2211023'
             ]
-        ];
-        $res = $amo->request("/api/v4/leads/12048809/notes", 'post', $data_notes);
+        ]);
 
-        dd($res);
+
+        // api/v4/contact/2211023/notes/{id}
+
+        $calls = $amo->request('api/v4/contact/2211023/notes/67345127', 'get');
+        
+
+        dd($calls);
+
+        foreach ($calls->_embedded->events as $event) 
+        {
+
+        }
 
         return 'dd';
     }
