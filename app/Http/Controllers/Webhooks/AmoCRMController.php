@@ -746,61 +746,6 @@ class AmoCRMController extends Controller
         $amo = \App\AmoAPI::getInstance();
 
 
-        $leads = [];
-        $leads[] = [
-            'name' => 'Новая сделка по звонку с 79896231790',
-        ];
-
-        $contacts = [];
-        $contacts[] = [
-            'name' => '79896231790',
-            'custom_fields_values' => [
-                '0' => [
-                    'field_id' => 75087,
-                    'values' => [
-                        '0' => [
-                            'value' => 79896231790,
-                            'enum_code' => 'MOB'
-                        ]
-                    ]
-                ]
-            ]
-            
-        ];
-
-        $metadata = [
-            'from' => '79896231790',
-            'phone' => 79896231790,
-            'called_at' => time(),
-            'duration' => 0,
-            'link' => '',
-            'service_code' => 'CkAvbEwPam6sad',
-            'is_call_event_needed' => true,
-            'uniq' => 'azfee7c0fc436088e64ba2e8822ba2b3',
-        ];
-
-        $unsorted_data = [];
-        $unsorted_data[] = [
-            'request_id' => 123,
-            'source_uid' => 'a3fee7c0fc436088e64ba2e8822ba2b3',
-            'source_name' => 'Telephony (source_name)',
-            // 'pipeline_id' => 2291194,
-            'created_at' => time(),
-            '_embedded' => [
-                'leads' => $leads,
-                'contacts' => $contacts
-            ],
-            'metadata' => $metadata,
-        ];
-
-        //dd($unsorted_data);
-
-        $res = $amo->request('api/v4/leads/unsorted/sip', 'post', $unsorted_data);
-
-
-        dd($res);
-
-
 
         // $url = 'https://app.uiscom.ru/system/media/talk/1197843161/13f79da9cdad2dfaee5ef282712164a4/';
         // $contents = file_get_contents($url);
@@ -812,10 +757,10 @@ class AmoCRMController extends Controller
         // $mime = Storage::mimeType('public/m/1.mp3');
         // $response = Response::make($contents, 200);
         // $response->header('Content-Type', $mime);
-        // return $response;
-        return Storage::download('public/m/1.mp3', '1.mp3');
-        $url = Storage::url('file.jpg');
-        dd($url);
+        // // return $response;
+        // return Storage::download('public/m/1.mp3', '1.mp3');
+        // $url = Storage::url('file.jpg');
+        // dd($url);
 
 
         $amo = \App\AmoAPI::getInstance();
@@ -825,7 +770,7 @@ class AmoCRMController extends Controller
         $data[] = [
             "duration" => 0,
             "source" => "example_integration",
-            "phone" => "71234123400",
+            "phone" => "79896231790",
             "link" => "",
             "direction" => "inbound",
             "call_result"=> "Успешный разговор",

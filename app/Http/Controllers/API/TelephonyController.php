@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use \Curl\Curl;
 use App\Models\User;
+use Illuminate\Support\Facades\Storage;
+// use Illuminate\Support\Facades\File;
 
 class TelephonyController extends Controller
 {
@@ -18,15 +20,7 @@ class TelephonyController extends Controller
     
     public function record(Request $request)
     {
-        
-        // 1 – оставил сообщение
-        // 2 – перезвонить позже
-        // 3 – нет на месте
-        // 4 – разговор состоялся
-        // 5 – неверный номер
-        // 6 – Не дозвонился
-        // 7 – номер занят.
-
+    
         $direction = ($request->input('direction') == 'in') ? 'inbound' : 'outbound';
         
         $virtual_phone = $request->input('virtual_phone_number'); // Виртуальный
@@ -37,11 +31,28 @@ class TelephonyController extends Controller
         $link = $request->input('file_link'); // Сcылка на файл
         $uniq = $request->input('communication_id'); // ID Звонка 
 
-        $start_time = $request->input('start_time');
+        $start_time = $request->input('start_time'); 
+
+        $filename = str_replace([':', ' '], ['-', '_'], $start_time);
+
+        $from = '';
+        $to = '';
+
+        if ($direction == 'inbound') {
+            $from = $extension_phone;
+            $to = $contact_phone;
+        } else {
+            $from = $contact_phone;
+            $to = $extension_phone;
+        }
+
+        $filename = $filename . "_from_$from" . "_to_$to";
+
+        $link = $this->savetTalk($link, $filename);
 
         $data = [
-            'direction' => $duration,
-            'source' => 'private.bk-invent.ru', // ?
+            'direction' => $direction,
+            'source' => 'Telephony',
             'phone' => $contact_phone,
             'link' => $link,
             'duration' => $duration,
@@ -53,44 +64,61 @@ class TelephonyController extends Controller
 
         $user = User::where('extension_phone_number', $extension_phone)->first();
         
-        if ($user) {
-            $data['responsible_user_id'] = $user->amo_user_id;    
+        if ($user) $data['responsible_user_id'] = $user->amo_user_id;
+
+        $res = $this->addCall($data);
+
+        if ($res->errors) {
+            if ($direction == 'inbound') {
+                $this->addUnsorted($data); 
+            } elseif ($direction == 'outbound') {
+                $this->addContact($data['phone']);
+                $this->addCall($data);
+            }
         }
 
-        $call_data = [];
-        $call_data[] = $data;
-
-        $res = $amo->request('api/v4/calls', 'post', $call_data);
-
-        // Проверка  $res
+        return 'ok';
     }
 
     public function lost(Request $request)
     {
+
+        // 2 – перезвонить позже
+        // 3 – нет на месте
+        // 6 – Не дозвонился
+        // 7 – номер занят.
+
+        //"direction": "out",
+        //"employee_full_names": [
+        //     "Маркетинг (208)"
+        // ],
+        // "employee_ids": [
+        //     1406556
+        //   ]
+
         $direction = ($request->input('direction') == 'in') ? 'inbound' : 'outbound';
-        $virtual_phone = $request->input('virtual_phone_number'); // Виртуальный
-        $extension_phone = $request->input('extension_phone_number'); // Добавочный
-        $contact_phone = $request->input('contact_phone_number'); // Номер клиента
-        $call_result = $request->input('employee_full_name'); // Менеджер
-        $uniq = $request->input('communication_id'); // ID Звонка
+        $virtual_phone = $request->input('virtual_phone_number');
+        $contact_phone = $request->input('contact_phone_number');
+        $call_result = $request->input('lost_reason');
+        $uniq = $request->input('communication_id');
         $start_time = $request->input('start_time');
 
         $data = [
-            'direction' => $duration,
-            'source' => 'private.bk-invent.ru',
+            'direction' => $direction,
+            'source' => 'Telephony',
             'phone' => $contact_phone,
-            'duration' => 0,
+            'link' => '',
+            'duration' => $duration,
             'call_result' => $call_result,
-            'call_status' => 6, 
+            'call_status' => 4, 
             'uniq' => $uniq,
             'created_at' => strtotime($start_time)
         ];
 
-        $user = User::where('extension_phone_number', $extension_phone)->first();
-        
-        if ($user) {
-            $data['responsible_user_id'] = $user->amo_user_id;    
-        }
+        $responsible_user_id = 0;
+        //TODO (outbound) Поиск контакта или создание. Получение id отвестренного за контакт.
+        //TODO (inbound) Поиск контакта и получение id отвестренного за контака или отвравить в неразобранное
+        if ($responsible_user_id) $data['responsible_user_id'] = $responsible_user_id;
 
         $call_data = [];
         $call_data[] = $data;
@@ -98,14 +126,43 @@ class TelephonyController extends Controller
         $res = $amo->request('api/v4/calls', 'post', $call_data);
     }
 
-    private function searchInCRM($phone)
+    private function addCall($data)
     {
+        $res = $this->amo->request('api/v4/calls', 'post', [
+            '0' => $data
+        ]);
+        return $res;
     }
 
-    private function addToUnsorted($data)
+    private function savetTalk($url, $filename)
     {
+        $content = file_get_contents($url);
+        Storage::put("media/talk/$filename.mp3", $content);;
+        return url("media/talk/$filename");
+    }
 
+    private function addContact($phone)
+    {
+        $this->amo->request('api/v4/contacts', 'post', [
+            '0' => [
+                'name' => $phone,
+                'custom_fields_values' => [
+                    '0' => [
+                        'field_id' => 75087,
+                        'values' => [
+                            '0' => [
+                                'value' => $phone,
+                                'enum_code' => 'MOB'
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]);
+    }
 
+    private function addUnsorted($data)
+    {
         $contacts = [];
         $contacts[] = [
             'name' => $data['phone'],
@@ -133,7 +190,7 @@ class TelephonyController extends Controller
             'called_at' => $data['created_at'],
             'duration' => $data['duration'],
             'link' => $data['link'],
-            'service_code' => 'private.bk-invent.ru',
+            'service_code' => 'Telephony',
             'is_call_event_needed' => true,
         ];
 
@@ -148,11 +205,8 @@ class TelephonyController extends Controller
             'metadata' => $metadata,
         ];
 
-        $res = $amo->request('api/v4/leads/unsorted/sip', 'post', $unsorted_data);
+        $res = $this->amo->request('api/v4/leads/unsorted/sip', 'post', $unsorted_data);
         return $res ;
     }
 
-    private function addContact($phone)
-    {
-    }
 }
