@@ -28,20 +28,20 @@ class TelephonyController extends Controller
         // 7 – номер занят.
 
         $direction = ($request->input('direction') == 'in') ? 'inbound' : 'outbound';
+        
         $virtual_phone = $request->input('virtual_phone_number'); // Виртуальный
         $extension_phone = $request->input('extension_phone_number'); // Добавочный
         $contact_phone = $request->input('contact_phone_number'); // Номер клиента
         $call_result = $request->input('employee_full_name'); // Менеджер
         $duration = $request->input('file_duration'); // Длительность звонка 
-        $link = $request->input('file_link'); // Сыылка на файл
+        $link = $request->input('file_link'); // Сcылка на файл
         $uniq = $request->input('communication_id'); // ID Звонка 
 
-        //"notification_timestamp": 1593688834,
         $start_time = $request->input('start_time');
 
         $data = [
             'direction' => $duration,
-            'source' => 'example_integration', // ?
+            'source' => 'private.bk-invent.ru', // ?
             'phone' => $contact_phone,
             'link' => $link,
             'duration' => $duration,
@@ -51,10 +51,11 @@ class TelephonyController extends Controller
             'created_at' => strtotime($start_time)
         ];
 
-
-        $user = User::where('extension_phone', $extension_phone)->first();
-        $responsible_user_id = $user->amo_user_id;
-        $data['responsible_user_id'] = $responsible_user_id;
+        $user = User::where('extension_phone_number', $extension_phone)->first();
+        
+        if ($user) {
+            $data['responsible_user_id'] = $user->amo_user_id;    
+        }
 
         $call_data = [];
         $call_data[] = $data;
@@ -76,7 +77,7 @@ class TelephonyController extends Controller
 
         $data = [
             'direction' => $duration,
-            'source' => 'example_integration', // ?
+            'source' => 'private.bk-invent.ru',
             'phone' => $contact_phone,
             'duration' => 0,
             'call_result' => $call_result,
@@ -85,9 +86,11 @@ class TelephonyController extends Controller
             'created_at' => strtotime($start_time)
         ];
 
-        $user = User::where('extension_phone', $extension_phone)->first();
-        $responsible_user_id = $user->amo_user_id;
-        $data['responsible_user_id'] = $responsible_user_id;
+        $user = User::where('extension_phone_number', $extension_phone)->first();
+        
+        if ($user) {
+            $data['responsible_user_id'] = $user->amo_user_id;    
+        }
 
         $call_data = [];
         $call_data[] = $data;

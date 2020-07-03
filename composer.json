@@ -10,7 +10,6 @@
     "require": {
         "php": "^7.1.3",
         "amocrm/oauth2-amocrm": "^2.0",
-        "cnvs/canvas": "5.2.5",
         "dotzero/laravel-amocrm": "^0.7.0",
         "fideloper/proxy": "^4.0",
         "google/apiclient": "^2.2",
