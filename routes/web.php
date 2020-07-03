@@ -27,6 +27,8 @@ Route::get('login/google/callback', 'Auth\LoginController@handleProviderCallback
 Route::get('/phonebook/xml', 'PhoneBookController@xml')->name('phonebook.xml');
 Route::get('/phonebook/update', 'PhoneBookController@update')->name('phonebook.update');
 
+Route::get('/media/talk/{filename}', 'MediaController@talk')->name('media.talk');
+
 
 Route::get('email-banner/{contactid}', function ($contactid)
 {

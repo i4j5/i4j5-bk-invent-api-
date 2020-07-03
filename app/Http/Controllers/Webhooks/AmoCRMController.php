@@ -9,6 +9,7 @@ use Dotzero\LaravelAmoCrm\AmoCrmManager;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
+// use Symfony\Component\HttpFoundation\Response;
 
 class AmoCRMController extends Controller
 {
@@ -742,29 +743,107 @@ class AmoCRMController extends Controller
 
     public function dd(Request $request)
     {
+        $amo = \App\AmoAPI::getInstance();
+
+
+        $leads = [];
+        $leads[] = [
+            'name' => 'Новая сделка по звонку с 79896231790',
+        ];
+
+        $contacts = [];
+        $contacts[] = [
+            'name' => '79896231790',
+            'custom_fields_values' => [
+                '0' => [
+                    'field_id' => 75087,
+                    'values' => [
+                        '0' => [
+                            'value' => 79896231790,
+                            'enum_code' => 'MOB'
+                        ]
+                    ]
+                ]
+            ]
+            
+        ];
+
+        $metadata = [
+            'from' => '79896231790',
+            'phone' => 79896231790,
+            'called_at' => time(),
+            'duration' => 0,
+            'link' => '',
+            'service_code' => 'CkAvbEwPam6sad',
+            'is_call_event_needed' => true,
+            'uniq' => 'azfee7c0fc436088e64ba2e8822ba2b3',
+        ];
+
+        $unsorted_data = [];
+        $unsorted_data[] = [
+            'request_id' => 123,
+            'source_uid' => 'a3fee7c0fc436088e64ba2e8822ba2b3',
+            'source_name' => 'Telephony (source_name)',
+            // 'pipeline_id' => 2291194,
+            'created_at' => time(),
+            '_embedded' => [
+                'leads' => $leads,
+                'contacts' => $contacts
+            ],
+            'metadata' => $metadata,
+        ];
+
+        //dd($unsorted_data);
+
+        $res = $amo->request('api/v4/leads/unsorted/sip', 'post', $unsorted_data);
+
+
+        dd($res);
+
+
+
+        // $url = 'https://app.uiscom.ru/system/media/talk/1197843161/13f79da9cdad2dfaee5ef282712164a4/';
+        // $contents = file_get_contents($url);
+        // $name = '1.mp3';
+        // Storage::put('public/mp3/' .  $name, $contents);;
+        
+        
+        // $contents = Storage::get('public/m/1.mp3');
+        // $mime = Storage::mimeType('public/m/1.mp3');
+        // $response = Response::make($contents, 200);
+        // $response->header('Content-Type', $mime);
+        // return $response;
+        return Storage::download('public/m/1.mp3', '1.mp3');
+        $url = Storage::url('file.jpg');
+        dd($url);
+
 
         $amo = \App\AmoAPI::getInstance();
     
-        $calls = $amo->request('/api/v4/events', 'get', [
-            'filter' => [
-                'type' => 'incoming_call,outgoing_call',
-                'entity' => 'contact',
-                'entity_id' => '2211023'
-            ]
-        ]);
+        $data = [];
+
+        $data[] = [
+            "duration" => 0,
+            "source" => "example_integration",
+            "phone" => "71234123400",
+            "link" => "",
+            "direction" => "inbound",
+            "call_result"=> "Успешный разговор",
+            "call_status" => 6
+        ];
 
 
         // api/v4/contact/2211023/notes/{id}
 
-        $calls = $amo->request('api/v4/contact/2211023/notes/67345127', 'get');
+        $res = $amo->request('api/v4/calls', 'post', $data);
         
 
-        dd($calls);
+        dd($res);
 
-        foreach ($calls->_embedded->events as $event) 
-        {
+        // foreach ($calls->_embedded->events as $event) 
+        // {
 
-        }
+        // }
 
         return 'dd';
     }
