@@ -12,10 +12,10 @@ class WhatsAppController extends Controller
 {
     //protected $amo;
 
-    public function __construct()
-    {
-        //$this->amo = \App\AmoAPI::getInstance();
-    }
+    // public function __construct()
+    // {
+    //     //$this->amo = \App\AmoAPI::getInstance();
+    // }
 
     protected function getSizeFile($url)
     {
@@ -203,7 +203,6 @@ class WhatsAppController extends Controller
                 'amo_message_id' => '',
                 'whatsapp_message_id' => $whatsapp_message_id,
             ]);
-            
 
             // Формируем данные для amoCRM
 
@@ -224,12 +223,14 @@ class WhatsAppController extends Controller
                 ]
             ];
 
-            if ($avatar) {
-                $body['payload']['sender']['avatar'] = $avatar;
-            }
+            // if ($avatar) {
+            //     $body['payload']['sender']['avatar'] = $avatar;
+            // }
 
             if ($chat->amo_chat_id) {
                 $body['payload']['conversation_ref_id'] = $chat->amo_chat_id;
+            } elseif ($avatar) {
+                $body['payload']['sender']['avatar'] = $avatar;
             }
 
             $signature = hash_hmac('sha1', json_encode($body), $amo_secret);
@@ -242,8 +243,17 @@ class WhatsAppController extends Controller
             $curl->setHeader('x-signature', $signature);
             $res = $curl->post("https://amojo.amocrm.ru/v2/origin/custom/{$amo_scope_id}", $body);
 
-            $message->amo_message_id = $res->new_message->msgid;
-            $message->save();
+            if (isset($res->new_message->msgid)) {
+                $message->amo_message_id = $res->new_message->msgid;
+                $message->save();
+            } else {
+                $icq = new Curl();
+                $icq->get('https://api.icq.net/bot/v1/messages/sendText', [
+                    'token' => env('ICQ_TOKEN'),
+                    'chatId' => env('ICQ_CHAT_ID'),
+                    'text' => 'WhatsApp: есть qr-код',
+                ]);
+            }
         }
 
         foreach ($ack as $item) {

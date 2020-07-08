@@ -768,13 +768,13 @@ class AmoCRMController extends Controller
         $data = [];
 
         $data[] = [
-            "duration" => 0,
+            "duration" => 1,
             "source" => "example_integration",
             "phone" => "79896231790",
-            "link" => "",
-            "direction" => "inbound",
+            "link" => "https://bk-invent.ru/mlp/sn",
+            "direction" => "outbound",
             "call_result"=> "Успешный разговор",
-            "call_status" => 6
+            "call_status" => 4
         ];
 
 

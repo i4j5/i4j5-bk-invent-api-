@@ -30,7 +30,7 @@ class PhoneBookController extends Controller
 
     public function create()
     {
-        return view('phonebook.create')->with('groups', $this->groups);;
+        return view('phonebook.create')->with('groups', $this->groups);
     }
 
     public function store(Request $request)

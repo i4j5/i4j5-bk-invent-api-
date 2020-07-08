@@ -18,7 +18,6 @@ Route::get('/', function () {
 Route::get('/whatsapp', 'WhatsappController@index')->name('whatsapp.index');
 
 
-
 // Авторизация
 Auth::routes(['register' => false]);
 Route::get('login', ['as' => 'login', 'uses' => 'Auth\LoginController@redirectToProvider']);
@@ -103,5 +102,6 @@ Route::group(['middleware' => 'auth'], function(){
         Route::resource('pages', 'PagesController');
         Route::post('pages/image-upload', 'PagesController@imageUpload')->name('pages.image-upload');
         Route::get('tools/api/log', 'ToolsController@webhooksLog')->name('api.log');
+        Route::resource('users', 'UsersController');
     });
 });
