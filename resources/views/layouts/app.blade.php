@@ -67,6 +67,7 @@
 
                                     @if ( Auth::user()->isAdmin())
                                         <a class="dropdown-item" href="/pages">Cтраницы</a>
+                                        <a class="dropdown-item" href="/users">Пользователи</a>
                                         <a class="dropdown-item" href="/tools/api/log">Запросы к API</a>
                                     @endif
 

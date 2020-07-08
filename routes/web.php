@@ -95,8 +95,6 @@ Route::group(['middleware' => 'auth'], function(){
         return $response;
     });
 
-   
-
     Route::group(['middleware' => 'admin'], function(){
         Route::match(['get', 'post'], 'pages/sidebar', 'PagesController@sidebar')->name('pages.sidebar');
         Route::resource('pages', 'PagesController');

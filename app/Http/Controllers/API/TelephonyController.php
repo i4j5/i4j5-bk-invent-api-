@@ -70,14 +70,14 @@ class TelephonyController extends Controller
 
         if ($res->errors) {
             if ($direction == 'inbound') {
-                $this->addUnsorted($data); 
+                return $this->addUnsorted($data); 
             } elseif ($direction == 'outbound') {
                 $this->addContact($data['phone']);
-                $this->addCall($data);
+                return $this->addCall($data);
             }
         }
 
-        return 'ok';
+        return $res;
     }
 
     public function lost(Request $request)
@@ -88,17 +88,15 @@ class TelephonyController extends Controller
         // 6 – Не дозвонился
         // 7 – номер занят.
 
-        //"direction": "out",
-        //"employee_full_names": [
-        //     "Маркетинг (208)"
-        // ],
-        // "employee_ids": [
-        //     1406556
-        //   ]
+
+        $employee_ids = $request->input('employee_ids');
+        $employee_full_names = $request->input('employee_full_names');
 
         $direction = ($request->input('direction') == 'in') ? 'inbound' : 'outbound';
+
         $virtual_phone = $request->input('virtual_phone_number');
         $contact_phone = $request->input('contact_phone_number');
+
         $call_result = $request->input('lost_reason');
         $uniq = $request->input('communication_id');
         $start_time = $request->input('start_time');
@@ -108,22 +106,38 @@ class TelephonyController extends Controller
             'source' => 'Telephony',
             'phone' => $contact_phone,
             'link' => '',
-            'duration' => $duration,
+            'duration' => 0,
             'call_result' => $call_result,
-            'call_status' => 4, 
+            'call_status' => 6, 
             'uniq' => $uniq,
             'created_at' => strtotime($start_time)
         ];
 
         $responsible_user_id = 0;
-        //TODO (outbound) Поиск контакта или создание. Получение id отвестренного за контакт.
-        //TODO (inbound) Поиск контакта и получение id отвестренного за контака или отвравить в неразобранное
+        
+        // TODO Поиск контакта и получение id отвестренного
+        // $contact = $this->amo->request('api/v4/contacts', 'get', [
+        //     'filter[custom_fields_values][75087][]' => $contact_phone
+        // ]);
+
+        // $company = $this->amo->request('api/v4/companies', 'get', [
+        //     'filter[custom_fields_values][75087][]' => $contact_phone
+        // ]);
+
         if ($responsible_user_id) $data['responsible_user_id'] = $responsible_user_id;
 
-        $call_data = [];
-        $call_data[] = $data;
+        $res = $this->addCall($data); 
 
-        $res = $amo->request('api/v4/calls', 'post', $call_data);
+        if ($res->errors) {
+            if ($direction == 'inbound') {
+                return $this->addUnsorted($data); 
+            } elseif ($direction == 'outbound') {
+                $this->addContact($data['phone']);
+                return $this->addCall($data);
+            }
+        }
+
+        return $res;
     }
 
     private function addCall($data)

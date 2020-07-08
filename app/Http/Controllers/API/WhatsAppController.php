@@ -131,7 +131,6 @@ class WhatsAppController extends Controller
                 if ($message) continue;
             }
 
-
             $dataMessage = [];
 
             if ($item['type'] == 'chat') {
@@ -251,7 +250,7 @@ class WhatsAppController extends Controller
                 $icq->get('https://api.icq.net/bot/v1/messages/sendText', [
                     'token' => env('ICQ_TOKEN'),
                     'chatId' => env('ICQ_CHAT_ID'),
-                    'text' => 'WhatsApp: есть qr-код',
+                    'text' => 'WhatsApp: ' . json_encode($res),
                 ]);
             }
         }
