@@ -10,6 +10,7 @@
             <h1>
                 @if (isset($status->accountStatus))
                     {{$status->accountStatus}}
+                    <img src="{{env('WHATSAPP_URL')}}screenshot?token={{env('WHATSAPP_TOKEN')}}">
                 @elseif (isset($status->error)) 
                     Ошибка :(   
                 @endif
