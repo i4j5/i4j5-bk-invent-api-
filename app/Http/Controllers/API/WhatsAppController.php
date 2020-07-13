@@ -246,12 +246,31 @@ class WhatsAppController extends Controller
                 $message->amo_message_id = $res->new_message->msgid;
                 $message->save();
             } else {
-                $icq = new Curl();
-                $icq->get('https://api.icq.net/bot/v1/messages/sendText', [
-                    'token' => env('ICQ_TOKEN'),
-                    'chatId' => env('ICQ_CHAT_ID'),
-                    'text' => 'WhatsApp: ' . json_encode($res),
-                ]);
+                // unset($body['payload']['sender']['avatar']);
+                unset($body['payload']['conversation_ref_id']);
+
+                $signature = hash_hmac('sha1', json_encode($body), $amo_secret);
+                $curl->setHeader('x-signature', $signature);
+                $res = $curl->post("https://amojo.amocrm.ru/v2/origin/custom/{$amo_scope_id}", $body);
+
+                if (isset($res->new_message->msgid)) {
+                    $message->amo_message_id = $res->new_message->msgid;
+                    $message->save();
+                } else {
+                    $icq = new Curl();
+                    $icq->get('https://api.icq.net/bot/v1/messages/sendText', [
+                        'token' => env('ICQ_TOKEN'),
+                        'chatId' => env('ICQ_CHAT_ID'),
+                        'text' => 'WhatsApp: ' . json_encode($res),
+                    ]);
+                }
+
+                // $icq = new Curl();
+                // $icq->get('https://api.icq.net/bot/v1/messages/sendText', [
+                //     'token' => env('ICQ_TOKEN'),
+                //     'chatId' => env('ICQ_CHAT_ID'),
+                //     'text' => 'WhatsApp: ' . json_encode($res),
+                // ]);
             }
         }
 
