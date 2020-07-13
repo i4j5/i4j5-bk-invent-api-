@@ -112,7 +112,7 @@ class WhatsAppController extends Controller
             $whatsapp_message_id = (int) $item['id'];
             $phone = explode('@', $item['chatId'])[0];
             $author = explode('@', $item['author'])[0];
-            $nane = $item['senderName'];
+            $nane = $item['senderName'] ? $item['senderName'] : $phone;
             $avatar = false;
 
             $chat_api = new Curl(env('WHATSAPP_URL'));
@@ -246,9 +246,7 @@ class WhatsAppController extends Controller
                 $message->amo_message_id = $res->new_message->msgid;
                 $message->save();
             } else {
-                // unset($body['payload']['sender']['avatar']);
-                unset($body['payload']['conversation_ref_id']);
-
+                unset($body['payload']['sender']['avatar']);
                 $signature = hash_hmac('sha1', json_encode($body), $amo_secret);
                 $curl->setHeader('x-signature', $signature);
                 $res = $curl->post("https://amojo.amocrm.ru/v2/origin/custom/{$amo_scope_id}", $body);
@@ -257,20 +255,23 @@ class WhatsAppController extends Controller
                     $message->amo_message_id = $res->new_message->msgid;
                     $message->save();
                 } else {
-                    $icq = new Curl();
-                    $icq->get('https://api.icq.net/bot/v1/messages/sendText', [
-                        'token' => env('ICQ_TOKEN'),
-                        'chatId' => env('ICQ_CHAT_ID'),
-                        'text' => 'WhatsApp: ' . json_encode($res),
-                    ]);
-                }
+                    unset($body['payload']['conversation_ref_id']);
+                    $signature = hash_hmac('sha1', json_encode($body), $amo_secret);
+                    $curl->setHeader('x-signature', $signature);
+                    $res = $curl->post("https://amojo.amocrm.ru/v2/origin/custom/{$amo_scope_id}", $body);
 
-                // $icq = new Curl();
-                // $icq->get('https://api.icq.net/bot/v1/messages/sendText', [
-                //     'token' => env('ICQ_TOKEN'),
-                //     'chatId' => env('ICQ_CHAT_ID'),
-                //     'text' => 'WhatsApp: ' . json_encode($res),
-                // ]);
+                    if (isset($res->new_message->msgid)) {
+                        $message->amo_message_id = $res->new_message->msgid;
+                        $message->save();
+                    } else {
+                        $icq = new Curl();
+                        $icq->get('https://api.icq.net/bot/v1/messages/sendText', [
+                            'token' => env('ICQ_TOKEN'),
+                            'chatId' => env('ICQ_CHAT_ID'),
+                            'text' => 'WhatsApp: ' . json_encode($res),
+                        ]);
+                    }
+                }
             }
         }
 
