@@ -64,9 +64,13 @@ class AnalyticController extends Controller
             $visit->first_visit = $visit->id;
             $visit->save();
         } 
-        
-        // Получаем телефон
-        $phone = $this->reservationNumber($visit->id);
+
+        $phone = false;
+
+        if ($data['referrer'] || $data['utm_source']) {
+            // Получаем телефон
+            $phone = $this->reservationNumber($visit->id);
+        }
         
         return [
             'data' => [
@@ -98,7 +102,6 @@ class AnalyticController extends Controller
             $visit->roistat = $roistat;
         }
         
-
         if (!$visit->google_client_id) 
             $visit->google_client_id = $request->json('google_client_id');
         if (!$visit->metrika_client_id) 
@@ -106,7 +109,11 @@ class AnalyticController extends Controller
         
         $visit->save();
         
-        $phone = $this->reservationNumber($visit->id);
+        $phone = false;
+
+        if ($visit->referrer || $visit->utm_source) {
+            $phone = $this->reservationNumber($visit->id);
+        }
         
         return [
             'data' => [
@@ -202,7 +209,7 @@ class AnalyticController extends Controller
 
         AmoCRM::getInstance()->addLead($data);
 
-         //TODO: Отправка цели в яндекс метрику
+        //TODO: Отправка цели в яндекс метрику
 
         if (isset($data['google_client_id']) && $data['google_client_id']) {
             return $this->googleAalytics([
@@ -219,16 +226,6 @@ class AnalyticController extends Controller
         }
 
         return 'ok';
-    }
-
-    public function test(Request $request) 
-    {
-        return $this->googleAalytics([
-            'client_id' => '781100136.1581340180',
-            'event-сategory' => 'CRM',
-            'event-action' => 'SuccessDeal',
-            'price' => '11',
-        ]);
     }
 
     private function googleAalytics($params)
@@ -266,7 +263,6 @@ class AnalyticController extends Controller
             'ec' => $params['event-сategory'],
             'ea' => $params['event-action'],
         ]);
-
 
         // $z = $data['cid'] . $data['ec'] . $data['ea'] . $price;
         // foreach ($utm as $key => $value) {

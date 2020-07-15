@@ -133,7 +133,7 @@ class WhatsAppController extends Controller
 
             $dataMessage = [];
 
-            if ($item['type'] == 'chat') {
+            if ($item['type'] == 'chat' || $item['type'] == 'vcard') {
                 $dataMessage = [
                     'type' => 'text',
                     'text' => $item['body'],
@@ -307,7 +307,6 @@ class WhatsAppController extends Controller
                 $message->save();
             }
         }
-
 
         return 'ok';
     }
