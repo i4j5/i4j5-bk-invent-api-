@@ -106,6 +106,7 @@ class AmoCRM
             'visit' => '',
             'roistat' => '',
             'sudo' => false,
+            'page_view_tracker' => '',
         ];
 
         $data = array_merge($default_data, $params);
@@ -123,6 +124,8 @@ class AmoCRM
 
         // #КОНТАКТ
         $contact = $this->searchConcat($data['phone']);
+
+        // TODO если контакт есть - обновить данные трекера
 
         // #СДЕЛКА
         $lead = $this->amocrm->lead;
@@ -156,6 +159,8 @@ class AmoCRM
         Страница захвата: {$data['landing_page']} \n
         Ключевое слово: {$data['utm_term']} \n
         Реферальная ссылка: {$data['referrer']} \n
+        ====================\n
+        {$data['page_view_tracker']} \n
         ";
 
         $note['text'] = $data['comment'];
@@ -165,6 +170,7 @@ class AmoCRM
                 'name' => $data['name'],
                 'phone' => $data['phone'],
                 'email' => $data['email'],
+                'page_view_tracker' => $data['page_view_tracker'],
             ]);
         }
 

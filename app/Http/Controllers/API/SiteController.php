@@ -106,6 +106,8 @@ class SiteController extends Controller
             'comment' => '',
             'visit' => '',
             'tags' => ['Заявка с сайта'],
+            'page_view_tracker' => '',
+            'ip' => $request->ip()
         ];
         
         $request->order ? $data['title'] = $request->order : false;
@@ -129,7 +131,10 @@ class SiteController extends Controller
         $request->utm_content ? $data['utm_content'] = $request->utm_content : false;
         $request->utm_term ? $data['utm_term'] = $request->utm_term : false;
 
-        \App\AmoCRM::getInstance()->addLead($data);
+        $request->page_view_tracker ? $data['page_view_tracker'] = $request->page_view_tracker : false;
+
+        // \App\AmoCRM::getInstance()->addLead($data);
+        dd( \App\AmoAPI::getInstance()->addLead($data) );
 
         return 'ok';
     }
