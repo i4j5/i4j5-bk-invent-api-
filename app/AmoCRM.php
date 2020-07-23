@@ -5,6 +5,7 @@ namespace App;
 use \Curl\Curl;
 use \Dotzero\LaravelAmoCrm\AmoCrmManager;
 use App\Phone;
+use AmoCRM\Client\AmoCRMApiClient;
 
 class AmoCRM 
 {

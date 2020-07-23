@@ -101,5 +101,6 @@ Route::group(['middleware' => 'auth'], function(){
         Route::post('pages/image-upload', 'PagesController@imageUpload')->name('pages.image-upload');
         Route::get('tools/api/log', 'ToolsController@webhooksLog')->name('api.log');
         Route::resource('users', 'UsersController');
+        Route::resource('playments', 'PlaymentsController');
     });
 });

@@ -185,8 +185,7 @@ class SiteController extends Controller
                    
         
         Mail::send('email.question', $data, function ($message) {
-            $message->to('it@bkinvent.net')->from('support@bk-invent.ru', 'БК Инвент')->subject('Вопрос');
-            
+            $message->to('it@bkinvent.net')->from('support@bk-invent.ru', 'БК Инвент')->subject('Вопрос');   
         });
         
         return 'ok';
