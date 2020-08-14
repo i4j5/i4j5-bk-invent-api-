@@ -3,9 +3,9 @@
 @section('content')
 <div class="container">
     <p>Номер заказа: {{ $playment->id }}</p>
-    <p>Cумма: {{ $playment->amount / 100 }}</p>
+    <p>Cумма: {{ $playment->amount / 100 }} ₽</p>
     <p>Оплатить до: {{ $playment->date }}</p>
-    <p>Описание заказа: {{ $playment->description }}</p>
+    <p>Описание заказа:<br> {!!  str_replace("\n", '<br>', $playment->description) !!}</p>
     <p>ФИО: {{ $playment->fio }}</p>
     <p>Телефон: {{ $playment->phone }}</p>
     <p>E-mail: {{ $playment->email }}</p>

@@ -63,11 +63,6 @@ class PlaymentsController extends Controller
             'date' => 'required',
         ]);
 
-        // dd($request->date);"2020-07-24T03:03"
-        // yyyy-MM-ddTHH:mm:ss.
-
-        // $now = date('Y-m-d H:i:s', time());
-
         $curl = new Curl();
         $curl->setHeader('Content-Type', 'application/x-www-form-urlencoded');
 
@@ -90,16 +85,14 @@ class PlaymentsController extends Controller
         ]);
 
         $playment->id;
-        
-        // dd( date('Y-m-d\TH:m:s', strtotime($playment->date)) );
 
         $vars = [];
 		$vars['userName'] = env('SBERBANK_NAME');
 		$vars['password'] = env('SBERBANK_PASSWORD');
         $vars['orderNumber'] = $playment->id;
         $vars['amount'] = $sum;
-        $vars['returnUrl'] = 'http://example.com/success/';
-        $vars['failUrl'] = 'http://example.com/error/';
+        $vars['returnUrl'] = env('PAGE_PAY_SUCCESS');
+        $vars['failUrl'] = env('PAGE_PAY_ERROR');
         $vars['description'] =  $playment->description;
         $vars['expirationDate'] = date('Y-m-d\TH:m:s', strtotime($playment->date));
     
@@ -108,7 +101,7 @@ class PlaymentsController extends Controller
         if ($email) $vars['email'] = $email;
         if ($phone) $vars['phone'] = $phone;  //79998887766
     
-        $res = $curl->post('https://3dsec.sberbank.ru/payment/rest/register.do', $vars);
+        $res = $curl->post(env('SBERBANK_URL') . 'payment/rest/register.do', $vars);
         
         $res = json_decode($res);
 
@@ -123,7 +116,6 @@ class PlaymentsController extends Controller
             return redirect()->to('playments/' . $playment->id );
         } else {
             $playment->delete();
-            // Статус поменять ... 
             $request->session()->flash('message', $res->errorMessage);
             return redirect()->to('playments');
         }
