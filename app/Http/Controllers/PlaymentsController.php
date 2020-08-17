@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use \Curl\Curl;
 use App\Models\Playment;
 use Illuminate\Http\Request;
-use \Curl\Curl;
+use Illuminate\Support\Facades\Validator;
 
 class PlaymentsController extends Controller
 {
@@ -55,13 +56,16 @@ class PlaymentsController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+
+        $validator = Validator::make($request->all(), [
             'sum' => 'required|min:1',
-            'description' => 'required',
+            'description' => 'required|max:24',
             'email' => 'sometimes|nullable|email',
             'phone' => 'sometimes|nullable|numeric|min:10',
             'date' => 'required',
         ]);
+
+        $validator->validate();
 
         $curl = new Curl();
         $curl->setHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -72,7 +76,7 @@ class PlaymentsController extends Controller
         $description = $request->description;
 
         $playment = Playment::create([
-            'amount' => $sum ,
+            'amount' => $sum,
             'order_id' => '',
             'description' => $description,
             'status' => 0,
@@ -116,8 +120,10 @@ class PlaymentsController extends Controller
             return redirect()->to('playments/' . $playment->id );
         } else {
             $playment->delete();
-            $request->session()->flash('message', $res->errorMessage);
-            return redirect()->to('playments');
+            $validator->errors()->add('sber', $res->errorMessage);
+            return redirect('playments/create')
+                        ->withErrors($validator)
+                        ->withInput();
         }
     }
 
@@ -129,19 +135,6 @@ class PlaymentsController extends Controller
      */
     public function show(Playment $playment)
     {
-
-
-
-        $status = [
-            0 => 'заказ зарегистрирован, но не оплачен',
-            1 => 'предавторизованная сумма удержана (для двухстадийных платежей)',
-            2 => 'проведена полная авторизация суммы заказа',
-            3 => 'авторизация отменена',
-            4 => 'по транзакции была проведена операция возврата',
-            5 => 'инициирована авторизация через сервер контроля доступа банка-эмитента',
-            6 => 'авторизация отклонена',
-        ];
-
         $curl = new Curl();
         $curl->setHeader('Content-Type', 'application/x-www-form-urlencoded');
 
@@ -150,17 +143,10 @@ class PlaymentsController extends Controller
 		$vars['password'] = env('SBERBANK_PASSWORD');
         $vars['orderId'] = $playment->order_id;
     
-        $res = $curl->post('https://3dsec.sberbank.ru/payment/rest/getOrderStatusExtended.do', $vars);
-        $res = json_decode($res);
-        // dd($res);
+        $sber = $curl->post(env('SBERBANK_URL') . 'payment/rest/getOrderStatusExtended.do', $vars);
+        $sber = json_decode($sber);
 
-        
-
-        // $res->amount $playment->amount
-
-        // $res->date
-
-        return view('playments.show', compact('playment'));
+        return view('playments.show', compact(['playment', 'sber']));
     }
 }
 

@@ -21,7 +21,7 @@
             }
 
             img {
-                max-width: 100%;
+                max-width: 200px !important;
             }
 
             .full-height {
@@ -84,7 +84,7 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    <img src="img/logo.png">
+                    <img style="max-width: 100%;" src="img/logo.png">
                 </div>
 
                 <div class="links">
