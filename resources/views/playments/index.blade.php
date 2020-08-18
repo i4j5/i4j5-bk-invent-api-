@@ -11,6 +11,8 @@
             <button type="submit" class="btn btn-primary my-2 my-sm-0">Поиск</button>
         </form>
 
+        <br>
+
         <table class="table table-striped table-bordered table-sm">
             <thead>
                 <tr>
@@ -46,7 +48,7 @@
                     <td>
                       <div class="btn-group" role="group" aria-label="Basic example">
                           <a href="{{ URL::to('playments/' . $playment->id) }}">
-                            <button type="button" class="btn btn-warning">Open</button>
+                            <button type="button" class="btn btn-warning">Открыть</button>
                           </a>
                       </div>
                     </td>

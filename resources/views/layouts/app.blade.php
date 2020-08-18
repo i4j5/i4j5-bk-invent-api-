@@ -42,6 +42,9 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url('/main.html') }}">Вики</a>
                         </li> 
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url('/playments') }}">Интернет-эквайринг</a>
+                        </li> 
                         </li>    
                     </ul>
 

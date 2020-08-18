@@ -29,7 +29,7 @@ class PlaymentsController extends Controller
                             ->orWhere('description', 'LIKE', '%' . $search . '%')
                             ->paginate(25);
         } else {
-            $playments = Playment::paginate(15);
+            $playments = Playment::orderBy('created_at', 'desc')->paginate(15);
         }
 
        
