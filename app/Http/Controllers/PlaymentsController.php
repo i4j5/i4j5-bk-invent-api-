@@ -93,7 +93,7 @@ class PlaymentsController extends Controller
         $vars = [];
 		$vars['userName'] = env('SBERBANK_NAME');
 		$vars['password'] = env('SBERBANK_PASSWORD');
-        $vars['orderNumber'] = $playment->id;
+        $vars['orderNumber'] = $playment->deal_id . '-' .env('PAY_PREFIX_ORDERNUMBER') . $playment->id . env('PAY_SUFFIX_ORDERNUMBER') ;
         $vars['amount'] = $sum;
         $vars['returnUrl'] = env('PAGE_PAY_SUCCESS');
         $vars['failUrl'] = env('PAGE_PAY_ERROR');
