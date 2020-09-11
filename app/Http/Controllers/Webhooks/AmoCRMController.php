@@ -563,11 +563,15 @@ class AmoCRMController extends Controller
         
         set_time_limit(0);
 
+        $users = [];
+        foreach (User::all() as $user) {
+            $users[$user->email] = $user->asana_user_id;
+        }
+
         $gid = $request->input('gid');
         $type = $request->input('type');
         $amo_user_id = $request->input('responsible');
         $deal_id = $request->input('deal_id');
-
 
         $asana = new Curl();
         $asana->setHeader('Authorization', 'Bearer ' . env('ASANA_KEY'));
@@ -626,6 +630,18 @@ class AmoCRMController extends Controller
             if ($count > 0) {
                 if($asana_user_id) $data['assignee'] = $asana_user_id;
                 $rename = true;
+            }
+
+            preg_match_all("/[-a-z0-9!#$&'*_`{|}~]+[-a-z0-9!#$%&'*_`{|}~\.=?]*@[a-zA-Z0-9_-]+[a-zA-Z0-9\._-]+/i", $name, $result);
+            $result = $result[0];
+            if (count($result)) {
+                foreach ($result as $email) {
+                    $name = str_replace("%$email%", "", $name, $count);
+                    if ($count > 0) {
+                        if($users[$email]) $data['assignee'] = $users[$email];
+                        $rename = true;
+                    }
+                }
             }
 
             $name = str_replace("%description%", "", $name, $count);
