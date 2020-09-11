@@ -577,7 +577,7 @@ class AmoCRMController extends Controller
         $asana->setHeader('Authorization', 'Bearer ' . env('ASANA_KEY'));
         $asana->setHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-        sleep(4);
+        // sleep(4);
 
         $asana_user_id = 0;
         $description = '';
@@ -605,6 +605,26 @@ class AmoCRMController extends Controller
 
             $tasks = $asana->get("https://app.asana.com/api/1.0/tasks/$gid/subtasks")->data;
         }
+
+        $subtasks = [];
+        foreach ( $tasks as $task ) {
+            usleep(2);
+            $data = $asana->get("https://app.asana.com/api/1.0/tasks/$task->gid/subtasks")->data;
+            $subtasks =  array_merge( $subtasks, $data);
+            // dd($data);
+        }
+
+        $subsubtasks = [];
+        foreach ( $subtasks as $task ) {
+            usleep(2);
+            $data = $asana->get("https://app.asana.com/api/1.0/tasks/$task->gid/subtasks")->data;
+            $subsubtasks =  array_merge( $subsubtasks, $data);
+            // dd($data);
+        }
+
+        $tasks = array_merge($tasks, $subtasks, $subsubtasks);
+
+        // dd($tasks);
 
         foreach ( $tasks as $task )
         {
@@ -653,7 +673,7 @@ class AmoCRMController extends Controller
             if($rename) {
                 $data['name'] = $name;
                 $asana->put("https://app.asana.com/api/1.0/tasks/$task->gid", $data);
-                usleep(50);
+                usleep(30);
             } 
         }
 
