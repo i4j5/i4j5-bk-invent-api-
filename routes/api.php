@@ -36,6 +36,7 @@ Route::prefix('webhook')->group(function () {
 
     //amoCRM
     Route::prefix('amocrm')->group(function () {
+        Route::get('moving-deal-folders', 'Webhooks\AmoCRMController@movingDealFolder');
         Route::post('create-deal-folders', 'Webhooks\AmoCRMController@createDealFolders');
         Route::post('create-deal-project', 'Webhooks\AmoCRMController@createDealProject');
         Route::post('update-deal-project', 'Webhooks\AmoCRMController@updateDealProject');

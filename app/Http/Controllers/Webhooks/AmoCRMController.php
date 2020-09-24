@@ -56,6 +56,58 @@ class AmoCRMController extends Controller
 
         return 'ok';
     }
+
+    // Перемещение папки
+    public function movingDealFolder(Request $request)
+    { 
+
+        // $deal_id  = $request->input('id');
+        $fileId  = '1moFQViUk5RfkkyylZXe8wnl8TZee3o9knTiPbH5orGw';
+        $newParentId = '1O-sJurrxMu_W8PUPJ3pwc_-aoalirCGm';
+
+        // if (!$deal_id) return 'error';
+
+        $client = new \Google_Client();
+        $client->setAuthConfig(storage_path(env('GOOGLE_API_KEY')));
+        $client->addScope(\Google_Service_Drive::DRIVE);
+        $service = new \Google_Service_Drive($client);
+
+        $file = new \Google_Service_Drive_DriveFile();
+
+        $parent = new \Google_Service_Drive_ParentReference();
+        $parent->setId($newParentId);
+    
+        // $file->setParents(array($parent));
+
+        // $file = new \Google_Service_Drive_DriveFile([
+        //     'parents' => [$newParentId],
+        //     //'name' => $data['name'],
+        //     'mimeType' => 'application/vnd.google-apps.folder'
+        // ]);
+    
+        $updatedFile = $service->files->patch($fileId, $file);
+
+
+        dd($updatedFile);
+
+
+        // $emptyFileMetadata = new \Google_Service_Drive_DriveFile();
+        // $file = $service->files->get($fileId, array('fields' => 'parents'));
+        // $previousParents = join(',', $file->parents);
+
+        // $file = $service->files->update($fileId, $emptyFileMetadata, array(
+        //   'addParents' => $newParentId,
+        //   //'removeParents' => $previousParents,
+        //   'fields' => 'id, parents'));
+    
+        return $file;
+
+
+
+
+
+
+    }
     
     // Папка  
     public function createDealFolders(Request $request)
@@ -165,6 +217,22 @@ class AmoCRMController extends Controller
 ';
 
         foreach ($deal->custom_fields as $field) {
+
+            if ((int) $field->id == 75413) {
+                if ($field->values[0]->value != '') {
+                    $description = $description . '
+';
+                    $description = $description . 'Приоритет выполнения работ: ' . $field->values[0]->value;
+                }
+            }
+
+            if ((int) $field->id == 75415) {
+                if ($field->values[0]->value != '') {
+                    $description = $description . '
+';
+                    $description = $description . 'Условия работы: ' . $field->values[0]->value;
+                }
+            }
 
             if ((int) $field->id == 75401) {
                 if ($field->values[0]->value != '') {
