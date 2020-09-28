@@ -218,6 +218,15 @@ class AmoCRMController extends Controller
 
         foreach ($deal->custom_fields as $field) {
 
+            if ((int) $field->id == 329647) {
+                if ($field->values[0]->value != '') {
+                    $description = $description . '
+';
+                    $description = $description . 'Заказ 1С: ' . $field->values[0]->value;
+                }
+            }
+
+
             if ((int) $field->id == 75413) {
                 if ($field->values[0]->value != '') {
                     $description = $description . '
@@ -895,5 +904,71 @@ class AmoCRMController extends Controller
         // }
 
         return 'dd';
+    }
+
+    public function distributionLead(Request $request)
+    {        
+
+        // $users = [5802439, 6345826];
+        $users = [6345826];
+        $contac_id = null;  
+
+        $lead_id = isset($request->input('leads')['add'][0]['id']) ? (int) $request->input('leads')['add'][0]['id'] : (int) $request->input('leads')['status'][0]['id'];
+        
+        $amo = \App\AmoAPI::getInstance();
+
+        $lead = $amo->request('/api/v2/leads','get', ['id'=>$lead_id])->_embedded->items[0];
+
+        if (isset($lead->main_contact)) {
+            $contac_id = $lead->main_contact->id;
+        }
+       
+        $tasks = [];
+
+        $data = $amo->request('/api/v4/tasks','get', [
+            'filter' => [
+                'entity_type' => 'leads',
+                'entity_id' => $lead_id,
+                'is_completed' => 0
+            ]
+        ]);
+
+        if (isset($data->_embedded)) {
+            $data->_embedded->tasks;
+            $tasks = array_merge($tasks, $data->_embedded->tasks);
+        }
+
+        if ($contac_id){
+            $data = $amo->request('/api/v4/tasks','get', [
+                'filter' => [
+                    'entity_type' => 'contacts',
+                    'entity_id' => $contac_id,
+                    'is_completed' => 0
+                ]
+            ]);
+
+            if (isset($data->_embedded)) {
+                $data->_embedded->tasks;
+                $tasks = array_merge($tasks, $data->_embedded->tasks);
+            }
+        }
+
+        $responsible_user_id = $users[array_rand($users, 1)];
+
+        $amo->request("/api/v4/contacts/$contac_id",'patch', [
+            'responsible_user_id' => $responsible_user_id
+        ]);
+
+        $amo->request("/api/v4/leads/$lead_id",'patch', [
+            'responsible_user_id' => $responsible_user_id
+        ]);
+
+        foreach ($tasks as $task) {
+            $amo->request("/api/v4/tasks/$task->id", 'patch', [
+                'responsible_user_id' => $responsible_user_id
+            ]);
+        }
+
+        return $responsible_user_id;
     }
 }
