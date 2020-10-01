@@ -28,6 +28,22 @@ class WhatsAppController extends Controller
 
         return $file_size;
     }
+
+    protected function getFileName($url)
+    {
+        $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+
+        $str =  basename($url);
+
+        $ext = substr(strrchr($str, '.'), 1);
+        $ext = explode('?', $ext)[0];
+        
+        $name = substr(str_shuffle($permitted_chars), 0, 5) .'-'. substr(str_shuffle($permitted_chars), 0, 5) .'-'. time() .'-'. substr(str_shuffle($permitted_chars), 0, 5);
+
+        return "$name.$ext";
+    }
+
+
     
     public function amocrmWebhook(Request $request)
     {
@@ -146,7 +162,7 @@ class WhatsAppController extends Controller
                     'type' => 'picture',
                     'text' => '',
                     'media' => $item['body'],
-                    'file_name' => basename($item['body']),
+                    'file_name' => $this->getFileName($item['body']),
                     'file_size' => (int) $this->getSizeFile($item['body']),
                 ];
             } elseif ($item['type'] == 'video') {
@@ -154,7 +170,7 @@ class WhatsAppController extends Controller
                     'type' => 'video',
                     'text' => '',
                     'media' => $item['body'],
-                    'file_name' => basename($item['body']),
+                    'file_name' => $this->getFileName($item['body']),
                     'file_size' => (int) $this->getSizeFile($item['body']),
                 ];
             }  elseif ($item['type'] == 'ptt') {
@@ -162,7 +178,7 @@ class WhatsAppController extends Controller
                     'type' => 'video',
                     'text' => 'голосовое сообщение',
                     'media' => $item['body'],
-                    'file_name' => basename($item['body']),
+                    'file_name' => $this->getFileName($item['body']),
                     'file_size' => (int) $this->getSizeFile($item['body']),
                 ];
             } else {
@@ -170,7 +186,7 @@ class WhatsAppController extends Controller
                     'type' => 'file',
                     'text' => '',
                     'media' => $item['body'],
-                    'file_name' => basename($item['body']),
+                    'file_name' => $this->getFileName($item['body']),
                     'file_size' => (int) $this->getSizeFile($item['body']),
                 ];
             }
