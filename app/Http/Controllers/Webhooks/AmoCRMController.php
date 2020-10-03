@@ -909,8 +909,7 @@ class AmoCRMController extends Controller
     public function distributionLead(Request $request)
     {        
 
-        // $users = [5802439, 6345826];
-        $users = [6345826];
+        $users = [6345826, 5802439];
         $contac_id = null;  
 
         $lead_id = isset($request->input('leads')['add'][0]['id']) ? (int) $request->input('leads')['add'][0]['id'] : (int) $request->input('leads')['status'][0]['id'];
