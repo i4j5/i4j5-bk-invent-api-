@@ -123,6 +123,8 @@ class WhatsAppController extends Controller
         $amo_secret = env('AMO_CHANNEL_SECRET_KEY');
         $amo_scope_id = env('AMO_CHANNEL_SCOPE_ID');
 
+        $amo = \App\AmoAPI::getInstance();
+
         foreach ($messages as $item) {
 
             $whatsapp_message_id = (int) $item['id'];
@@ -289,6 +291,30 @@ class WhatsAppController extends Controller
                     }
                 }
             }
+            
+
+            //Уведомление 
+    
+            $text = "WhatsApp \n$nane\n$phone";
+            $deal = null;
+
+            $res = $amo->request('/api/v4/leads', 'get', [
+                'query' => $phone
+            ]);
+
+            if ($res && isset($res->_embedded) && isset($res->_embedded->leads)) {
+                $deal = $res->_embedded->leads[0];
+                $text = $text . "\n$deal->name\nhttps://bkinvent.amocrm.ru/leads/detail/$deal->id";
+            }
+
+            $text = "$text\n\n" . $item['body'];
+            
+            (new Curl())->get('https://api.icq.net/bot/v1/messages/sendText', [
+                'token' => '001.1127437940.0574669410:756518822',
+                'chatId' => 'bkinvent_sales',
+                'text' => $text,
+            ]);
+            
         }
 
         foreach ($ack as $item) {

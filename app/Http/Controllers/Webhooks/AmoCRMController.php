@@ -856,27 +856,18 @@ class AmoCRMController extends Controller
 
     public function dd(Request $request)
     {
-        $users = [1, 2, 3];
-
-        $json = json_decode(Storage::get('json/crm.json'), true);
         
-        if (isset($json['counter'])) {
-            $json['counter'] = count($users) > $json['counter'] ? $json['counter']+1 : 1;
-        } else {
-            $json['counter'] = 1;
-        }
 
-        Storage::put('json/crm.json', json_encode($json));
-
-
-        dd($json, $users[$json['counter']-1]);
+        // $icq = new Curl();
+        // $res = $icq->get('https://api.icq.net/bot/v1/messages/sendText', [
+        //     'token' => '001.1127437940.0574669410:756518822',
+        //     'chatId' => 'bkinvent_sales',
+        //     'text' => "WhatsApp \n 123",
+        // ]);
 
 
-       
+        // dd(json_encode($res));
 
-
-
-        exit;
 
 
 
@@ -898,36 +889,28 @@ class AmoCRMController extends Controller
         // return Storage::download('public/m/1.mp3', '1.mp3');
         // $url = Storage::url('file.jpg');
         // dd($url);
+        $text = '';
+        $res = $amo->request('/api/v4/leads', 'get', [
+            'query' => '79129050156'
+        ]);
 
+        if ($res && isset($res->_embedded) && isset($res->_embedded->leads)) {
+            $deal = $res->_embedded->leads[0];
+        }
 
-        $amo = \App\AmoAPI::getInstance();
-    
-        $data = [];
+        if ($deal) {
+            $text = $text . "\n\n$deal->name\n" . $deal->_links->self->href;
+        }
 
-        $data[] = [
-            "duration" => 1,
-            "source" => "example_integration",
-            "phone" => "79896231790",
-            "link" => "https://bk-invent.ru/mlp/sn",
-            "direction" => "outbound",
-            "call_result"=> "Успешный разговор",
-            "call_status" => 4
-        ];
+        // (new Curl())->get('https://api.icq.net/bot/v1/messages/sendText', [
+        //     'token' => '001.1127437940.0574669410:756518822',
+        //     'chatId' => 'bkinvent_sales',
+        //     'text' => "WhatsApp",
+        // ]);
 
+        dd($deal);
 
-        // api/v4/contact/2211023/notes/{id}
-
-        $res = $amo->request('api/v4/calls', 'post', $data);
-        
-
-        dd($res);
-
-        // foreach ($calls->_embedded->events as $event) 
-        // {
-
-        // }
-
-        return 'dd';
+        return $text;
     }
 
     public function distributionLead(Request $request)
