@@ -856,6 +856,30 @@ class AmoCRMController extends Controller
 
     public function dd(Request $request)
     {
+        $users = [1, 2, 3];
+
+        $json = json_decode(Storage::get('json/crm.json'), true);
+        
+        if (isset($json['counter'])) {
+            $json['counter'] = count($users) > $json['counter'] ? $json['counter']+1 : 1;
+        } else {
+            $json['counter'] = 1;
+        }
+
+        Storage::put('json/crm.json', json_encode($json));
+
+
+        dd($json, $users[$json['counter']-1]);
+
+
+       
+
+
+
+        exit;
+
+
+
         $amo = \App\AmoAPI::getInstance();
 
 
@@ -912,6 +936,15 @@ class AmoCRMController extends Controller
         $users = [6345826, 5802439];
         $contac_id = null;  
 
+        $json = json_decode(Storage::get('json/crm.json'), true);
+        
+        if (isset($json['counter'])) {
+            $json['counter'] = count($users) > $json['counter'] ? $json['counter']+1 : 1;
+        } else {
+            $json['counter'] = 1;
+        }
+
+
         $lead_id = isset($request->input('leads')['add'][0]['id']) ? (int) $request->input('leads')['add'][0]['id'] : (int) $request->input('leads')['status'][0]['id'];
         
         $amo = \App\AmoAPI::getInstance();
@@ -952,7 +985,8 @@ class AmoCRMController extends Controller
             }
         }
 
-        $responsible_user_id = $users[array_rand($users, 1)];
+        // $responsible_user_id = $users[array_rand($users, 1)];
+        $responsible_user_id = $users[$json['counter']-1];
 
         $amo->request("/api/v4/contacts/$contac_id",'patch', [
             'responsible_user_id' => $responsible_user_id
@@ -967,6 +1001,8 @@ class AmoCRMController extends Controller
                 'responsible_user_id' => $responsible_user_id
             ]);
         }
+
+        Storage::put('json/crm.json', json_encode($json));
 
         return $responsible_user_id;
     }

@@ -151,7 +151,7 @@ class TelephonyController extends Controller
     private function savetTalk($url, $filename)
     {
         $content = file_get_contents($url);
-        Storage::put("media/talk/$filename.mp3", $content);;
+        Storage::put("media/talk/$filename.mp3", $content);
         return url("media/talk/$filename");
     }
 
