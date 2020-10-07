@@ -833,6 +833,10 @@ class AmoCRMController extends Controller
             ];
     
             $amo->request('/api/v2/contacts', 'post', $contact_data);
+
+            $amo->request("/api/v4/leads/$lead_id",'patch', [ 
+                'status_id' => 35272936
+            ]);
         }
        
         return 'ok';
@@ -976,7 +980,8 @@ class AmoCRMController extends Controller
         ]);
 
         $amo->request("/api/v4/leads/$lead_id",'patch', [
-            'responsible_user_id' => $responsible_user_id
+            'responsible_user_id' => $responsible_user_id, 
+            'status_id' => 35272936
         ]);
 
         foreach ($tasks as $task) {
@@ -988,5 +993,94 @@ class AmoCRMController extends Controller
         Storage::put('json/crm.json', json_encode($json));
 
         return $responsible_user_id;
+    }
+
+    public function watcher($action = null)
+    {
+        $text = null;
+
+        $launch_hour = date('G');
+        $weekday = date('w'); //"0"(вс)-"6"(сб)
+        $time = time();
+
+        // МЕНЕДЖЕР НАЗНАЧЕН
+        $amo = \App\AmoAPI::getInstance();
+        $res = $amo->request('/api/v4/leads', 'get', [
+            'filter' => [
+                'statuses' => [
+                    0 => [
+                        'pipeline_id' => 2291194,
+                        'status_id' => 35272936
+                    ]
+                ]
+            ]
+        ]);
+
+        if ($res && isset($res->_embedded) && isset($res->_embedded->leads)) {
+
+            if ($weekday != 0 || $weekday != 6) {
+                if ($launch_hour >= 8 && $launch_hour < 18) {
+                    if (count($res->_embedded->leads) >= 8) {
+                        $text = "$text\nНа этапе \"МЕНЕДЖЕР НАЗНАЧЕН\" Слишком много сделок. Старайтесь вовремя принимать в работу качественные заявки и отсеивать все лишнее";
+                    }
+
+                }
+            }
+        }
+
+        // Проверка времени на этапе
+
+        if ($weekday != 0 || $weekday != 6) {
+            if ($launch_hour >= 9 && $launch_hour < 10) {
+               
+                $leads_kp = [];
+                for ($i=1, $run=true; $run; $i++) {
+                    
+                    $res = $amo->request('/api/v4/leads', 'get', [
+                        'filter' => [
+                            'statuses' => [
+                                0 => [
+                                    'pipeline_id' => 2291194,
+                                    'status_id' => 31519291 //ОТПРАВЛЕНО КП
+                                ]
+                            ]
+                        ],
+                        'limit' => 250,
+                        'page' => $i
+                    ]);
+
+                    if($res) {
+                        $leads_kp = array_merge($leads_kp, $res->_embedded->leads);
+                    } else {
+                        $run = false;
+                    }
+                }
+
+                foreach ($leads_kp as $lead) {
+                    if (($time - $lead->updated_at) >= 1) { //432000
+                            $text = "$text\n сделка $lead->name не обновлялась более 5 дней после отправки КП";
+                    }
+                }
+
+            }
+        }
+
+
+        if ($text) {
+            $text = "Рекомендации$text";
+
+            dd($text);
+
+            // (new Curl())->get('https://api.icq.net/bot/v1/messages/sendText', [
+            //     // 'token' => '001.1127437940.0574669410:756518822',
+            //     // 'chatId' => 'bkinvent_sales',
+            //     'token' => env('ICQ_TOKEN'),
+            //     'chatId' => env('ICQ_CHAT_ID'),
+            //     'text' => $text,
+            // ]);
+        }
+
+        return 'ok';
+        
     }
 }

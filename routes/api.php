@@ -42,6 +42,7 @@ Route::prefix('webhook')->group(function () {
         Route::post('update-deal-project', 'Webhooks\AmoCRMController@updateDealProject');
         Route::post('raw-lead', 'Webhooks\AmoCRMController@rawLead');
         Route::post('distribution-lead', 'Webhooks\AmoCRMController@distributionLead');
+        Route::get('watcher/{action}', 'Webhooks\AmoCRMController@watcher');
 
         Route::post('unsorted', 'Webhooks\AmoCRMController@unsorted');
 
