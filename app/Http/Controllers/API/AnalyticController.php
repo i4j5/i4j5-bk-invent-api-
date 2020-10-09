@@ -264,14 +264,15 @@ class AnalyticController extends Controller
             'ea' => $params['event-action'],
         ]);
 
-        // $z = $data['cid'] . $data['ec'] . $data['ea'] . $price;
-        // foreach ($utm as $key => $value) {
-        //     $z = $z . $value;
-        // }
 
         $data['z'] = md5($data['cid'] . $data['ec'] . $data['ea'] . $price . date('dmY'));
 
-        if ($price) $data['cm3'] = $price;
+        if ($price) {
+            $data['cm3'] = $price;
+            $data['ti'] = 'T'.time();
+            $data['tr'] = $price;
+            $data['pa'] = 'purchase';
+        }
 
         $curl = new Curl();
         $curl->setUserAgent('user_agent_string');
