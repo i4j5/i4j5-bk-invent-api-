@@ -860,17 +860,7 @@ class AmoCRMController extends Controller
 
     public function dd(Request $request)
     {
-        
 
-        // $icq = new Curl();
-        // $res = $icq->get('https://api.icq.net/bot/v1/messages/sendText', [
-        //     'token' => '001.1127437940.0574669410:756518822',
-        //     'chatId' => 'bkinvent_sales',
-        //     'text' => "WhatsApp \n 123",
-        // ]);
-
-
-        // dd(json_encode($res));
 
 
 
@@ -993,6 +983,55 @@ class AmoCRMController extends Controller
         Storage::put('json/crm.json', json_encode($json));
 
         return $responsible_user_id;
+    }
+
+    public function successDeal(Request $request) {
+        $deal_id = isset($request->input('leads')['add'][0]['id']) ? (int) $request->input('leads')['add'][0]['id'] : (int) $request->input('leads')['status'][0]['id'];
+    
+        $amo = \App\AmoAPI::getInstance();
+
+        $deal = $amo->request("/api/v4/leads/$deal_id",'get');
+
+        $task_id = 1198187107997838;
+        $section_id = 1198187107997787;
+
+        $description = "https://bkinvent.amocrm.ru/leads/detail/$deal->id";
+
+        $asana = new Curl();
+        $asana->setHeader('Authorization', 'Bearer ' . env('ASANA_KEY'));
+        $asana->setHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+        // dd( $asana->get("https://app.asana.com/api/1.0/tasks/$task_id") );
+
+        $data = [
+            'name' => $deal->name,
+            'include' => [
+                'notes',
+                'assignee',
+                'subtasks',
+                'attachments',
+                'tags',
+                'followers',
+                'projects',
+                'dates',
+                'parent',
+            ]
+        ];
+
+        $res = $asana->post("https://app.asana.com/api/1.0/tasks/$task_id/duplicate", $data);
+        $gid = $res->data->new_task->gid;
+
+        $asana->post("https://app.asana.com/api/1.0/sections/$section_id/addTask", [
+            'task' => $gid
+        ]);
+
+        $asana->put("https://app.asana.com/api/1.0/tasks/$gid", [
+            'notes' => $description,
+            'due_on' => date('Y-m-d')
+        ]);
+
+        return 'ok';
+
     }
 
     public function watcher($action = null)

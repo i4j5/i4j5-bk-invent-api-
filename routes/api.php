@@ -46,6 +46,7 @@ Route::prefix('webhook')->group(function () {
 
         Route::post('unsorted', 'Webhooks\AmoCRMController@unsorted');
 
+        Route::post('success-deal', 'Webhooks\AmoCRMController@successDeal');
         Route::get('email-banner', 'Webhooks\AmoCRMController@emailBanner');
         Route::any('deal/{event}', 'Webhooks\AmoCRMController@deal');
         Route::any('dd', 'Webhooks\AmoCRMController@dd');
