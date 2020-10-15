@@ -1059,18 +1059,21 @@ class AmoCRMController extends Controller
 
             if ($weekday != 0 || $weekday != 6) {
                 if ($launch_hour >= 8 && $launch_hour < 18) {
-                    if (count($res->_embedded->leads) >= 8) {
-                        $text = "$text\nНа этапе \"МЕНЕДЖЕР НАЗНАЧЕН\" Слишком много сделок. Старайтесь вовремя принимать в работу качественные заявки и отсеивать все лишнее";
+                    if (count($res->_embedded->leads) >= 10) {
+                        $text = "$text\n\nНа этапе \"МЕНЕДЖЕР НАЗНАЧЕН\" Слишком много сделок. Старайтесь вовремя принимать в работу качественные заявки и отсеивать все лишнее";
                     }
 
                 }
             }
         }
 
+
+
+
         // Проверка времени на этапе
 
         if ($weekday != 0 || $weekday != 6) {
-            if ($launch_hour >= 9 && $launch_hour < 10) {
+            if ($action == 'day') {
                
                 $leads_kp = [];
                 for ($i=1, $run=true; $run; $i++) {
@@ -1088,7 +1091,7 @@ class AmoCRMController extends Controller
                         'page' => $i
                     ]);
 
-                    if($res) {
+                    if($res && isset($res->_embedded)) {
                         $leads_kp = array_merge($leads_kp, $res->_embedded->leads);
                     } else {
                         $run = false;
@@ -1096,27 +1099,64 @@ class AmoCRMController extends Controller
                 }
 
                 foreach ($leads_kp as $lead) {
-                    if (($time - $lead->updated_at) >= 1) { //432000
-                            $text = "$text\n сделка $lead->name не обновлялась более 5 дней после отправки КП";
+                    if (($time - $lead->updated_at) >= 432000) { //432000
+                            $text = "$text\n\nCделка \"$lead->name\" не обновлялась более 5 дней\nhttps://bkinvent.amocrm.ru/leads/detail/$lead->id";
+                            // $text = "$text\n\nCделка \"$lead->name\" не обновлялась более 5 дней после отправки КП";
                     }
                 }
+
+
+                /////
+
+
+                $leads_qualification = [];
+                for ($i=1, $run=true; $run; $i++) {
+                    
+                    $res = $amo->request('/api/v4/leads', 'get', [
+                        'filter' => [
+                            'statuses' => [
+                                0 => [
+                                    'pipeline_id' => 2291194,
+                                    'status_id' => 31518136
+                                ]
+                            ]
+                        ],
+                        'limit' => 250,
+                        'page' => $i
+                    ]);
+
+                    if($res && isset($res->_embedded)) {
+                        $leads_qualification = array_merge($leads_qualification, $res->_embedded->leads);
+                    } else {
+                        $run = false;
+                    }
+                }
+
+                foreach ($leads_qualification as $lead) {
+                    if (($time - $lead->updated_at) >= 172800) {
+                            $text = "$text\n\nКлиент слишком долго ждет КП. Cделка \"$lead->name\"\nhttps://bkinvent.amocrm.ru/leads/detail/$lead->id";
+                    }
+                }
+
+
+
 
             }
         }
 
 
         if ($text) {
-            $text = "Рекомендации$text";
+            $text = "РЕКОМЕНДАЦИИ$text";
 
-            dd($text);
+            // dd($text);
 
-            // (new Curl())->get('https://api.icq.net/bot/v1/messages/sendText', [
-            //     // 'token' => '001.1127437940.0574669410:756518822',
-            //     // 'chatId' => 'bkinvent_sales',
-            //     'token' => env('ICQ_TOKEN'),
-            //     'chatId' => env('ICQ_CHAT_ID'),
-            //     'text' => $text,
-            // ]);
+            (new Curl())->get('https://api.icq.net/bot/v1/messages/sendText', [
+                // 'token' => '001.1127437940.0574669410:756518822',
+                // 'chatId' => 'bkinvent_sales',
+                'token' => env('ICQ_TOKEN'),
+                'chatId' => env('ICQ_CHAT_ID'),
+                'text' => $text,
+            ]);
         }
 
         return 'ok';
