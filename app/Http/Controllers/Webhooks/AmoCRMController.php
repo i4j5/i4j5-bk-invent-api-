@@ -861,6 +861,51 @@ class AmoCRMController extends Controller
     public function dd(Request $request)
     {
 
+        $phone = '79896231790';
+        $nane = 'ТЕСТ';
+        $author = $phone;
+
+        $amo_secret = env('AMO_CHANNEL_SECRET_KEY');
+        $amo_scope_id = env('AMO_CHANNEL_SCOPE_ID');
+
+        $dataMessage = [
+            'type' => 'text',
+            'text' =>  'ТЕСТ',
+            'media' => null,
+            'file_name' => null,
+            'file_size' => 0,
+        ];
+
+
+        $body = [
+            'event_type' => 'new_message',
+            'payload' => [
+                'timestamp' => time(),
+                'msgid' => uniqid(),
+                'conversation_id' => $phone,
+                'sender' => [
+                    'id' => $author,
+                    'name' => $nane,
+                    'profile' => [
+                        'phone' => $phone
+                    ],
+                ],
+                'message' => $dataMessage
+            ]
+        ];
+
+
+        $signature = hash_hmac('sha1', json_encode($body), $amo_secret);
+        $curl = new Curl();
+        $curl->setHeader('cache-contro', 'no-cache');
+        $curl->setHeader('content-type', 'application/json');
+        $curl->setHeader('x-signature', $signature);
+        $res = $curl->post("https://amojo.amocrm.ru/v2/origin/custom/{$amo_scope_id}", $body);
+
+        dd($res);
+
+        exit;
+
 
 
 

@@ -26,13 +26,7 @@ Route::prefix('webhook')->group(function () {
         return 'ok!';
     });
    
-    // //Битрикс24
-    // Route::prefix('bitrix24')->group(function () {
-    //     Route::post('create-deal-main-responsible', 'Webhooks\Bitrix24Controller@createDealMainResponsible');
-    //     Route::post('create-deal-folders', 'Webhooks\Bitrix24Controller@createDealFolders');
-    //     Route::post('create-deal-project', 'Webhooks\Bitrix24Controller@сreatDealProject');
-    //     Route::post('complement-deal', 'Webhooks\Bitrix24Controller@complementDeal');
-    // });
+    Route::get('yandex-forms', 'Webhooks\YandexFormsController@balans');
 
     //amoCRM
     Route::prefix('amocrm')->group(function () {
