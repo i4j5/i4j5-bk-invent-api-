@@ -347,6 +347,8 @@ class AmoCRMController extends Controller
 ';
         }
 
+        $description = $description . 'Промо код: ' . $deal_id;;
+
         $asana = new Curl();
         
         $asana->setHeader('Authorization', 'Bearer ' . env('ASANA_KEY'));
