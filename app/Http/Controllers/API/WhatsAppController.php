@@ -177,8 +177,9 @@ class WhatsAppController extends Controller
                 ];
             }  elseif ($item['type'] == 'ptt') {
                 $dataMessage = [
-                    'type' => 'video',
-                    'text' => 'голосовое сообщение',
+                    'type' => 'voice',
+                    //'text' => 'голосовое сообщение',
+                    'text' => '',
                     'media' => $item['body'],
                     'file_name' => $this->getFileName($item['body']),
                     'file_size' => (int) $this->getSizeFile($item['body']),

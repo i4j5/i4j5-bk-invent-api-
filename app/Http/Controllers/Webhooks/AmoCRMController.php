@@ -957,7 +957,7 @@ class AmoCRMController extends Controller
     public function distributionLead(Request $request)
     {        
 
-        $users = [6345826, 5802439];
+        $users = [5802439];
         $contac_id = null;  
 
         $json = json_decode(Storage::get('json/crm.json'), true);
