@@ -41,13 +41,16 @@ class Phone
         
         if(strlen($phone) >= 11) {
             if($phone[0] == 8) {
-                $phone[0] = 7;	
+                $phone[0] = 7;
+                $phone = '+' . $phone;		
             }
         }
 
         if(strlen($phone) == 10) {
-            $phone = '7' . $phone;	
+            $phone = '+7' . $phone;	
         }
+
+        
         
         if ($enum == 334469) $enum = 334461;
 

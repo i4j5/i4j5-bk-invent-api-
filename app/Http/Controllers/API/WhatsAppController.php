@@ -184,6 +184,13 @@ class WhatsAppController extends Controller
                     'file_name' => $this->getFileName($item['body']),
                     'file_size' => (int) $this->getSizeFile($item['body']),
                 ];
+            } elseif ($item['type'] == 'call_log') {
+                $url = 'sendMessage?token=' . env('WHATSAPP_TOKEN');
+                $curl = new Curl(env('WHATSAPP_URL'));
+                $curl->post($url, [
+                    'phone' => $phone,
+                    'body' => 'К сожалению мы не можем принимать звонки в WhatsApp. Перезвоните нам на рабочий номер: +7 (863) 310-12-02', 
+                ]);
             } else {
                 $dataMessage = [
                     'type' => 'file',

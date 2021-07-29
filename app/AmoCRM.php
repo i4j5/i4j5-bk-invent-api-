@@ -123,6 +123,10 @@ class AmoCRM
             $data['phone'] = '7' . $data['phone'];
         }
 
+        if ( strlen($data['phone']) == 11 && ($data['phone'][0] === 7)) {
+            $data['phone'] = '+' . $data['phone'];
+        }
+
         // #КОНТАКТ
         $contact = $this->searchConcat($data['phone']);
 
